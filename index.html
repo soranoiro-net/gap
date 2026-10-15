@@ -4,19 +4,19 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>soranoiro.net｜産直とGAPの取り組みを支援するツール</title>
-<meta name="description" content="産直とGAPの取り組みを支援するツールを公開しています。生協版適正農業規範 青果・米編の点検表アプリ、農業気象ダッシュボードなど。">
+<meta name="description" content="産直とGAPの取り組みを支援するツールを公開しています。点検表アプリ：生協版適正農業規範 青果・米編、農業気象ダッシュボードなど。">
 <meta name="theme-color" content="#1b3a5c">
 <style>
 :root{
-  --ai:#1b3a5c;--ai-deep:#10253d;--ai-soft:#e9eef5;--ai-line:#c9d3e0;
-  --paper:#f7f6f1;--card:#ffffff;--ink:#1c2433;--mut:#5a6476;--line:#dcdfe6;
+  --ai:#1b3a5c;--ai-deep:#10253d;--ai-soft:#e9eef5;--ai-line:#c9d3e0;--hd:#13304e;
+  --paper:#dfe6ef;--card:#ffffff;--ink:#1c2433;--mut:#5a6476;--line:#d3d9e2;--shadow:0 2px 10px rgba(16,37,61,.10);
   --gold:#a8864f;--badge:#8a5a00;--badge-bg:#fbf1dc;
   --serif:"Hiragino Mincho ProN","Yu Mincho","YuMincho","Noto Serif JP","BIZ UDPMincho",serif;
   --sans:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic","YuGothic","Meiryo","Noto Sans JP",sans-serif;
 }
 @media (prefers-color-scheme:dark){:root{
-  --ai:#8fb0d6;--ai-deep:#0b1726;--ai-soft:#17263a;--ai-line:#2a3d55;
-  --paper:#0f1520;--card:#151d2a;--ink:#e3e8f0;--mut:#9aa6b8;--line:#263247;
+  --ai:#9dbce0;--ai-deep:#0b1726;--ai-soft:#22344d;--ai-line:#3a5272;--hd:#21426a;
+  --paper:#070a0f;--card:#1a2536;--ink:#e6ebf2;--mut:#a3afc0;--line:#34465f;--shadow:0 2px 12px rgba(0,0,0,.55);
   --gold:#c9a86e;--badge:#f0c46e;--badge-bg:#33291a;}}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -25,7 +25,7 @@ a{color:var(--ai)}
 .wrap{max-width:880px;margin:0 auto;padding:0 20px}
 
 /* ヘッダー */
-header{background:var(--ai-deep);color:#f2f5f9;position:relative;overflow:hidden}
+header{background:var(--hd);color:#f2f5f9;border-bottom:3px solid var(--gold);position:relative;overflow:hidden}
 header::after{content:"";position:absolute;inset:0;background:
   radial-gradient(1200px 300px at 85% -40%,rgba(143,176,214,.22),transparent 60%),
   repeating-linear-gradient(90deg,rgba(255,255,255,.035) 0 1px,transparent 1px 64px);pointer-events:none}
@@ -36,14 +36,14 @@ h1{font-family:var(--serif);font-weight:600;font-size:clamp(34px,6vw,48px);lette
 .lead{margin:0;font-size:17px;color:#dfe7f1}
 
 /* 見出し */
-main{padding-top:48px;padding-bottom:20px}
+main.wrap{padding-top:48px;padding-bottom:20px}
 section{margin:0 0 52px}
 h2{font-family:var(--serif);font-weight:600;font-size:22px;letter-spacing:.08em;margin:0 0 20px;display:flex;align-items:center;gap:14px}
 h2::after{content:"";flex:1;height:1px;background:var(--line)}
 h2 small{font-family:var(--sans);font-size:12px;letter-spacing:.2em;color:var(--mut);font-weight:400}
 
 /* ツールのカード */
-.tool{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--ai);border-radius:4px;padding:28px 28px 24px;margin:0 0 22px;box-shadow:0 1px 2px rgba(16,37,61,.05)}
+.tool{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--ai);border-radius:4px;padding:28px 28px 24px;margin:0 0 22px;box-shadow:var(--shadow)}
 .tool .tag{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 10px}
 .chip{font-size:12px;padding:2px 10px;border-radius:2px;border:1px solid var(--ai-line);color:var(--ai);background:var(--ai-soft);letter-spacing:.06em}
 .chip.beta{border-color:transparent;color:var(--badge);background:var(--badge-bg);font-weight:700}
@@ -112,14 +112,14 @@ footer .brand{font-family:var(--serif);letter-spacing:.08em;color:var(--ink)}
 
     <article class="tool">
       <div class="tag"><span class="chip beta">試作版・テスト運用中</span><span class="chip">生協産直マネジメントシステム</span><span class="chip">GAP</span></div>
-      <h3>点検表：生協版適正農業規範 青果・米編<span class="ver">試作版 Ver0.9.6</span></h3>
+      <h3>点検表アプリ：生協版適正農業規範 青果・米編<span class="ver">試作版 Ver0.9.7</span></h3>
       <p class="desc">生協産直マネジメントシステムにおける「生協版適正農業規範 青果・米編」の自己点検・内部監査・二者点検を、スマートフォン・タブレット・パソコンで入力・保存・共有するための補助ツールです。</p>
 
       <ul class="feats">
         <li><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2"/></svg><span><b>インストール不要</b>　ブラウザで開くだけで使えます</span></li>
         <li><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2"/></svg><span><b>外部と通信しません</b>　入力内容は端末とファイルの中だけ</span></li>
         <li><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2"/></svg><span><b>LINE・メールで共有</b>　結果をファイルで送れます</span></li>
-        <li><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2"/></svg><span><b>様式どおりのExcel出力</b>　記録として保管できます</span></li>
+        <li><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2"/></svg><span><b>様式Excelを出力</b>　Excel点検表の様式で保管できます</span></li>
         <li><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2"/></svg><span><b>前回の結果を参照・コピー</b>　1項目ずつ入力できます</span></li>
         <li><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2"/></svg><span><b>解説・参考資料をその場で</b>　規範項目ごとに確認できます</span></li>
       </ul>
@@ -142,7 +142,7 @@ footer .brand{font-family:var(--serif);letter-spacing:.08em;color:var(--ink)}
           <span class="s">通信をしないこと、不正なファイルへの対策などの確認結果。配布ファイルの指紋（SHA-256）も掲載</span><span class="go" aria-hidden="true">›</span></a>
       </div>
 
-      <p class="notice">点検項目・解説などの内容は、日本生活協同組合連合会・全国産直研究会「生協版適正農業規範 青果・米編（点検表）2025年版」に基づいています。本アプリは同会が公式に提供するものではありません。点検表の内容・運用については、日本生協連の点検表および運用マニュアルが優先します。</p>
+      <p class="notice">点検項目・解説などの内容は、日本生活協同組合連合会・全国産直研究会「生協版適正農業規範 青果・米編（点検表）2025年版」に基づいています。点検表アプリは同会が公式に提供するものではありません。点検表の内容・運用については、日本生協連の点検表および運用マニュアルが優先します。</p>
     </article>
 
     <article class="tool">
@@ -160,14 +160,14 @@ footer .brand{font-family:var(--serif);letter-spacing:.08em;color:var(--ink)}
     <h2 id="sec-news">お知らせ <small>NEWS</small></h2>
     <dl class="news">
       <dt>2026年10月</dt>
-      <dd>「点検表：生協版適正農業規範 青果・米編」試作版 Ver0.9.6 を公開し、テスト運用を始めました。</dd>
+      <dd>「点検表アプリ：生協版適正農業規範 青果・米編」試作版 Ver0.9.7 を公開し、テスト運用を始めました。</dd>
     </dl>
   </section>
 
   <section aria-labelledby="sec-about" class="about">
     <h2 id="sec-about">このサイトについて <small>ABOUT</small></h2>
     <p>生協産直と、GAP（適正農業規範）の取り組みを現場で進めるための、小さな道具を公開しています。点検や記録の手間を減らし、生産者・生産者団体・生協の対話に時間を使えることを目指しています。</p>
-    <p class="contact">ご意見・不具合のご連絡：<span>（連絡先を記入）</span></p>
+    <p class="contact">ご意見・不具合のご連絡：<a href="mailto:gap@soranoiro.net">gap@soranoiro.net</a></p>
   </section>
 
 </main>

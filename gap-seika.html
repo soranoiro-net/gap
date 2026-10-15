@@ -6,7 +6,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; worker-src 'none'; frame-src 'none'; child-src 'none'; object-src 'none'; media-src 'none'; manifest-src 'none'; form-action 'none'; base-uri 'none'">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="format-detection" content="telephone=no">
-<title>点検表：生協版適正農業規範 青果・米編（試作版）</title>
+<title>点検表アプリ：生協版適正農業規範 青果・米編（試作版）</title>
 <style>
 :root{
   --bg:#f5f6f2;--card:#fff;--ink:#1d2620;--mut:#65706a;--line:#dde2da;--soft:#eef1ea;
@@ -200,7 +200,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 <script>
 'use strict';
 /* ========== マスタ ========== */
-const APP_VER='0.9.6';const APP_PROVIDER='（提供者名を記入）';const APP_TITLE='点検表：生協版適正農業規範 青果・米編（試作版 Ver'+APP_VER+'）';const FMT=1, MASTER_VER='2025年版（20250513）';
+const APP_VER='0.9.7';const APP_PROVIDER='soranoiro.net　（連絡先）gap@soranoiro.net';const APP_TITLE='点検表アプリ：生協版適正農業規範 青果・米編（試作版 Ver'+APP_VER+'）';const FMT=1, MASTER_VER='2025年版（20250513）';
 const M=JSON.parse(document.getElementById('master').textContent);
 const CROPS=['青果','米','スプラウト','きのこ'];
 const KUBUN=['生産者','団体','両方'];
@@ -232,7 +232,7 @@ function load(k){try{const s=localStorage.getItem('sgap.'+k);return s?JSON.parse
 function drop(k){try{localStorage.removeItem('sgap.'+k)}catch(e){}}
 function toast(m,ms=2600){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('show'),ms)}
 function pickFiles(accept,multiple){return new Promise(res=>{const i=document.createElement('input');i.type='file';i.accept=accept;i.multiple=!!multiple;i.style.display='none';document.body.appendChild(i);i.onchange=()=>{res([...i.files]);i.remove()};i.click();})}
-async function readJSON(f){let o;try{o=JSON.parse(await f.text())}catch(e){throw new Error(f.name+' は点検ファイルとして読み込めません')}if(!o||!String(o.kind||'').startsWith('sgap-'))throw new Error(f.name+' はこのアプリのファイルではありません');return o}
+async function readJSON(f){let o;try{o=JSON.parse(await f.text())}catch(e){throw new Error(f.name+' は点検データファイルとして読み込めません')}if(!o||!String(o.kind||'').startsWith('sgap-'))throw new Error(f.name+' はこのアプリのファイルではありません');return o}
 function setAns(obj,id,a){const v=a.v||'',c=(a.c||'');if(!v&&!c.trim())delete obj[id];else obj[id]={v,c}}
 function scopeItems(role,kmap,crops){return ITEMS.filter(it=>{const k=kb(kmap,it.id);
   if(role==='producer'?!(k==='生産者'||k==='両方'):!(k==='団体'||k==='両方'))return false;
@@ -353,8 +353,8 @@ const XLSX_MIME='application/vnd.openxmlformats-officedocument.spreadsheetml.she
 /* ========== ホーム ========== */
 const VIEWS={};
 VIEWS.home=()=>`${bar(APP_TITLE).replace('<h1>','<h1 style="white-space:normal">')}<div class="wrap">
-<p class="mut">生協版適正農業規範 青果・米編 ${MASTER_VER}　使う人を選んでください。</p>
-<button class="card role" data-go="p-setup"><span class="tag">生産者</span><h2>自己点検をする</h2><div class="mut">区分が「生産者」「両方」の項目を点検し、結果ファイルを団体事務局へ送ります。</div>${P?`<div class="cont">▶ 続きから：${esc(P.producer.name||'（名前未入力）')}（${st(pScope(),id=>P.answers[id]).done}/${pScope().length}）</div>`:''}</button>
+<p class="mut">使う人を選んでください。　原本：生協版適正農業規範 青果・米編 ${MASTER_VER}</p>
+<button class="card role" data-go="p-setup"><span class="tag">生産者</span><h2>自己点検をする</h2><div class="mut">区分が「生産者」「両方」の項目を点検し、自己点検ファイルを団体事務局へ送ります。</div>${P?`<div class="cont">▶ 続きから：${esc(P.producer.name||'（名前未入力）')}（${st(pScope(),id=>P.answers[id]).done}/${pScope().length}）</div>`:''}</button>
 <button class="card role" data-go="g-home"><span class="tag">団体事務局</span><h2>区分の設定・団体の自己点検・集約</h2><div class="mut">区分を設定して生産者へ配り、届いた結果を1つの「自己点検集約ファイル」にまとめます。</div>${G?`<div class="cont">▶ 続きから：${esc(G.group.name||'（団体名未入力）')}（生産者 ${G.producers.length}名）</div>`:''}</button>
 <button class="card role" data-go="a-setup"><span class="tag">監査担当・生協担当</span><h2>内部監査／二者点検をする</h2><div class="mut">自己点検集約ファイルを読み込み、自己点検の結果を見ながら評価します。結果は別の監査ファイルに保存します。</div>${A?`<div class="cont">▶ 続きから：${A.type==='twoparty'?'二者点検':'内部監査'}（${esc(A.ref.groupName||'')}）</div>`:''}</button>
 <div class="card"><h3>ファイルの流れ</h3><div class="flow">
@@ -362,12 +362,12 @@ VIEWS.home=()=>`${bar(APP_TITLE).replace('<h1>','<h1 style="white-space:normal">
 <div>② 生産者 → 団体事務局：<b>自己点検ファイル</b>（1人1ファイル）</div>
 <div>③ 団体事務局：団体分と生産者分を <b>自己点検集約ファイル</b> にまとめる</div>
 <div>④ 監査担当・生協：集約ファイルを参照して評価 → <b>内部監査ファイル</b>／<b>二者点検ファイル</b>（別々に保存）</div>
-<div>⑤ 保管用に、元の様式どおりのExcelや一覧Excelを出力</div></div></div>
+<div>⑤ 保管用に、様式Excelや一覧Excelを出力</div></div></div>
 <div class="card"><h3>大切なこと</h3><p class="mut small" style="margin:0">入力内容はこの端末のブラウザに一時保存されますが、機種変更やブラウザの設定で消えることがあります。区切りごとに必ず「ファイルに保存」してください。記録として保管するのは保存したファイルです。</p></div>
-<button class="btn" data-go="license" style="width:100%;margin-bottom:8px">このアプリについて・ライセンス</button>
 <button class="btn" data-go="ref" style="width:100%">資料：規範で要求している文書一覧・用語の定義</button>
 <button class="btn" data-go="usage" style="width:100%;margin-top:8px">生協版適正農業規範 青果・米編の使用方法</button>
 <a class="btn" href="${MANUAL_URL}" target="_blank" rel="noopener" style="width:100%;margin-top:8px">生協産直マネジメントシステム・運用マニュアル（外部リンク）↗</a>
+<button class="btn" data-go="license" style="width:100%;margin-top:8px">このアプリについて・ライセンス</button>
 </div>`;
 VIEWS.pv=()=>`${bar('前回の結果（読み込み済み）',UI.back||'home')}<div class="wrap"><div class="card"><p class="mut small">この端末だけに保存されています。生産者名・団体名が同じものが、点検画面に表示されます。</p>
 <div class="rows">${PV.recs.map((r,i)=>({r,i})).sort((a,b)=>(a.r.type+pvName(a.r)).localeCompare(b.r.type+pvName(b.r),'ja')).map(({r,i})=>`<div class="row"><div class="rn"><b>${esc(r.type==='団体'?(r.name||r.group)+'（団体）':pvName(r)||'（名前不明：対応する集約ファイルを読み込んでください）')}</b><span>${esc(KLABEL[r.kind]||'')} ${esc(jdate(r.date))}／${Object.keys(r.answers).length}項目／${esc(r.src)}</span></div><button class="btn sm dng" data-act="pv-del" data-i="${i}">削除</button></div>`).join('')||'<p class="mut">ありません</p>'}</div>
@@ -381,7 +381,7 @@ VIEWS.usage=()=>{let h='',tbl='';const flush=()=>{if(tbl){h+=`<div class="card">
     const isH=/^[０-９0-9]+．/.test(head);
     h+=isH?`<h2 style="margin:22px 0 8px;font-size:17px">${esc(head)}</h2>${body?`<div class="card"><p style="margin:0">${linkify(body)}</p></div>`:''}`
       :`<div class="card"><p style="margin:0">${linkify(t)}</p></div>`});
-  flush();return `${bar('使用方法',UI.back||'home')}<div class="wrap"><p class="mut small">出典：生協版適正農業規範 青果・米編 点検表（${MASTER_VER}）の「使用方法」。本アプリでの区分の修正は、団体事務局の「区分の確認・修正」で行います。</p>${h}
+  flush();return `${bar('使用方法',UI.back||'home')}<div class="wrap"><p class="mut small">出典：生協版適正農業規範 青果・米編 点検表（${MASTER_VER}）の「使用方法」。点検表アプリでの区分の修正は、団体事務局の「区分の確認・修正」で行います。</p>${h}
 <a class="btn pri" href="${MANUAL_URL}" target="_blank" rel="noopener" style="width:100%">運用マニュアル（PDF・外部リンク）を開く ↗</a></div>`};
 const LIBS=[["ExcelJS 4.4.0", "MIT", "Copyright (c) 2014-2019 Guyon Roche"], ["JSZip", "MIT（MIT または GPL-3.0 の選択制のうち MIT を選択）", "Copyright (c) 2009-2016 Stuart Knightley, David Duponchel, Franz Buchinger, António Afonso"], ["pako", "MIT および Zlib", "Copyright (C) 2014-2017 by Vitaly Puzrin and Andrei Tuputcyn"], ["Day.js", "MIT", "Copyright (c) 2018-present, iamkun"], ["saxes", "ISC", "Copyright (c) Louis-Dominique Dubeau（sax の派生：Copyright (c) Isaac Z. Schlueter and Contributors）"], ["xmlchars", "MIT", "Copyright Louis-Dominique Dubeau and contributors to xmlchars"], ["fast-csv", "MIT", "Copyright (c) 2011-2019 C2FO"], ["uuid", "MIT", "Copyright (c) 2010-2020 Robert Kieffer and other contributors"], ["readable-stream / string_decoder", "MIT", "Copyright Node.js contributors. All rights reserved."], ["buffer / safe-buffer", "MIT", "Copyright (c) Feross Aboukhadijeh, and other contributors."], ["ieee754", "BSD-3-Clause", "Copyright 2008 Fair Oaks Labs, Inc."], ["base64-js", "MIT", "Copyright (c) 2014 Jameson Little"], ["setimmediate", "MIT", "Copyright (c) 2012 Barnesandnoble.com, llc, Donavon West, and Domenic Denicola"], ["immediate", "MIT", "Copyright (c) 2012 Barnesandnoble.com, llc, Donavon West, Domenic Denicola, Brian Cavalier"], ["lie", "MIT", "Copyright (c) 2014-2018 Calvin Metcalf, Jordan Harband"], ["util-deprecate", "MIT", "Copyright (c) 2014 Nathan Rajlich"], ["inherits", "ISC", "Copyright (c) Isaac Z. Schlueter"], ["lodash（部分モジュール）", "MIT", "Copyright JS Foundation and other contributors"], ["core-js / regenerator-runtime / events / process（ブラウザ向け互換部品）", "MIT", "各著作権者"]];
 const LIC_TEXTS=[["MIT License（全文）", "Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."], ["ISC License（全文）", "Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE."], ["BSD-3-Clause License（ieee754）", "Copyright 2008 Fair Oaks Labs, Inc.\n\nRedistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:\n\n1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.\n\n2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.\n\n3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.\n\nTHIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."], ["Zlib License（pako）", "This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held liable for any damages arising from the use of this software.\n\nPermission is granted to anyone to use this software for any purpose, including commercial applications, and to alter it and redistribute it freely, subject to the following restrictions:\n\n1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.\n2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.\n3. This notice may not be removed or altered from any source distribution."]];
@@ -437,7 +437,7 @@ VIEWS['g-home']=()=>{if(!G)return `${bar('団体事務局','home')}<div class="w
 <div class="card"><h2>② 団体の自己点検</h2><p class="mut small">区分「団体」「両方」の項目　入力済 ${gs.done}/${gs.n}　✕ ${gs.x}</p>
 <div class="btns"><button class="btn pri" data-go="g-check">団体の自己点検を入力する</button></div></div>
 <div class="card"><h2>③ 生産者の自己点検（${G.producers.length}名）</h2>
-<div class="btns"><button class="btn pri" data-act="g-import" style="width:100%">生産者の結果ファイルを取り込む（複数可）</button></div>
+<div class="btns"><button class="btn pri" data-act="g-import" style="width:100%">生産者の自己点検ファイルを取り込む（複数可）</button></div>
 <p class="mut small">自己点検ファイル（.txt／.json）のほか、Excel点検表（.xlsx）に入力されたものも取り込めます。同じ生産者の新しいファイルは上書きされます。</p>
 ${G.producers.length>8?`<input type="search" id="lq" placeholder="生産者名で絞り込み" value="${esc(UI.lq)}" style="margin-bottom:8px">`:''}
 <div class="rows">${prods.map(p=>{const s=st(scopeItems('producer',G.kubun,p.crops),id=>p.answers[id]);return `<div class="row"><div class="rn"><b>${esc(p.name)}</b><span>${esc(cropLabel(p.crops,p.cropText))} ${p.date?'／'+jdate(p.date):''}</span></div>
@@ -445,9 +445,9 @@ ${G.producers.length>8?`<input type="search" id="lq" placeholder="生産者名�
 <div class="card"><h2>④ 保存・出力</h2>${dirtyMark(G)}
 <div class="btns col"><button class="btn pri" data-act="g-save">自己点検集約ファイルを保存</button><button class="btn" data-act="list-xl" data-src="g">一覧Excelを出力（集計・明細・✕一覧）</button></div>
 </div>
-<div class="card"><h2>⑤ 様式どおりのExcelを出力</h2><p class="mut small">配布されている元の点検表Excelに、結果を書き込んだファイルを作ります。生産者を選ぶと、その生産者と団体の結果を1枚にまとめます。「両方」の項目は、1つのセルに「生○／団○」の形で両方の結果が入ります。最初の1回だけ、元の点検表Excelファイルを選ぶ画面が出ます。</p>
+<div class="card"><h2>⑤ 様式Excelを出力</h2><p class="mut small">未記入のExcel点検表に結果を書き込んで、様式Excelを作ります。生産者を選ぶと、その生産者と団体の結果を1枚にまとめます。「両方」の項目は、1つのセルに「生○／団○」の形で両方の結果が入ります。最初の1回だけ、未記入のExcel点検表を選ぶ画面が出ます。</p>
 <select id="fx-g" style="margin-bottom:8px"><option value="group">${esc((G.group.name||'団体')+'（団体のみ）')}</option>${G.producers.slice().sort((a,b)=>a.name.localeCompare(b.name,'ja')).map(p=>`<option value="${p.id}">${esc(p.name)} ＋ 団体（統合）</option>`).join('')}</select>
-<button class="btn pri" data-act="form-xl-sel" data-src="g" style="width:100%">様式どおりのExcelを作る</button></div>
+<button class="btn pri" data-act="form-xl-sel" data-src="g" style="width:100%">様式Excelを作る</button></div>
 ${prevCard((()=>{const g=pvMatch('団体','',G.group.name).length;const p=G.producers.filter(x=>pvMatch('生産者',x.name).length).length;
   const cur=new Set(G.producers.map(x=>nn(x.name)));const unP=[...new Set(PV.recs.filter(r=>r.type==='生産者'&&!cur.has(nn(pvName(r)))).map(r=>pvName(r)||'（名前不明）'))];
   const unG=[...new Set(PV.recs.filter(r=>r.type==='団体'&&nn(G.group.name)&&nn(r.group)&&nn(r.group)!==nn(G.group.name)).map(r=>r.group))];
@@ -527,9 +527,9 @@ ${!AS.fromXl&&AS.updated!==A.ref.selfUpdated?`<div class="note">自己点検集�
 ${ts.length>8?`<input type="search" id="lq" placeholder="生産者名で絞り込み" value="${esc(UI.lq)}" style="margin-bottom:8px">`:''}
 <div class="rows">${ts.filter(t=>!q||t.label.includes(q)).map(t=>{const ss=st(t.items,t.self),as=aStat(AS,t);return `<div class="row"><div class="rn"><b>${esc(t.label)}</b><span>自己点検 ${ss.done}/${ss.n}${ss.x?` ✕${ss.x}`:''}</span></div>
 ${as.done?`<span class="pill${as.todo?'':' ok'}">評価 ${as.done}/${as.n}</span>`:''}${as.w?`<span class="pill w">要コメント${as.w}</span>`:''}<button class="btn sm pri" data-go="a-check" data-tid="${t.tid}">評価</button><button class="btn sm" data-act="form-xl" data-src="a" data-id="${t.tid}">Excel</button></div>`}).join('')}</div></div>
-<div class="card"><h2>保存・出力</h2>${dirtyMark(A)}<div class="btns col"><button class="btn pri" data-act="a-save">${aLabel(A.type)}ファイルを保存</button><button class="btn" data-act="list-xl" data-src="a">一覧Excelを出力（自己点検と評価を並べて）</button></div></div><div class="card"><h2>様式どおりのExcelを出力（自己点検＋評価）</h2>${AS.fromXl?'<p class="note small" style="margin:0 0 8px">Excel点検表を読み込んでいる場合は、その対象のExcelをもとに、評価欄（F・G列）と監査の実施日・担当者だけを書き込んだ新しいファイルを作ります（読み込んだExcelがない対象や、アプリを開き直した後は、元の点検表Excelをもとに作ります）。</p>':''}<p class="mut small">配布されている元の点検表Excelに、結果を書き込んだファイルを作ります。生産者を選ぶと、その生産者と団体の結果を1枚にまとめます。「両方」の項目は、1つのセルに「生○／団○」の形で両方の結果が入ります。最初の1回だけ、元の点検表Excelファイルを選ぶ画面が出ます。</p>
+<div class="card"><h2>保存・出力</h2>${dirtyMark(A)}<div class="btns col"><button class="btn pri" data-act="a-save">${aLabel(A.type)}ファイルを保存</button><button class="btn" data-act="list-xl" data-src="a">一覧Excelを出力（自己点検と評価を並べて）</button></div></div><div class="card"><h2>様式Excelを出力（自己点検＋評価）</h2>${AS.fromXl?'<p class="note small" style="margin:0 0 8px">Excel点検表を読み込んでいる場合は、その対象のExcelをもとに、評価欄（F・G列）と監査の実施日・担当者だけを書き込んだ新しいファイルを作ります（読み込んだExcelがない対象や、アプリを開き直した後は、未記入のExcel点検表をもとに作ります）。</p>':''}<p class="mut small">未記入のExcel点検表に結果を書き込んで、様式Excelを作ります。生産者を選ぶと、その生産者と団体の結果を1枚にまとめます。「両方」の項目は、1つのセルに「生○／団○」の形で両方の結果が入ります。最初の1回だけ、未記入のExcel点検表を選ぶ画面が出ます。</p>
 <select id="fx-a" style="margin-bottom:8px">${AS.producers.slice().sort((a,b)=>a.name.localeCompare(b.name,'ja')).map(p=>`<option value="${p.id}">${esc(p.name)} ＋ 団体（統合）</option>`).join('')}<option value="group">${esc((AS.group.name||'団体')+'（団体のみ）')}</option></select>
-<button class="btn pri" data-act="form-xl-sel" data-src="a" style="width:100%">様式どおりのExcelを作る</button></div></div>`};
+<button class="btn pri" data-act="form-xl-sel" data-src="a" style="width:100%">様式Excelを作る</button></div></div>`};
 VIEWS['a-check']=()=>{const t=targetsOf(AS).find(x=>x.tid===UI.tid);if(!t)return VIEWS['a-targets']();
  const ctx={mode:'audit',items:t.items,kub:id=>kb(AS.kubun,id),get:id=>((A.targets[t.tid]||{}).answers||{})[id],set:(id,a)=>{setAns(aAns(t.tid),id,a);touch(A)},refs:id=>refsFor(AS,t,id),prevRecs:t.type==='団体'?pvMatch('団体','',AS.group.name):pvMatch('生産者',t.label)};
  return `${bar(aLabel(A.type)+'：'+t.label,'a-targets')}${checklist(ctx)}
@@ -537,9 +537,9 @@ VIEWS['a-check']=()=>{const t=targetsOf(AS).find(x=>x.tid===UI.tid);if(!t)return
 
 /* ========== Excel ========== */
 async function getTemplate(){if(UI.tpl)return UI.tpl;
-  const ok=await confirmSheet('元のExcel点検表を選んでください','結果を書き込む元になる、配布されている点検表のExcelファイル（例：生協版適正農業規範青果・米編（点検表）20250513.xlsx）を選んでください。元のファイルは変更されず、結果を書き込んだ新しいExcelができます。アプリを開いている間は、2回目以降は選ばなくても作れます。','Excelファイルを選ぶ');
+  const ok=await confirmSheet('未記入のExcel点検表を選んでください','結果を書き込む元になる、何も記入していないExcel点検表（配布されたもの。例：生協版適正農業規範青果・米編（点検表）20250513.xlsx）を選んでください。選んだファイルは変更されず、結果を書き込んだ様式Excelが新しくできます。アプリを開いている間は、2回目以降は選ばなくても作れます。','Excelファイルを選ぶ');
   if(!ok)return null;const [f]=await pickFiles('.xlsx,'+XLSX_MIME);if(!f)return null;const buf=await f.arrayBuffer();
-  const cells=await readSheetCells(buf,'点検表').catch(()=>null);if(!cells)throw new Error('「点検表」シートがありません。元の点検表Excelを選んでください');UI.tpl=buf;return buf}
+  const cells=await readSheetCells(buf,'点検表').catch(()=>null);if(!cells)throw new Error('「点検表」シートがありません。未記入のExcel点検表を選んでください');UI.tpl=buf;return buf}
 function confirmSheet(title,body,okLabel){return new Promise(res=>{$('#modal').innerHTML=`<div class="modal"><div class="sheet"><h2>${esc(title)}</h2><p class="mut">${esc(body)}</p><div class="btns col"><button class="btn pri" id="cs-ok">${esc(okLabel)}</button><button class="btn" id="cs-no">やめる</button></div></div></div>`;
   $('#cs-ok').onclick=()=>{$('#modal').innerHTML='';res(true)};$('#cs-no').onclick=()=>{$('#modal').innerHTML='';res(false)}})}
 /* xlsx の読み取り（ExcelJSに頼らない簡易リーダー：他のソフトで保存したファイルにも強い） */
@@ -662,7 +662,7 @@ async function writeFormExcelJS(tpl,cells,rowItem){const wb=new ExcelJS.Workbook
   return new Blob([await wb.xlsx.writeBuffer()],{type:XLSX_MIME})}
 async function buildForm(S,tid,Au){const xb=Au&&S.fromXl?XLBUF[S.id+'|'+tid]:null;
   const tpl=xb?xb.buf:await getTemplate();if(!tpl)return null;let cells=formPlan(S,tid,Au);const info={base:xb?xb.name:'',notes:[]};
-  if(Au&&S.fromXl&&!xb)info.notes.push(tid!=='group'||Object.keys(XLBUF).length?'この対象のExcel点検表が手元にないため（アプリを開き直した、または団体のExcelを読み込んでいない）、元の点検表Excelをもとに作成しました。':'元の点検表Excelをもとに作成しました。');
+  if(Au&&S.fromXl&&!xb)info.notes.push(tid!=='group'||Object.keys(XLBUF).length?'この対象のExcel点検表が手元にないため（アプリを開き直した、または団体のExcelを読み込んでいない）、未記入のExcel点検表をもとに作成しました。':'未記入のExcel点検表をもとに作成しました。');
   /* 行の位置は、A列の番号で探す */
   const sc=await readSheetCells(tpl,'点検表').catch(()=>null);const rowOf={};
   if(sc)Object.keys(sc).forEach(a=>{const m=a.match(/^A(\d+)$/);if(!m)return;const id=sc[a].replace(/\s/g,'');if(BYID[id]&&!rowOf[id])rowOf[id]=+m[1]});
@@ -782,7 +782,7 @@ ACT['a-save']=()=>{if(A.type==='twoparty'&&!String(A.coop||'').trim()){toast('�
 // Excel
 ACT['form-xl']=async el=>{const src=el.dataset.src,tid=el.dataset.id;const S=src==='a'?AS:G,Au=src==='a'?A:null;
   try{const r=await buildForm(S,tid,Au);if(!r)return;const {blob,info}=r;const nm=tid==='group'?S.group.name+'_団体':(prodOf(S,tid)||{}).name;
-    const body=info.base?`<p class="mut small">読み込んだExcel点検表「${esc(info.base)}」をもとに、<b>評価欄（F・G列）と${aLabel(Au.type)}の実施日・担当者だけ</b>を書き込んだ新しいファイルです。自己点検欄などは元のファイルのままです。</p>`:'<p class="mut small">元の点検表の様式に、結果を書き込んだExcelです。</p>';
+    const body=info.base?`<p class="mut small">読み込んだExcel点検表「${esc(info.base)}」をもとに、<b>評価欄（F・G列）と${aLabel(Au.type)}の実施日・担当者だけ</b>を書き込んだ新しいファイルです。自己点検欄などは元のファイルのままです。</p>`:'<p class="mut small">Excel点検表の様式に、結果を書き込んだExcelです。</p>';
     openSheet({title:'様式Excel',body:body+info.notes.map(n=>`<div class="note small">${esc(n)}</div>`).join(''),blob,name:`${Au?aLabel(Au.type):'自己点検'}_${fnSafe(S.group.name)}_${fnSafe(nm)}_${ymd()}.xlsx`})}catch(e){console.error(e);toast('Excelを作れませんでした：'+e.message,5000)}};
 ACT['form-xl-sel']=el=>{const v=$('#fx-'+el.dataset.src).value;return ACT['form-xl']({dataset:{src:el.dataset.src,id:v}})};
 ACT['list-xl']=async el=>{const src=el.dataset.src;const S=src==='a'?AS:G,Au=src==='a'?A:null;toast('Excelを作成中…',1500);

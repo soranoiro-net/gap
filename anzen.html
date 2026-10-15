@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>点検アプリ 安全性確認書（案）</title>
+<style>
+:root{--ink:#1d2620;--mut:#5f6a63;--line:#c9d1ca;--soft:#eef4ef;--acc:#2e7a4d;--warn:#8a5a00;--warn-bg:#fff4df;--ok:#1f7a45;--ok-bg:#e3f2e8;--bg:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.75 "Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo","Noto Sans JP",sans-serif}
+main{max-width:860px;margin:0 auto;padding:32px 20px 60px}
+.draft{display:inline-block;border:2px solid #c43c3c;color:#c43c3c;font-weight:700;padding:2px 12px;border-radius:6px;letter-spacing:.1em}
+h1{font-size:26px;margin:14px 0 4px}
+.sub{color:var(--mut);margin:0 0 24px}
+h2{font-size:18px;color:var(--acc);border-bottom:2px solid var(--acc);padding-bottom:4px;margin:34px 0 12px}
+h3{font-size:15px;margin:20px 0 6px}
+table{width:100%;border-collapse:collapse;margin:8px 0 14px;font-size:14px}
+th,td{border:1px solid var(--line);padding:7px 9px;vertical-align:top;text-align:left}
+th{background:var(--soft);font-weight:700;white-space:nowrap}
+td.res{white-space:nowrap;font-weight:700}
+.ok{color:var(--ok)}.cond{color:var(--warn)}
+.box{background:var(--soft);border-left:4px solid var(--acc);padding:12px 16px;border-radius:0 8px 8px 0;margin:12px 0}
+.warn{background:var(--warn-bg);border-left-color:#c98a1b}
+code,.hash{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;word-break:break-all;background:#f3f5f3;padding:1px 5px;border-radius:4px}
+.sign td{height:44px}
+ul{padding-left:1.3em;margin:6px 0}
+.small{font-size:13px;color:var(--mut)}
+.fill{color:var(--warn);font-weight:700}
+@media (max-width:640px){th{white-space:normal}td.res{white-space:normal}.wide{display:block;overflow-x:auto}}
+@media print{body{font-size:11pt}main{max-width:none;padding:0}h2{break-after:avoid}tr,.box{break-inside:avoid}.draft{border-color:#000;color:#000}@page{size:A4;margin:16mm}}
+</style>
+</head>
+<body>
+<main>
+<p style="margin:0 0 14px;font-size:14px"><a href="index.html" style="color:#1b3a5c">← soranoiro.net トップへ</a></p>
+<span class="draft">案</span>
+<h1>点検アプリ 安全性確認書（自己評価）</h1>
+<p class="sub">点検表：生協版適正農業規範 青果・米編（試作版 Ver0.9.6）</p>
+
+<table>
+<tr><th>対象アプリ</th><td>点検表：生協版適正農業規範 青果・米編（試作版 Ver0.9.6）<br>単一のHTMLファイル（ファイルサイズ 1,168,034 バイト）</td></tr>
+<tr><th>ファイルの指紋<br>（SHA-256）</th><td><span class="hash">c304721bf1f57ee8555004d7668638704e8556a445eb5d4625547d9a033ded85</span><br><span class="small">※ 公開用ファイル「gap-seika.html」の値です。ファイル名を変えても値は変わりませんが、中身を1文字でも変えると値が変わります（提供者名を書き込んだ場合は、6章の方法で計算し直して記入してください）。</span></td></tr>
+<tr><th>確認日</th><td>2026年10月13日</td></tr>
+<tr><th>確認者</th><td class="fill">（記入）</td></tr>
+<tr><th>確認の方法</th><td>プログラムの内容の確認（静的確認）と、ブラウザ（Chromium）でアプリを自動操作して動作を確かめる試験（動的確認）</td></tr>
+</table>
+
+<div class="box warn"><b>この確認書の位置づけ</b><br>この確認書は、提供者が自ら行った確認の記録（自己評価）です。第三者による認証や、危害が一切ないことの保証ではありません。確認した範囲と、確認していないことを、あわせて記載しています（5章）。</div>
+
+<h2>1．アプリの構成</h2>
+<ul>
+<li>アプリは<b>1つのHTMLファイル</b>だけでできており、ブラウザで開いて使います。サーバー側のプログラムやデータベースはありません。</li>
+<li>入力内容は、<b>利用者の端末のブラウザ内</b>（ブラウザの保存領域）に一時保存されます。</li>
+<li>人から人へのデータの受け渡しは、利用者が保存したファイル（.txt／.xlsx）を、利用者自身がLINE・メールなどで送る方法で行います。アプリが自動で送ることはありません。</li>
+<li>Excelファイルの作成・読み込みのために、オープンソースソフトウェア ExcelJS 4.4.0（MITライセンス）をファイル内に組み込んでいます。外部から読み込むプログラムはありません。</li>
+</ul>
+
+<h2>2．確認した項目と結果</h2>
+<div class="wide">
+<table>
+<tr><th>No.</th><th>確認の観点</th><th>確認した内容・方法</th><th>結果</th></tr>
+<tr><td>S-1</td><td>外部への通信</td><td>・アプリに<b>通信禁止の設定（Content Security Policy）</b>を組み込み、外部との通信をブラウザが止めるようにした。<br>・試験で、外部への通信（fetch、XMLHttpRequest、WebSocket、sendBeacon、外部画像の読み込み）をわざと実行させ、<b>すべてブラウザに拒否される</b>ことを確認した。<br>・生産者・団体事務局・監査の全機能を操作する試験で、<b>外部への通信が0件</b>であることを確認した。</td><td class="res ok">適合</td></tr>
+<tr><td>S-2</td><td>外部プログラムの読み込み</td><td>外部のサーバーからプログラムを読み込む記述がないこと、通信禁止の設定で外部プログラムの読み込みも禁止していることを確認した。</td><td class="res ok">適合</td></tr>
+<tr><td>S-3</td><td>端末の機能の利用</td><td>カメラ、マイク、位置情報、通知、連絡先などを使う記述がないことを確認した。</td><td class="res ok">適合</td></tr>
+<tr><td>S-4</td><td>追跡・広告</td><td>Cookie、アクセス解析、広告の仕組みがないことを確認した。</td><td class="res ok">適合</td></tr>
+<tr><td>S-5</td><td>不正なファイルを読み込んだときの安全性</td><td>生産者名・コメント欄などにプログラム（スクリプト）を仕込んだ偽の点検ファイルを作成して読み込ませ、<b>プログラムが実行されず、文字として表示される</b>ことを確認した（取り込み・表示・保存・前回の結果の各画面）。</td><td class="res ok">適合</td></tr>
+<tr><td>S-6</td><td>データの保存場所</td><td>入力内容の保存先が、端末のブラウザ内（「sgap.」で始まる保存領域）と、利用者が保存したファイルだけであることを確認した。アプリ内の「データを消去」ボタン、またはブラウザのデータ削除で消去できる。</td><td class="res ok">適合</td></tr>
+<tr><td>S-7</td><td>作成するExcelファイル</td><td>・様式Excelは、元の点検表Excelの中身を保ったまま、結果を書き込むセル・行の高さ・書式だけを変更する方式であることを確認した。<br>・変更した部分が、Excelのファイル形式の国際規格（ISO/IEC 29500）の定義に合っていることを確認した。<br>・読み込んだ元のExcelファイル自体は変更されないことを確認した。</td><td class="res ok">適合</td></tr>
+<tr><td>S-8</td><td>組み込んだソフトウェアの既知の問題</td><td>脆弱性データベースによる確認（npm audit）で、重大（high／critical）は0件。中程度が2件（ExcelJSが内部で使う uuid の、特定の使い方をした場合の範囲確認の不足）あった。このアプリはその使い方をしておらず、また外部と通信しないため、<b>影響はないと判断</b>した。</td><td class="res cond">条件付き適合</td></tr>
+<tr><td>S-9</td><td>ライセンス</td><td>組み込んだソフトウェアのライセンス（MIT、ISC、BSD-3-Clause、Zlib）の条件である著作権表示・ライセンス文を、アプリ内の「このアプリについて・ライセンス」に掲載した。</td><td class="res ok">適合</td></tr>
+<tr><td>S-10</td><td>機能の動作</td><td>次の一連の流れを自動試験で確認し、エラーがないことを確認した。<br>区分の設定と配布／生産者の自己点検と保存／団体での取り込み・集約／内部監査・二者点検（集約ファイル・Excel点検表の両方）／前回の結果の参照・コピー／様式Excel・一覧Excelの出力／再開</td><td class="res ok">適合</td></tr>
+<tr><td>S-11</td><td>改ざんの確認</td><td>配布ファイルの指紋（SHA-256）を記録した。受け取った人が、正規のファイルかどうかを確かめられる（6章）。</td><td class="res ok">適合</td></tr>
+</table>
+</div>
+
+<h2>3．試験の環境</h2>
+<table>
+<tr><th>ブラウザ</th><td>Chromium（Google Chromeと同じ仕組みのブラウザ）、スマートフォン相当の画面サイズを含む</td></tr>
+<tr><th>試験の方法</th><td>Playwright（ブラウザ自動操作の試験ツール）による自動操作、プログラムの内容の確認</td></tr>
+<tr><th>試験に使ったデータ</th><td>架空の団体・生産者のデータ（実在の個人情報は使用していない）</td></tr>
+</table>
+
+<h2>4．残っているリスクと対策</h2>
+<table>
+<tr><th>リスク</th><th>内容</th><th>対策</th></tr>
+<tr><td>入力内容の消失</td><td>ブラウザ内の一時保存は、ブラウザのデータ削除・機種変更・プライベートモードで消えることがある。</td><td>区切りごとに「ファイルに保存」する。記録として保管するのは保存したファイルとする（手引き 9-1）。</td></tr>
+<tr><td>誤送信・情報漏えい</td><td>点検ファイルには生産者名・点検結果が含まれる。送り先を誤ると第三者に渡る。</td><td>送り先を確認する。関係者以外に転送しない。端末に画面ロックを設定する。</td></tr>
+<tr><td>端末の紛失・共用</td><td>端末内に入力内容が残る。</td><td>画面ロックの設定。共用端末では、使用後にアプリの「データを消去」を行う。</td></tr>
+<tr><td>名前の照合ミス</td><td>取り込み・前回の結果は名前で照合するため、表記の違いで別人扱いになる。</td><td>生産者名・団体名の表記を統一する。</td></tr>
+<tr><td>試作版の不具合</td><td>想定していない操作で、正しく動かない可能性がある。</td><td>テスト運用期間中は、従来の記録も並行して残す。不具合は提供者に報告する。</td></tr>
+<tr><td>改ざんされたファイル</td><td>正規でないファイルを受け取る可能性。</td><td>正規の配布場所（URL）から開く。必要に応じて指紋（SHA-256）を確認する。</td></tr>
+</table>
+
+<h2>5．確認していないこと（この確認の限界）</h2>
+<ul>
+<li>iPhone・Androidの実機での網羅的な動作確認（共有画面からのLINE・メール送信を含む）</li>
+<li>Microsoft Excelの全バージョンでの表示確認</li>
+<li>専門業者・第三者機関による脆弱性診断</li>
+<li>配布場所（GitHub Pagesなど）のサーバー自体の安全性（サービス提供者の管理範囲）</li>
+<li>点検表の内容（規範・解説）の正確性の再確認（日本生協連の点検表から自動で取り込んだもの）</li>
+</ul>
+
+<h2>6．ファイルが正規のものか確かめる方法</h2>
+<p>受け取ったHTMLファイルの指紋（SHA-256）を計算し、1ページ目の値と一致すれば、提供者が確認したものと同じファイルです。</p>
+<table>
+<tr><th>Windows</th><td>PowerShellで <code>Get-FileHash ファイル名.html -Algorithm SHA256</code><br>またはコマンドプロンプトで <code>certutil -hashfile ファイル名.html SHA256</code></td></tr>
+<tr><th>Mac</th><td>ターミナルで <code>shasum -a 256 ファイル名.html</code></td></tr>
+</table>
+<p class="small">※ 版を更新したときは、この確認書も更新し、新しい指紋を記録してください。</p>
+
+<h2>7．再確認の時期</h2>
+<ul>
+<li>アプリの版を更新したとき（少なくとも S-1、S-5、S-8、S-10 を再確認する）</li>
+<li>組み込んだソフトウェア（ExcelJS）を更新したとき</li>
+<li>重大な脆弱性の情報が公表されたとき</li>
+<li>上記にかかわらず、年1回</li>
+</ul>
+
+<h2>8．確認の記録</h2>
+<table class="sign">
+<tr><th style="width:24%">確認日</th><th style="width:20%">版</th><th>確認者（署名）</th><th style="width:26%">備考</th></tr>
+<tr><td>2026年10月13日</td><td>Ver0.9.6</td><td></td><td>初版</td></tr>
+<tr><td></td><td></td><td></td><td></td></tr>
+<tr><td></td><td></td><td></td><td></td></tr>
+</table>
+</main>
+</body>
+</html>

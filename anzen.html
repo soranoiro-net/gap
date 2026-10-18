@@ -33,12 +33,12 @@ ul{padding-left:1.3em;margin:6px 0}
 <main>
 <p style="margin:0 0 14px;font-size:14px"><a href="index.html" style="color:#1b3a5c">← soranoiro.net トップへ</a></p>
 <h1>点検表アプリ 安全性確認書（自己評価）</h1>
-<p class="sub">点検表アプリ：生協版適正農業規範 青果・米編（試作版 Ver0.9.7）</p>
+<p class="sub">点検表アプリ：生協版適正農業規範 青果・米編（試作版 Ver0.9.8）</p>
 
 <table>
-<tr><th>対象アプリ</th><td>点検表アプリ：生協版適正農業規範 青果・米編（試作版 Ver0.9.7）<br>単一のHTMLファイル「gap-seika.html」（ファイルサイズ 1,168,049 バイト）</td></tr>
-<tr><th>ファイルの指紋<br>（SHA-256）</th><td><span class="hash">527e14dacf8ce2548760733e6d2b8fc9cae498e1f7496964ce7e6f8f40405f1d</span><br><span class="small">※ 公開用ファイル「gap-seika.html」の値です。ファイル名を変えても値は変わりませんが、中身を1文字でも変えると値が変わります。</span></td></tr>
-<tr><th>確認日</th><td>2026年10月15日</td></tr>
+<tr><th>対象アプリ</th><td>点検表アプリ：生協版適正農業規範 青果・米編（試作版 Ver0.9.8）<br>単一のHTMLファイル「gap-seika.html」（ファイルサイズ 1,180,223 バイト）</td></tr>
+<tr><th>ファイルの指紋<br>（SHA-256）</th><td><span class="hash">fff831513f6df4a98f8448febabf7ea9e871cc474064b2bf835a5ae844f92708</span><br><span class="small">※ 公開用ファイル「gap-seika.html」の値です。ファイル名を変えても値は変わりませんが、中身を1文字でも変えると値が変わります。</span></td></tr>
+<tr><th>確認日</th><td>2026年10月18日</td></tr>
 <tr><th>確認者</th><td>soranoiro.net　菅野昌英</td></tr>
 <tr><th>確認の方法</th><td>プログラムの内容の確認（静的確認）と、ブラウザ（Chromium）でアプリを自動操作して動作を確かめる試験（動的確認）</td></tr>
 </table>
@@ -66,7 +66,7 @@ ul{padding-left:1.3em;margin:6px 0}
 <tr><td>S-7</td><td>作成するExcelファイル</td><td>・様式Excelは、元の点検表Excelの中身を保ったまま、結果を書き込むセル・行の高さ・書式だけを変更する方式であることを確認した。<br>・変更した部分が、Excelのファイル形式の国際規格（ISO/IEC 29500）の定義に合っていることを確認した。<br>・読み込んだ元のExcelファイル自体は変更されないことを確認した。</td><td class="res ok">適合</td></tr>
 <tr><td>S-8</td><td>組み込んだソフトウェアの既知の問題</td><td>脆弱性データベースによる確認（npm audit）で、重大（high／critical）は0件。中程度が2件（ExcelJSが内部で使う uuid の、特定の使い方をした場合の範囲確認の不足）あった。このアプリはその使い方をしておらず、また外部と通信しないため、<b>影響はないと判断</b>した。</td><td class="res cond">条件付き適合</td></tr>
 <tr><td>S-9</td><td>ライセンス</td><td>組み込んだソフトウェアのライセンス（MIT、ISC、BSD-3-Clause、Zlib）の条件である著作権表示・ライセンス文を、アプリ内の「このアプリについて・ライセンス」に掲載した。</td><td class="res ok">適合</td></tr>
-<tr><td>S-10</td><td>機能の動作</td><td>次の一連の流れを自動試験で確認し、エラーがないことを確認した。<br>区分の設定と配布／生産者の自己点検と保存／団体での取り込み・集約／内部監査・二者点検（集約ファイル・Excel点検表の両方）／前回の結果の参照・コピー／様式Excel・一覧Excelの出力／再開</td><td class="res ok">適合</td></tr>
+<tr><td>S-10</td><td>機能の動作</td><td>次の一連の流れを自動試験で確認し、エラーがないことを確認した。<br>区分の設定と配布／生産者の自己点検と保存／団体での取り込み・集約／内部監査・二者点検（集約ファイル・Excel点検表の両方）／前回の結果の参照・コピー（2023年5月版の様式Excelからの読み込みを含む）／様式Excel・一覧Excelの出力／再開</td><td class="res ok">適合</td></tr>
 <tr><td>S-11</td><td>改ざんの確認</td><td>配布ファイルの指紋（SHA-256）を記録した。受け取った人が、正規のファイルかどうかを確かめられる（6章）。</td><td class="res ok">適合</td></tr>
 </table>
 </div>
@@ -117,7 +117,7 @@ ul{padding-left:1.3em;margin:6px 0}
 <table class="sign">
 <tr><th style="width:24%">確認日</th><th style="width:20%">版</th><th>確認者</th><th style="width:26%">備考</th></tr>
 <tr><td>2026年10月15日</td><td>Ver0.9.7</td><td>soranoiro.net　菅野昌英</td><td>初版</td></tr>
-<tr><td></td><td></td><td></td><td></td></tr>
+<tr><td>2026年10月18日</td><td>Ver0.9.8</td><td>soranoiro.net　菅野昌英</td><td>2023年5月版の読み込みを追加。全項目を再確認</td></tr>
 <tr><td></td><td></td><td></td><td></td></tr>
 </table>
 </main>

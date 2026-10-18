@@ -200,7 +200,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 <script>
 'use strict';
 /* ========== マスタ ========== */
-const APP_VER='0.9.7';const APP_PROVIDER='soranoiro.net　（連絡先）gap@soranoiro.net';const APP_TITLE='点検表アプリ：生協版適正農業規範 青果・米編（試作版 Ver'+APP_VER+'）';const FMT=1, MASTER_VER='2025年版（20250513）';
+const APP_VER='0.9.8';const APP_PROVIDER='soranoiro.net　（連絡先）gap@soranoiro.net';const APP_TITLE='点検表アプリ：生協版適正農業規範 青果・米編（試作版 Ver'+APP_VER+'）';const FMT=1, MASTER_VER='2025年版（20250513）';
 const M=JSON.parse(document.getElementById('master').textContent);
 const CROPS=['青果','米','スプラウト','きのこ'];
 const KUBUN=['生産者','団体','両方'];
@@ -211,6 +211,9 @@ function cropOf(t){const m=String(t).match(/【(青果|米|スプラウト類?|�
 M.sections.forEach((s,si)=>s.n.forEach(n=>{n.sec=si;NORMS[n.id]=n;const nc=cropOf(n.t);
   n.items.forEach(it=>{const o=Object.assign({},it,{norm:n.id,sec:si,crop:cropOf(it.t)||nc});ITEMS.push(o);BYID[o.id]=o;});}));
 
+/* ========== 2023年5月版 → 2025年版の対応表（利用者確認済み 2026-10-18） ========== */
+const MAP23={"map": {"1-02-2": {"c": "chg", "s": [["1-02-2", "主"]]}, "1-02-3": {"c": "chg", "s": [["1-02-3", "主"]]}, "1-03-2": {"c": "chg", "s": [["1-03-2", "主"]]}, "1-04-1": {"c": "renumchg", "s": [["1-04-2", "主"], ["1-04-1", "関連"]]}, "1-04-2": {"c": "renumchg", "s": [["1-04-1", "主"], ["1-04-3", "関連"], ["1-04-5", "関連"]]}, "1-05-1": {"c": "renum", "s": [["2-08-1", "主"]]}, "1-05-2": {"c": "renum", "s": [["2-08-2", "主"]]}, "1-05-3": {"c": "renum", "s": [["2-08-3", "主"]]}, "1-05-4": {"c": "renum", "s": [["2-08-4", "主"]]}, "1-05-5": {"c": "renum", "s": [["2-08-5", "主"]]}, "1-05-6": {"c": "renum", "s": [["2-08-6", "主"]]}, "1-05-7": {"c": "renumchg", "s": [["2-09-1", "主"]]}, "1-05-8": {"c": "renumchg", "s": [["2-09-2", "主"]]}, "4-01-4": {"c": "chg", "s": [["4-01-4", "主"]]}, "5-07-5": {"c": "minor", "s": [["5-07-5", "主"]]}, "6-05-1": {"c": "minor", "s": [["6-05-1", "主"]]}, "6-31-4": {"c": "chg", "s": [["6-31-4", "主"]]}, "6-32-4": {"c": "minor", "s": [["6-32-4", "主"]]}, "7-01-1": {"c": "chg", "s": [["7-01-1", "主"]]}, "7-15-3": {"c": "merge", "s": [["7-15-3", "主"], ["7-15-4", "主"], ["7-15-5", "主"]]}, "7-17-1": {"c": "merge", "s": [["7-17-1", "主"], ["7-17-2", "主"]]}, "7-17-2": {"c": "renum", "s": [["7-17-3", "主"]]}, "7-17-3": {"c": "renum", "s": [["7-17-4", "主"]]}, "7-17-4": {"c": "renum", "s": [["7-17-5", "主"]]}, "7-17-5": {"c": "renum", "s": [["7-17-6", "主"]]}, "7-17-6": {"c": "renum", "s": [["7-17-7", "主"]]}, "7-17-7": {"c": "new", "s": [["7-17-8", "関連"]]}, "7-17-8": {"c": "chg", "s": [["7-17-8", "主"]]}, "7-17-10": {"c": "chg", "s": [["7-17-10", "主"]]}, "7-18-1": {"c": "new", "s": []}, "7-18-2": {"c": "new", "s": []}, "7-18-3": {"c": "new", "s": []}, "7-18-4": {"c": "new", "s": []}, "7-18-5": {"c": "new", "s": []}, "7-18-6": {"c": "new", "s": []}, "7-18-7": {"c": "new", "s": []}, "7-18-8": {"c": "new", "s": []}, "7-19-1": {"c": "new", "s": []}, "7-19-2": {"c": "new", "s": []}, "7-19-3": {"c": "new", "s": []}, "7-19-4": {"c": "new", "s": []}}, "t23": {"1-02-2": "生協の理念、産直政策、組合員の声について理解している", "1-02-3": "交流計画と交流実績の記録があり、交流活動の評価と改善を行っている", "1-03-2": "取引している生協毎に組合員の声を定期的に入手し、商品開発、改善に活かしている", "1-04-2": "仕様書および生協との合意事項からの変更時に、出荷生協に確認している", "1-04-1": "仕様書は、定期的に更新され最新のものが保管されており、最新の仕様書と同一のものを生協に提出している", "1-04-3": "生協との日々の実際の取引ごとに数量、価格、規格等を確認、記載した、商談記録や協議会等の議事録がある", "1-04-5": "生協と取引基本契約を締結している", "2-08-1": "適正農業規範による自己点検を行っている", "2-08-2": "内部監査、取引先による二者点検、第三者機関等による審査を受け入れている", "2-08-3": "自己点検の結果や内部監査・取引先による二者点検・第三者機関等による審査の指摘事項について、改善に向けて進捗管理を行っている", "2-08-4": "【団体】適正農業規範による自己点検、内部監査を行っている", "2-08-5": "【団体】取引先による二者点検、第三者機関等による審査を受け入れている", "2-08-6": "【団体】自己点検の結果や内部監査・取引先による二者点検・第三者機関等による審査の指摘事項について、改善に向けて進捗管理を行っている", "2-09-1": "生産者全員に、適正農業規範の自己点検を指導し、適正農業規範に関する情報提供、学習会を行っている", "2-09-2": "生産者の自己点検結果について内部監査を行い、不適合事項を指摘して改善を促している", "4-01-4": "リスク評価結果に基づき、食品安全・環境保全・労働安全、それぞれのリスクに対しての対策方法を決定し、周知している", "5-07-5": "安全に作業を行うための服装や保護具を着用し適切に保管している", "6-05-1": "土壌の浸食を軽減する対策をしている", "6-31-4": "作物残さ等の有機物のリサイクルを行っている", "6-32-4": "「圃場に堆肥や飼料を施用する際に、過剰な臭気が発生しないように配慮している", "7-01-1": "他者の知的財産を侵害することが無いよう、信頼できる供給元から種苗を入手している", "7-15-3": "使用する肥料、土壌改良剤の原料について、放射性物質汚染の心配がないことを確認している", "7-15-4": "使用する肥料、土壌改良剤の原料は、重金属で汚染されていないことを確認している", "7-15-5": "使用する肥料、土壌改良剤は、不十分な発酵による病原性微生物によって汚染されていないことを確認している", "7-17-1": "肥料（種子や苗に使用した肥料を含む）・堆肥・土壌改良材を、いつ、どこに使用したかを記録・保管している", "7-17-2": "肥料・堆肥・土壌改良材の購入伝票を保管している", "7-17-3": "使用した肥料、土壌改良資材等が栽培計画書と異なる場合、肥料登録等により、食品安全や環境保全、労働安全に影響を及ぼさないことを確認している", "7-17-4": "肥料等を崩落・落下、発熱・発火しないように適切に保管している", "7-17-5": "肥料等の袋は劣化したり破損したりして、漏れ出していない", "7-17-6": "肥料等によって圃場、農産物、作業用の施設、河川、用水を汚染する危険性がない", "7-17-7": "農薬登録されている肥料、農薬が添加されている肥料を適切に管理している", "7-17-8": "堆肥を施用する場合は、病原微生物、外来雑草種子等の撲滅のため、適切に堆肥化したものを使用している", "7-17-10": "堆肥が農産物と直接接触しないようにしている"}, "ids23": ["1-01-1", "1-02-1", "1-02-2", "1-02-3", "1-03-1", "1-03-2", "1-04-1", "1-04-2", "1-04-3", "1-04-4", "1-04-5", "2-01-1", "2-01-2", "2-01-3", "2-01-4", "2-02-1", "2-02-2", "2-02-3", "2-03-1", "2-03-2", "2-03-3", "2-03-4", "2-03-5", "2-04-1", "2-04-2", "2-04-3", "2-05-1", "2-05-2", "2-05-3", "2-05-4", "2-06-1", "2-06-2", "2-07-1", "2-07-2", "2-07-3", "2-08-1", "2-08-2", "2-08-3", "2-08-4", "2-08-5", "2-08-6", "2-09-1", "2-09-2", "3-01-1", "3-01-2", "3-01-3", "3-02-1", "3-02-2", "3-02-3", "3-02-4", "3-02-5", "3-03-1", "3-03-2", "3-03-3", "3-03-4", "3-03-5", "3-03-6", "4-01-1", "4-01-2", "4-01-3", "4-01-4", "4-01-5", "4-02-1", "4-02-2", "4-02-3", "4-03-1", "4-03-2", "4-03-3", "4-04-1", "4-05-1", "4-06-1", "4-06-2", "4-06-3", "4-06-4", "4-06-5", "4-06-6", "4-06-7", "4-06-8", "4-06-9", "4-07-1", "4-07-2", "4-07-3", "4-07-4", "4-07-5", "4-08-1", "4-08-2", "4-08-3", "4-09-1", "4-09-2", "4-09-3", "4-10-1", "4-10-2", "4-10-3", "4-10-4", "4-11-1", "4-11-2", "4-11-3", "4-12-1", "4-12-2", "4-12-3", "4-13-1", "4-13-2", "4-13-3", "4-13-4", "4-13-5", "4-14-1", "4-14-2", "4-14-3", "4-14-4", "4-14-5", "5-01-1", "5-01-2", "5-01-3", "5-01-4", "5-01-5", "5-01-6", "5-01-7", "5-02-1", "5-02-2", "5-02-3", "5-02-4", "5-02-5", "5-03-1", "5-03-2", "5-04-1", "5-04-2", "5-05-1", "5-06-1", "5-07-1", "5-07-2", "5-07-3", "5-07-4", "5-07-5", "5-08-1", "5-08-2", "5-08-3", "6-01-1", "6-01-2", "6-01-3", "6-01-4", "6-01-5", "6-02-1", "6-02-2", "6-03-1", "6-03-2", "6-03-3", "6-03-4", "6-03-5", "6-04-1", "6-04-2", "6-04-3", "6-04-4", "6-05-1", "6-05-2", "6-06-1", "6-06-2", "6-06-3", "6-07-1", "6-07-2", "6-07-3", "6-07-4", "6-08-1", "6-08-2", "6-09-1", "6-09-2", "6-10-1", "6-10-2", "6-10-3", "6-11-1", "6-12-1", "6-12-2", "6-12-3", "6-13-1", "6-13-2", "6-13-3", "6-14-1", "6-14-2", "6-14-3", "6-15-1", "6-15-2", "6-15-3", "6-16-1", "6-16-2", "6-16-3", "6-16-4", "6-17-1", "6-18-1", "6-18-2", "6-18-3", "6-19-1", "6-20-1", "6-20-2", "6-20-3", "6-21-1", "6-22-1", "6-22-2", "6-22-3", "6-22-4", "6-22-5", "6-22-6", "6-23-1", "6-23-2", "6-23-3", "6-24-1", "6-24-2", "6-24-3", "6-25-1", "6-25-2", "6-25-3", "6-26-1", "6-26-2", "6-27-1", "6-27-2", "6-27-3", "6-28-1", "6-29-1", "6-29-2", "6-29-3", "6-30-1", "6-30-2", "6-30-3", "6-30-4", "6-30-5", "6-30-6", "6-30-7", "6-31-1", "6-31-10", "6-31-11", "6-31-12", "6-31-13", "6-31-14", "6-31-15", "6-31-2", "6-31-3", "6-31-4", "6-31-5", "6-31-6", "6-31-7", "6-31-8", "6-31-9", "6-32-1", "6-32-2", "6-32-3", "6-32-4", "6-32-5", "6-33-1", "6-34-1", "6-34-2", "6-34-3", "7-01-1", "7-01-2", "7-01-3", "7-02-1", "7-03-1", "7-03-2", "7-03-3", "7-03-4", "7-03-5", "7-03-6", "7-04-1", "7-04-2", "7-04-3", "7-05-1", "7-05-2", "7-05-3", "7-05-4", "7-05-5", "7-05-6", "7-05-7", "7-06-1", "7-06-2", "7-06-3", "7-06-4", "7-06-5", "7-07-1", "7-07-2", "7-07-3", "7-07-4", "7-08-1", "7-08-2", "7-09-1", "7-10-1", "7-10-2", "7-10-3", "7-10-4", "7-11-1", "7-11-2", "7-12-1", "7-12-10", "7-12-11", "7-12-12", "7-12-13", "7-12-2", "7-12-3", "7-12-4", "7-12-5", "7-12-6", "7-12-7", "7-12-8", "7-12-9", "7-13-1", "7-13-2", "7-14-1", "7-14-2", "7-15-1", "7-15-2", "7-15-3", "7-15-4", "7-15-5", "7-16-1", "7-16-2", "7-16-3", "7-17-1", "7-17-10", "7-17-11", "7-17-2", "7-17-3", "7-17-4", "7-17-5", "7-17-6", "7-17-7", "7-17-8", "7-17-9"]};const ID23S=new Set(MAP23.ids23);
+function pvSrc(id){const m=MAP23.map[id];if(m)return m;return ID23S.has(id)?{c:'same',s:[[id,'主']]}:null}
 /* ========== ユーティリティ ========== */
 const $=(s,r=document)=>r.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -272,13 +275,13 @@ function pvAns(src){const o={};Object.entries(src||{}).forEach(([id,a])=>{if(BYI
 async function pvLoadFile(f){let n=0;
   if(/\.xlsx$/i.test(f.name)){const x=await readXl(f);const isP=!!x.producer;const who=isP?'生':'団';const kind=x.tDate?'twoparty':x.iDate?'internal':'audit';
     const self={},aud={};Object.entries(x.rows).forEach(([id,r])=>{if(isP&&r.k==='団体')return;const s1=splitWho(r.v,r.c,who);if(s1.v||s1.c)self[id]=s1;const a1=splitWho(r.f,r.g,who);if(a1.v||a1.c)aud[id]=a1});
-    const base={type:isP?'生産者':'団体',name:isP?x.producer:x.group,group:x.group,src:f.name+'（様式Excel）'};
+    const v23=x.ver==='2023';const base={type:isP?'生産者':'団体',name:isP?x.producer:x.group,group:x.group,src:f.name+(v23?'（2023年版の様式Excel）':'（様式Excel）')};if(v23)base.ver='2023';
     if(Object.keys(self).length){pvAdd(Object.assign({key:'xl|'+f.name+'|self',kind:'self',date:isP?x.pDate:x.gDate,answers:self},base));n++}
     if(Object.keys(aud).length){pvAdd(Object.assign({key:'xl|'+f.name+'|aud',kind,date:kind==='twoparty'?x.tDate:x.iDate,answers:aud},base));n++}
-    if(isP){const gs={},ga={};Object.entries(x.rows).forEach(([id,r])=>{const k=r.k||BYID[id].k;
+    if(isP){const gs={},ga={};Object.entries(x.rows).forEach(([id,r])=>{const k=r.k||(BYID[id]||{}).k;
         const take=(v,c)=>k==='団体'?splitWho(v,c,'団'):(k==='両方'&&(/団/.test(String(v||''))||/^団：/m.test(String(c||''))))?splitWho(v,c,'団'):null;
         const s1=take(r.v,r.c);if(s1&&(s1.v||s1.c))gs[id]=s1;const a1=take(r.f,r.g);if(a1&&(a1.v||a1.c))ga[id]=a1});
-      const gb={type:'団体',name:x.group,group:x.group,src:f.name+'（様式Excel・団体分）'};
+      const gb={type:'団体',name:x.group,group:x.group,src:f.name+(v23?'（2023年版の様式Excel・団体分）':'（様式Excel・団体分）')};if(v23)gb.ver='2023';
       if(Object.keys(gs).length){pvAdd(Object.assign({key:'xl|'+f.name+'|gself',kind:'self',date:x.gDate,answers:gs},gb));n++}
       if(Object.keys(ga).length){pvAdd(Object.assign({key:'xl|'+f.name+'|gaud',kind,date:kind==='twoparty'?x.tDate:x.iDate,answers:ga},gb));n++}}
     if(!n)throw new Error(f.name+'：点検結果が見つかりませんでした');return n}
@@ -289,9 +292,20 @@ async function pvLoadFile(f){let n=0;
   if(o.kind==='sgap-audit'){Object.entries(o.targets||{}).forEach(([tid,t])=>{const ans=pvAns(t.answers);if(!Object.keys(ans).length)return;
       pvAdd({key:o.id+'|'+tid,kind:o.type,type:tid==='group'?'団体':'生産者',tid,selfId:o.ref.selfId,name:tid==='group'?o.ref.groupName:(t.label||''),group:o.ref.groupName,date:o.date,answers:ans,src:f.name});n++});return n}
   throw new Error(f.name+'：前回の結果として使えないファイルです（設定ファイルなど）')}
-function pvList(id,ctx){const seen=new Set();return (ctx.prevRecs||[]).map((r,k)=>({r,k,a:r.answers[id]})).filter(x=>{if(!x.a)return false;const key=[x.r.kind,x.r.date,x.a.v,x.a.c].join('|');if(seen.has(key))return false;seen.add(key);return true})}
-function prevHTML(it,ctx){const l=pvList(it.id,ctx);if(!l.length)return '';
-  return `<div class="refs">${l.map(x=>`<div class="ref pv"><span class="rl">前回 ${esc(KLABEL[x.r.kind]||'')}${x.r.date?' '+jdate(x.r.date):''}</span><b class="vv ${vcls(x.a.v)}">${x.a.v||'—'}</b>${ctx.readonly?'':`<button class="pvc" data-act="pv-copy" data-k="${x.k}">コピー</button>`}${x.a.c?`<span class="rc">${nl(x.a.c)}</span>`:''}</div>`).join('')}</div>`}
+function pvList(id,ctx){const seen=new Set(),out=[];(ctx.prevRecs||[]).forEach((r,k)=>{
+    if(r.ver==='2023'){const m=pvSrc(id);if(!m)return;m.s.forEach(([sid,role])=>{const a=r.answers[sid];if(a)out.push({r,k,a,sid,role,c:m.c})})}
+    else{const a=r.answers[id];if(a)out.push({r,k,a})}});
+  return out.filter(x=>{const key=[x.r.kind,x.r.date,x.sid||'',x.a.v,x.a.c].join('|');if(seen.has(key))return false;seen.add(key);return true})}
+const OLDTAG={chg:'表現変更あり',renumchg:'番号・表現変更あり',merge:'統合元'};
+const needOldConfirm=x=>x.sid&&(x.role==='関連'||['chg','renumchg','merge','new'].includes(x.c));
+function prevHTML(it,ctx){const l=pvList(it.id,ctx);const m=pvSrc(it.id);
+  const isNew=(ctx.prevRecs||[]).some(r=>r.ver==='2023')&&m&&m.c==='new';
+  if(!l.length&&!isNew)return '';
+  return `<div class="refs">${isNew?`<div class="ref pv"><span class="rl"><b style="color:var(--acc)">新設項目</b>（2023年版にはない点検項目です）</span></div>`:''}${l.map(x=>{
+    let lab='前回 '+(KLABEL[x.r.kind]||'')+(x.r.date?' '+jdate(x.r.date):'');let tag='',old='';
+    if(x.sid){lab+='（2023年版'+(x.sid!==it.id?' '+x.sid:'')+'）';tag=x.role==='関連'?'関連・参考':(OLDTAG[x.c]||'');
+      if(tag)old=`<details class="rc" style="flex:1 1 100%"><summary style="cursor:pointer;color:var(--acc)">2023年版の文面</summary>${esc((MAP23.t23[x.sid])||'')}</details>`}
+    return `<div class="ref pv"><span class="rl">${esc(lab)}${tag?` <b style="color:var(--warn)">${esc(tag)}</b>`:''}</span><b class="vv ${vcls(x.a.v)}">${x.a.v||'—'}</b>${ctx.readonly?'':`<button class="pvc" data-act="pv-copy" data-k="${x.k}"${x.sid?` data-sid="${x.sid}"`:''}>コピー</button>`}${x.a.c?`<span class="rc">${nl(x.a.c)}</span>`:''}${old}</div>`}).join('')}</div>`}
 function prevCard(matchInfo,note){const n=PV.recs.length;
   return `<div class="card"><h2>前回の結果（任意）</h2><p class="mut small">過去の自己点検ファイル・集約ファイル・内部監査／二者点検ファイル・様式Excelを読み込むと、各項目に前回の結果が表示され、1項目ずつ「コピー」で入力できます。</p>${note?`<p class="note small" style="margin:0 0 10px">${note}</p>`:''}
 <p class="small" style="margin:0">読み込み済み：${n}件${n&&matchInfo?'　'+matchInfo:''}</p>
@@ -479,7 +493,7 @@ function refsFor(S,t,id){const r=[{label:t.type==='団体'?'団体の自己点�
 /* 読み込んだExcel点検表の中身（アプリを開いている間だけ保持） */
 const XLBUF={};
 function hash32(str){let h=0x811c9dc5;for(const ch of String(str)){h^=ch.codePointAt(0);h=Math.imul(h,16777619)>>>0}return h.toString(16)}
-async function selfFromXl(files,base,isAdd){const xs=[];for(const f of files){const x=await readXl(f);x.fname=f.name;x.buf=await f.arrayBuffer();xs.push(x)}
+async function selfFromXl(files,base,isAdd){const xs=[];for(const f of files){const x=await readXl(f);if(x.ver==='2023')throw new Error(OLD_XL_MSG(f.name));x.fname=f.name;x.buf=await f.arrayBuffer();xs.push(x)}
   const gname=(xs.find(x=>x.group)||{}).group||'';
   const bad=xs.filter(x=>x.group&&nn(x.group)!==nn(gname));if(bad.length)throw new Error('団体名が異なるExcelが含まれています：'+bad.map(x=>x.fname+'（'+x.group+'）').join('、'));
   const yr=(xs.map(x=>x.pDate||x.gDate||x.iDate||x.tDate).filter(Boolean).sort().pop()||'').slice(0,4);
@@ -554,8 +568,8 @@ function xdoc(s){return new DOMParser().parseFromString(s,'application/xml')}
 const byTag=(n,t)=>[...n.getElementsByTagNameNS('*',t)];
 /* ふりがな（rPh）を除いた文字だけを取り出す */
 const plainT=n=>byTag(n,'t').filter(x=>!(x.parentNode&&x.parentNode.localName==='rPh')).map(x=>x.textContent).join('');
-async function readSheetCells(buf,sheetName){const get=await unzip(buf);const wbx=xdoc(await get('xl/workbook.xml')||'');
-  const sh=byTag(wbx,'sheet').find(s=>s.getAttribute('name')===sheetName);if(!sh)return null;
+async function readSheetCells(buf,sheetName,fallback){const get=await unzip(buf);const wbx=xdoc(await get('xl/workbook.xml')||'');
+  const sheets=byTag(wbx,'sheet');const sh=sheets.find(s=>s.getAttribute('name')===sheetName)||(fallback?sheets[0]:null);if(!sh)return null;
   const rid=sh.getAttribute('r:id')||sh.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships','id');
   const rel=byTag(xdoc(await get('xl/_rels/workbook.xml.rels')),'Relationship').find(r=>r.getAttribute('Id')===rid);
   let tg=rel.getAttribute('Target');tg=tg.startsWith('/')?tg.slice(1):'xl/'+tg.replace(/^\.\//,'');
@@ -564,11 +578,14 @@ async function readSheetCells(buf,sheetName){const get=await unzip(buf);const wb
     const v=byTag(c,'v')[0];let val;if(t==='s')val=v?sst[+v.textContent]:'';else if(t==='inlineStr')val=plainT(c);else val=v?v.textContent:'';
     if(t!=='s'&&t!=='inlineStr'&&t!=='str'&&t!=='b'&&/^[DF]1[1-4]$/.test(r)&&/^\d+(\.\d+)?$/.test(val)){const d=new Date(Math.round((+val-25569)*864e5));val=d.getUTCFullYear()+'-'+pad(d.getUTCMonth()+1)+'-'+pad(d.getUTCDate())}
     cells[r]=String(val).trim()});return cells}
-async function readXl(file){const buf=await file.arrayBuffer();let cells;try{cells=await readSheetCells(buf,'点検表')}catch(e){throw new Error(file.name+'：'+e.message)}
+async function readXl(file){const buf=await file.arrayBuffer();let cells;try{cells=await readSheetCells(buf,'点検表',true)}catch(e){throw new Error(file.name+'：'+e.message)}
   if(!cells)throw new Error(file.name+' に「点検表」シートがありません');const c=a=>cells[a]||'';
-  const rows={};Object.keys(cells).forEach(a=>{const m=a.match(/^A(\d+)$/);if(!m)return;const id=cells[a].replace(/\s/g,'');if(BYID[id]&&!rows[id]){const r=m[1];rows[id]={k:normK(c('C'+r)),v:c('D'+r),c:c('E'+r),f:c('F'+r),g:c('G'+r)}}});
+  const ver=(/2023/.test(c('A5'))||/品質保証システム/.test(c('A3')))?'2023':'2025';const okId=id=>ver==='2023'?ID23S.has(id):!!BYID[id];
+  const rows={};Object.keys(cells).forEach(a=>{const m=a.match(/^A(\d+)$/);if(!m)return;const id=cells[a].replace(/\s/g,'');if(okId(id)&&!rows[id]){const r=m[1];rows[id]={k:normK(c('C'+r)),v:c('D'+r),c:c('E'+r),f:c('F'+r),g:c('G'+r)}}});
   const d=s=>{s=String(s||'').replace(/[\/.年月]/g,'-').replace(/日/,'');const m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);return m?m[1]+'-'+pad(m[2])+'-'+pad(m[3]):''};
-  return {rows,coop:c('B1'),group:c('A8'),producer:c('D8'),crop:c('F8'),gDate:d(c('D11')),gIns:c('F11'),pDate:d(c('D12')),pIns:c('F12'),iDate:d(c('D13')),tDate:d(c('D14'))}}
+  if(ver==='2023')return {ver,rows,coop:c('B1'),group:c('A7'),producer:c('D7'),crop:c('F7'),gDate:d(c('D10')),gIns:c('F10'),pDate:d(c('D11')),pIns:c('F11'),iDate:d(c('D12')),tDate:d(c('D13'))};
+  return {ver,rows,coop:c('B1'),group:c('A8'),producer:c('D8'),crop:c('F8'),gDate:d(c('D11')),gIns:c('F11'),pDate:d(c('D12')),pIns:c('F12'),iDate:d(c('D13')),tDate:d(c('D14'))}}
+const OLD_XL_MSG=n=>n+'：2023年5月版のExcel点検表です。ここでは2025年版だけを読み込めます。2023年版の記録は「前回の結果を読み込む」で読み込んでください';
 /* ===== 様式Excel：書き込む内容を決める ===== */
 function formPlan(S,tid,Au){const cells={};const set=(a,v,sz)=>{cells[a]={v:(v===''||v==null)?null:String(v),sz:sz||0}};
   const p=tid==='group'?null:prodOf(S,tid);
@@ -710,7 +727,8 @@ ACT['pv-load']=async()=>{const fs=await pickFiles('.txt,.json,.xlsx,text/plain,a
 ACT['pv-del']=el=>{PV.recs.splice(+el.dataset.i,1);persist();render()};
 ACT['pv-clear']=()=>{if(!confirm('読み込んだ前回の結果をすべて削除しますか？（元のファイルは消えません）'))return;PV={recs:[],idmap:{}};persist();render()};
 ACT['pv-toggle']=()=>{UI.showPrev=!UI.showPrev;render()};
-ACT['pv-copy']=el=>{const ctx=UI.ctx;if(!ctx)return;const id=el.closest('.item').dataset.id;const r=ctx.prevRecs[+el.dataset.k];const a=r&&r.answers[id];if(!a)return;
+ACT['pv-copy']=el=>{const ctx=UI.ctx;if(!ctx)return;const id=el.closest('.item').dataset.id;const r=ctx.prevRecs[+el.dataset.k];const sid=el.dataset.sid;const a=r&&r.answers[sid||id];if(!a)return;
+  if(sid){const m=pvSrc(id)||{};const role=((m.s||[]).find(z=>z[0]===sid)||[])[1];if(needOldConfirm({sid,role,c:m.c})&&!confirm('2023年版から表現が変わった（または統合・関連する）点検項目です。今の点検項目の内容に合っているか確認したうえでコピーしてください。\nコピーしますか？'))return}
   const cur=ctx.get(id);if(cur&&(cur.v||cur.c)&&!(cur.v===a.v&&cur.c===a.c)&&!confirm('いまの入力を、前回の内容で置き換えますか？'))return;
   ctx.set(id,{v:a.v||'',c:a.c||''});if(a.c)UI.openC.add(id);refreshCard(id);refreshProg();toast('前回の内容をコピーしました。内容を確認し、必要なら修正してください')};
 ACT['sh-share']=async()=>{const s=UI.sheet;try{await navigator.share({files:[s.file],title:s.name});s.onSaved&&s.onSaved();closeSheet();toast('送信画面を開きました')}catch(e){if(e.name!=='AbortError')toast('送れませんでした。「この端末に保存」をお使いください')}};
@@ -733,7 +751,7 @@ ACT['g-new']=()=>{G=newG();persist();go('g-home')};
 ACT['g-resume']=async()=>{const [f]=await pickFiles('.txt,.json,text/plain,application/json');if(!f)return;try{const o=await readJSON(f);if(o.kind!=='sgap-self-group')throw new Error('これは自己点検集約ファイルではありません');checkMaster(o);
   if(G&&G.id!==o.id&&!confirm('いま開いている団体のデータを、読み込んだファイルに置き換えます。よろしいですか？'))return;G=o;G.savedAt=G.updated;persist();go('g-home')}catch(e){toast(e.message,4000)}};
 ACT['g-reset']=()=>{if(!confirm('この端末に一時保存されている団体のデータ（集約中の生産者分を含む）を消去します。保存したファイルは消えません。よろしいですか？'))return;G=null;persist();go('home')};
-ACT['g-xl-kubun']=async()=>{const [f]=await pickFiles('.xlsx,'+XLSX_MIME);if(!f)return;try{const buf=await f.arrayBuffer();const x=await readXl(new File([buf],f.name));let n=0,bad=0,chg=0;const km={};
+ACT['g-xl-kubun']=async()=>{const [f]=await pickFiles('.xlsx,'+XLSX_MIME);if(!f)return;try{const buf=await f.arrayBuffer();const x=await readXl(new File([buf],f.name));if(x.ver==='2023')throw new Error(OLD_XL_MSG(f.name));let n=0,bad=0,chg=0;const km={};
   ITEMS.forEach(it=>{const r=x.rows[it.id];if(!r)return;if(r.k){n++;if(r.k!==it.k){km[it.id]=r.k;chg++}}else bad++});
   if(!n)throw new Error('区分を読み取れませんでした');G.kubun=km;if(!G.group.name&&x.group)G.group.name=x.group;if(!G.group.coop&&x.coop)G.group.coop=x.coop;touch(G);
   UI.tpl=buf;
@@ -744,7 +762,7 @@ ACT['g-setting-file']=()=>{if(!G.group.name.trim()){toast('団体名を入力し
   openSheet({title:'生産者に配る設定ファイル',body:`<p class="mut small">このファイルを生産者に送ります。生産者はアプリで「設定ファイルを読み込んで始める」を選びます。区分を変更したときは配り直してください。</p>`,blob:jsonBlob(o),name:`設定_${fnSafe(G.group.name)}_${ymd()}.txt`})};
 ACT['g-import']=async()=>{const fs=await pickFiles('.txt,.json,.xlsx,text/plain,application/json,'+XLSX_MIME,true);if(!fs.length)return;let add=0,upd=0,skip=0;const errs=[];
   for(const f of fs){try{let rec;
-    if(/\.xlsx$/i.test(f.name)){const x=await readXl(f);if(!x.producer)throw new Error(f.name+'：生産者名（D8）が空欄です');const ans={};
+    if(/\.xlsx$/i.test(f.name)){const x=await readXl(f);if(x.ver==='2023')throw new Error(OLD_XL_MSG(f.name));if(!x.producer)throw new Error(f.name+'：生産者名（D8）が空欄です');const ans={};
       Object.entries(x.rows).forEach(([id,r])=>{const k=kb(G.kubun,id);const pv=splitWho(r.v,r.c,'生');if((k==='生産者'||k==='両方')&&(pv.v||pv.c))ans[id]=pv});
       rec={id:'xl-'+uid(),name:x.producer,crops:CROPS.filter(c=>x.crop.includes(c)),cropText:x.crop,date:x.pDate,inspector:x.pIns,answers:ans,updated:nowISO(),source:f.name+'（Excel）'}}
     else{const o=await readJSON(f);if(o.kind!=='sgap-self-producer')throw new Error(f.name+'：生産者の自己点検ファイルではありません');checkMaster(o);

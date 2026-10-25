@@ -200,7 +200,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 <script>
 'use strict';
 /* ========== マスタ ========== */
-const APP_VER='0.9.8';const APP_PROVIDER='soranoiro.net　（連絡先）gap@soranoiro.net';const APP_TITLE='点検表アプリ：生協版適正農業規範 青果・米編（試作版 Ver'+APP_VER+'）';const FMT=1, MASTER_VER='2025年版（20250513）';
+const APP_VER='0.9.9';const APP_PROVIDER='soranoiro.net　（連絡先）gap@soranoiro.net';const APP_TITLE='点検表アプリ：生協版適正農業規範 青果・米編（試作版 Ver'+APP_VER+'）';const FMT=1, MASTER_VER='2025年版（20250513）';
 const M=JSON.parse(document.getElementById('master').textContent);
 const CROPS=['青果','米','スプラウト','きのこ'];
 const KUBUN=['生産者','団体','両方'];
@@ -316,7 +316,12 @@ const FILTERS={self:[['all','すべて'],['todo','未入力'],['x','✕のみ']]
   audit:[['all','すべて'],['todo','未評価'],['refx','自己点検が✕'],['warn','要コメント']],
   ro:[['all','すべて'],['todo','未入力'],['x','✕のみ']]};
 function needC(a,refs){const r=refs&&refs[0];return !!(a&&a.v&&r&&r.v&&a.v!==r.v&&!(a.c||'').trim())}
-function pass(it,ctx){const q=UI.q.trim();if(q&&!(it.id.includes(q)||it.t.includes(q)||NORMS[it.norm].t.includes(q)))return false;
+/* 検索の対象：番号・点検項目・規範項目に加えて、コメント（今回の入力、自己点検の結果、前回の結果）も探す */
+function searchHit(it,ctx,q){if(it.id.includes(q)||it.t.includes(q)||NORMS[it.norm].t.includes(q))return true;
+  const a=ctx.get(it.id);if(a&&(a.c||'').includes(q))return true;
+  if(ctx.refs&&ctx.refs(it.id).some(r=>(r.c||'').includes(q)))return true;
+  if(UI.showPrev&&ctx.prevRecs&&ctx.prevRecs.length&&pvList(it.id,ctx).some(x=>(x.a.c||'').includes(q)))return true;return false}
+function pass(it,ctx){const q=UI.q.trim();if(q&&!searchHit(it,ctx,q))return false;
   const a=ctx.get(it.id)||{},f=UI.filter;
   if(f==='todo')return !a.v; if(f==='x')return a.v==='✕';
   if(f==='refx'){const r=ctx.refs(it.id);return r.some(x=>x.v==='✕')}
@@ -346,7 +351,7 @@ function progHTML(ctx){const s=st(ctx.items,ctx.get);let extra='';
 function checklist(ctx){UI.ctx=ctx;const fl=FILTERS[ctx.readonly?'ro':ctx.mode];
   const secs=M.sections.map((s,si)=>ctx.items.some(it=>it.sec===si)?`<option value="${si}">${esc(s.t)}</option>`:'').join('');
   return `<div class="prog"><div id="pg">${progHTML(ctx)}</div>
-<div class="tools"><input type="search" id="q" placeholder="番号・語句で検索" value="${esc(UI.q)}"><select id="jump"><option value="">章へ移動</option>${secs}</select></div>
+<div class="tools"><input type="search" id="q" placeholder="番号・語句・コメントで検索" value="${esc(UI.q)}"><select id="jump"><option value="">章へ移動</option>${secs}</select></div>
 <div class="fchips">${fl.map(([k,l])=>`<button data-f="${k}" class="${UI.filter===k?'on':''}">${l}</button>`).join('')}${ctx.prevRecs&&ctx.prevRecs.length?`<button data-act="pv-toggle" class="${UI.showPrev?'on':''}" style="margin-left:auto">前回${UI.showPrev?'を表示中':'を隠し中'}</button>`:''}</div></div>
 <div id="list">${listHTML(ctx)}</div>`}
 function refreshCard(id){const el=app.querySelector(`.item[data-id="${CSS.escape(id)}"]`);if(!el||!UI.ctx)return;const t=document.createElement('div');t.innerHTML=itemHTML(BYID[id],UI.ctx);el.replaceWith(t.firstElementChild)}

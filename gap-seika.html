@@ -9,17 +9,17 @@
 <title>点検表アプリ：生協版適正農業規範 青果・米編（試作版）</title>
 <style>
 :root{
-  --bg:#f5f6f2;--card:#fff;--ink:#1d2620;--mut:#65706a;--line:#dde2da;--soft:#eef1ea;
+  --bg:#f5f6f2;--card:#fff;--memo:#5a4fb0;--ink:#1d2620;--mut:#65706a;--line:#dde2da;--soft:#eef1ea;
   --acc:#2e7a4d;--acc-ink:#fff;--o:#1f8a4d;--o-bg:#e5f4ea;--x:#c43c3c;--x-bg:#fbe9e9;--n:#5f6670;--n-bg:#eceef1;
   --warn:#9a5b00;--warn-bg:#fff4df;--kp:#2b6cb0;--kd:#8a4fb5;--kb:#a16207;
   --r:12px;--sh:0 1px 2px rgba(0,0,0,.06),0 2px 8px rgba(0,0,0,.04);
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#121613;--card:#1b211d;--ink:#e5ebe6;--mut:#9aa59e;--line:#2d3631;--soft:#232b26;
+  --bg:#121613;--card:#1b211d;--memo:#b3a9f2;--ink:#e5ebe6;--mut:#9aa59e;--line:#2d3631;--soft:#232b26;
   --acc:#5cb783;--acc-ink:#0e1a12;--o:#62c68c;--o-bg:#1c3326;--x:#ef7d7d;--x-bg:#3a2020;--n:#aab1ba;--n-bg:#2a2f35;
   --warn:#f0b35a;--warn-bg:#35291a;--kp:#7fb2ea;--kd:#c79be6;--kb:#e2b04e;--sh:none;}}
 :root[data-theme="dark"]{
-  --bg:#121613;--card:#1b211d;--ink:#e5ebe6;--mut:#9aa59e;--line:#2d3631;--soft:#232b26;
+  --bg:#121613;--card:#1b211d;--memo:#b3a9f2;--ink:#e5ebe6;--mut:#9aa59e;--line:#2d3631;--soft:#232b26;
   --acc:#5cb783;--acc-ink:#0e1a12;--o:#62c68c;--o-bg:#1c3326;--x:#ef7d7d;--x-bg:#3a2020;--n:#aab1ba;--n-bg:#2a2f35;
   --warn:#f0b35a;--warn-bg:#35291a;--kp:#7fb2ea;--kd:#c79be6;--kb:#e2b04e;--sh:none;}
 *{box-sizing:border-box}
@@ -107,6 +107,19 @@ textarea{min-height:0;resize:vertical}
 .cm textarea{display:none;font-size:15px}
 .cm.open textarea{display:block}.cm.open .cmt{display:none}
 .cmt{border:0;background:none;color:var(--acc);font-weight:600;cursor:pointer;padding:4px 0;font-size:14px}
+.mm{margin-top:6px}.mbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.mm .mmt{border:0;background:none;color:var(--memo);font-weight:600;cursor:pointer;padding:4px 0;font-size:14px}.mm.open .mmt{display:none}
+.chk{border:1px solid var(--line);background:var(--card);color:var(--mut);border-radius:99px;padding:3px 10px;font-size:13px;cursor:pointer}.chk.on{background:var(--warn-bg);border-color:var(--warn);color:var(--warn);font-weight:700}
+.mbody{display:none;margin-top:6px;padding:8px 10px;border:1px dashed var(--memo);border-radius:10px;background:color-mix(in srgb,var(--memo) 7%,var(--card))}.mm.open .mbody{display:block}
+.mnote{font-size:12px;color:var(--memo);font-weight:600;margin-bottom:6px}
+.phs{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;align-items:center}
+.pth{padding:0;border:1px solid var(--line);border-radius:8px;width:64px;height:64px;overflow:hidden;background:var(--soft);cursor:pointer}.pth.miss{opacity:.4}
+.pvbig{display:block;max-width:100%;max-height:62vh;width:auto;height:auto;margin:0 auto 10px;border-radius:8px}
+.pth canvas{width:100%;height:100%;display:block}.pth,.pth canvas,.pvbig{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-user-drag:none}
+.phn{margin-top:6px;font-size:12px;color:var(--warn);font-weight:600}
+.mrow{padding:10px 0;border-top:1px solid var(--line)}.mrow:first-of-type{border-top:0}.mrow .ih{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.mtx{margin-top:6px;padding:8px 10px;border-left:3px solid var(--memo);background:color-mix(in srgb,var(--memo) 7%,var(--card));border-radius:0 8px 8px 0;font-size:14px}
+.mcard{border-color:color-mix(in srgb,var(--memo) 45%,var(--line))}
 .wm{display:none;margin-top:6px;color:var(--warn);font-size:13px;font-weight:700}
 .item.warn .wm{display:block}
 .ro{margin-top:8px;font-size:14px}
@@ -200,7 +213,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 <script>
 'use strict';
 /* ========== マスタ ========== */
-const APP_VER='0.10.1';const APP_PROVIDER='soranoiro.net　（連絡先）gap@soranoiro.net';const APP_TITLE='点検表アプリ：生協版適正農業規範 青果・米編（試作版 Ver'+APP_VER+'）';const FMT=1, MASTER_VER='2025年版（20250513）';
+const APP_VER='0.12.0';const APP_PROVIDER='soranoiro.net　（連絡先）gap@soranoiro.net';const APP_TITLE='点検表アプリ：生協版適正農業規範 青果・米編（試作版 Ver'+APP_VER+'）';const FMT=1, MASTER_VER='2025年版（20250513）';
 const M=JSON.parse(document.getElementById('master').textContent);
 const CROPS=['青果','米','スプラウト','きのこ'];
 const KUBUN=['生産者','団体','両方'];
@@ -234,7 +247,7 @@ function store(k,v){try{localStorage.setItem('sgap.'+k,JSON.stringify(v));return
 function load(k){try{const s=localStorage.getItem('sgap.'+k);return s?JSON.parse(s):null}catch(e){return null}}
 function drop(k){try{localStorage.removeItem('sgap.'+k)}catch(e){}}
 function toast(m,ms=2600){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('show'),ms)}
-function pickFiles(accept,multiple){return new Promise(res=>{const i=document.createElement('input');i.type='file';i.accept=accept;i.multiple=!!multiple;i.style.display='none';document.body.appendChild(i);i.onchange=()=>{res([...i.files]);i.remove()};i.click();})}
+function pickFiles(accept,multiple,capture){return new Promise(res=>{const i=document.createElement('input');i.type='file';i.accept=accept;i.multiple=!!multiple;if(capture)i.setAttribute('capture',capture);i.style.display='none';document.body.appendChild(i);i.onchange=()=>{res([...i.files]);i.remove()};i.addEventListener('cancel',()=>{res([]);i.remove()});i.click();})}
 async function readJSON(f){let o;try{o=JSON.parse(await f.text())}catch(e){throw new Error(f.name+' は点検データファイルとして読み込めません')}if(!o||!String(o.kind||'').startsWith('sgap-'))throw new Error(f.name+' はこのアプリのファイルではありません');return o}
 function setAns(obj,id,a){const v=a.v||'',c=(a.c||'');if(!v&&!c.trim())delete obj[id];else obj[id]={v,c}}
 function scopeItems(role,kmap,crops){return ITEMS.filter(it=>{const k=kb(kmap,it.id);
@@ -244,18 +257,19 @@ function st(items,get){const s={n:items.length,o:0,x:0,na:0,todo:0};items.forEac
 const cropLabel=(crops,txt)=>{crops=crops||[];txt=String(txt||'').trim();if(txt&&crops.every(c=>txt.includes(c)))return txt;return [crops.join('・'),txt].filter(Boolean).join(' ／ ')};
 
 /* ========== 状態 ========== */
-let P=load('p'), G=load('g'), A=load('a'), AS=load('as'), PV=load('pv')||{recs:[],idmap:{}};
-const UI={hideG:false,showPrev:true,view:'home',filter:'all',q:'',tid:null,tpl:null,sheet:null,openC:new Set(),ctx:null,lq:''};
+let P=load('p'), G=load('g'), A=load('a'), AS=load('as'), PV=load('pv')||{recs:[],idmap:{}}, MEMO=load('m')||{};
+const UI={hideG:false,showPrev:true,view:'home',filter:'all',q:'',tid:null,tpl:null,sheet:null,openC:new Set(),ctx:null,lq:'',openM:new Set(),jumpTo:null,mv:null};
 let saveT=null,storeWarned=false;
-function persist(){clearTimeout(saveT);saveT=setTimeout(()=>{const ok=[['p',P],['g',G],['a',A],['as',AS],['pv',PV]].every(([k,v])=>v?store(k,v):(drop(k),true));
+function persist(){clearTimeout(saveT);saveT=setTimeout(()=>{const ok=[['p',P],['g',G],['a',A],['as',AS],['pv',PV],['m',MEMO]].every(([k,v])=>v?store(k,v):(drop(k),true));
   if(!ok&&!storeWarned){storeWarned=true;toast('この端末には自動保存できませんでした。こまめに「ファイルに保存」してください',5000)}},300)}
 function touch(o){if(o)o.updated=nowISO();persist();const d=$('#dirty');if(d)d.textContent='ファイル未保存の変更あり'}
 
 /* ========== 描画の骨組み ========== */
 const app=$('#app');
 function bar(title,back){return `<div class="bar">${back?`<button class="bk" data-go="${back}">‹ 戻る</button>`:''}<h1>${esc(title)}</h1></div>`}
-function go(v,opt={}){UI.view=v;UI.filter='all';UI.q='';UI.openC.clear();if(opt.tid!==undefined)UI.tid=opt.tid;render();window.scrollTo(0,0)}
-function render(){UI.ctx=null;const f=VIEWS[UI.view]||VIEWS.home;app.innerHTML=f()}
+function go(v,opt={}){UI.view=v;UI.filter='all';UI.q='';UI.openC.clear();UI.openM.clear();if(opt.tid!==undefined)UI.tid=opt.tid;render();window.scrollTo(0,0)}
+function render(){UI.ctx=null;const f=VIEWS[UI.view]||VIEWS.home;app.innerHTML=f();hydPh(app);
+  if(UI.jumpTo){const e=app.querySelector(`.item[data-id="${CSS.escape(UI.jumpTo)}"]`);UI.jumpTo=null;if(e)setTimeout(()=>e.scrollIntoView({block:'start'}),60)}}
 function dirtyMark(o){return o&&(!o.savedAt||o.updated>o.savedAt)?'<span id="dirty" class="dirty">ファイル未保存の変更あり</span>':'<span id="dirty" class="dirty"></span>'}
 
 
@@ -321,9 +335,81 @@ function prevCard(matchInfo,note){const n=PV.recs.length;
 <p class="small" style="margin:0">読み込み済み：${n}件${n&&matchInfo?'　'+matchInfo:''}</p>
 <div class="btns"><button class="btn sm" data-act="pv-load">前回の結果を読み込む</button>${n?`<button class="btn sm" data-go="pv">一覧・削除</button>`:''}</div></div>`}
 
+/* ========== 自分用メモ（監査担当者だけが見る手控え。この端末だけに保存し、ファイルには含めない） ========== */
+/* メモの文章・印：localStorage（sgap.m）／写真：IndexedDB（sgap-photo）。監査（A.id）ごとに分けて持つ */
+const mBook=()=>{if(!A)return null;const b=MEMO[A.id]||(MEMO[A.id]={items:{}});b.type=A.type;b.group=(A.ref||{}).groupName||'';b.date=A.date||'';return b};
+const mGet=(tid,id)=>{const b=A&&MEMO[A.id];return (b&&b.items[tid+'|'+id])||null};
+const mHas=m=>!!(m&&(String(m.t||'').trim()||(m.ph||[]).length));
+function mSet(tid,id,patch){const b=mBook();if(!b)return;const k=tid+'|'+id;const m=Object.assign({t:'',chk:false,ph:[]},b.items[k]||{},patch);m.u=nowISO();
+  if(!String(m.t).trim()&&!m.chk&&!m.ph.length)delete b.items[k];else b.items[k]=m;persist()}
+function mStats(tid){const b=A&&MEMO[A.id];const r={n:0,chk:0,ph:0};if(!b)return r;
+  Object.entries(b.items).forEach(([k,m])=>{if(tid&&!k.startsWith(tid+'|'))return;if(mHas(m))r.n++;if(m.chk)r.chk++;r.ph+=(m.ph||[]).length});return r}
+const PH={db:null,async open(){if(this.db)return this.db;if(!window.indexedDB)throw new Error('この端末・ブラウザでは写真を保存できません');
+    this.db=await new Promise((res,rej)=>{const r=indexedDB.open('sgap-photo',1);r.onupgradeneeded=()=>r.result.createObjectStore('ph');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(new Error('写真の保存場所を開けませんでした'))});return this.db},
+  async tx(mode,fn){const db=await this.open();return new Promise((res,rej)=>{const t=db.transaction('ph',mode);let out;const r=fn(t.objectStore('ph'));if(r)r.onsuccess=()=>{out=r.result};
+    t.oncomplete=()=>res(out);t.onerror=t.onabort=()=>{const e=t.error;rej(new Error(e&&e.name==='QuotaExceededError'?'写真を保存できませんでした（端末の空き容量が足りない可能性があります）':'写真を保存できませんでした'))}})},
+  put(id,v){return this.tx('readwrite',s=>s.put(v,id))},get(id){return this.tx('readonly',s=>s.get(id))},del(id){return this.tx('readwrite',s=>s.delete(id))},clear(){return this.tx('readwrite',s=>s.clear())}};
+/* 写真は<img>ではなく<canvas>に描いて表示する（長押しで「画像を保存」「コピー」ができないようにする） */
+const PHBMP={};
+async function phBmp(id){if(PHBMP[id])return PHBMP[id];const r=await PH.get(id);if(!r)return null;const blob=new Blob([r.buf],{type:r.type||'image/jpeg'});
+  let bm;try{bm=await createImageBitmap(blob)}catch(e){bm=await new Promise((res,rej)=>{const u=URL.createObjectURL(blob);const im=new Image();im.onload=()=>{URL.revokeObjectURL(u);res(im)};im.onerror=()=>{URL.revokeObjectURL(u);rej(e)};im.src=u})}
+  return PHBMP[id]=bm}
+function drawPh(cv,bm,cover){const w=bm.width||bm.naturalWidth,h=bm.height||bm.naturalHeight;const g=cv.getContext('2d');
+  if(cover){const S=cv.width,r=Math.max(S/w,S/h),dw=w*r,dh=h*r;g.drawImage(bm,(S-dw)/2,(S-dh)/2,dw,dh)}else{cv.width=w;cv.height=h;g.drawImage(bm,0,0)}}
+async function hydPh(root){const cvs=[...(root||app).querySelectorAll('canvas[data-ph]:not([data-done])')];for(const cv of cvs){cv.dataset.done='1';try{const bm=await phBmp(cv.dataset.ph);if(bm)drawPh(cv,bm,cv.classList.contains('th'));else cv.closest('.pth')&&cv.closest('.pth').classList.add('miss')}catch(e){}}}
+function phDrop(id){const bm=PHBMP[id];if(bm&&bm.close)bm.close();delete PHBMP[id];return PH.del(id).catch(()=>{})}
+/* どのメモからも使われていない写真を消す */
+async function phGC(){try{const used=new Set();Object.values(MEMO).forEach(b=>Object.values(b.items||{}).forEach(m=>(m.ph||[]).forEach(x=>used.add(x))));
+  const keys=await PH.tx('readonly',s=>s.getAllKeys());for(const k of keys||[])if(!used.has(k))await phDrop(k)}catch(e){}}
+/* 監査ごとのメモ・写真を消す */
+async function memoClear(aid){const b=MEMO[aid];if(b)for(const m of Object.values(b.items||{}))for(const x of (m.ph||[]))await phDrop(x);delete MEMO[aid];persist();await phGC()}
+const thumb=pid=>`<button class="pth" data-act="m-view" data-ph="${esc(pid)}" aria-label="写真を開く"><canvas class="th" width="128" height="128" data-ph="${esc(pid)}"></canvas></button>`;
+const PH_NOTE='写真撮影は必ず被点検者の許諾を得て行ってください。撮影した写真は点検表アプリ内だけに保存され、メモと写真（または監査データ）を消去すると消えます。';
+/* 写真は取り込むときに縮小する（長い辺1600px・JPEG）。このとき撮影場所などの埋め込み情報も消える */
+async function shrink(f){const MAX=1600;let src,w,h;
+  try{src=await createImageBitmap(f,{imageOrientation:'from-image'});w=src.width;h=src.height}
+  catch(e){src=await new Promise((res,rej)=>{const u=URL.createObjectURL(f);const im=new Image();im.onload=()=>{URL.revokeObjectURL(u);res(im)};im.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('写真を読み込めませんでした：'+f.name))};im.src=u});w=src.naturalWidth;h=src.naturalHeight}
+  const r=Math.min(1,MAX/Math.max(w,h));const c=document.createElement('canvas');c.width=Math.max(1,Math.round(w*r));c.height=Math.max(1,Math.round(h*r));c.getContext('2d').drawImage(src,0,0,c.width,c.height);if(src.close)src.close();
+  const blob=await new Promise(res=>c.toBlob(res,'image/jpeg',0.8));if(!blob)throw new Error('写真を変換できませんでした：'+f.name);return {buf:await blob.arrayBuffer(),type:'image/jpeg',w:c.width,h:c.height,at:nowISO()}}
+function mmHTML(tid,id,o={}){const m=mGet(tid,id)||{};const k=tid+'|'+id;const open=mHas(m)||UI.openM.has(k)||!!o.open;
+  return `<div class="mm${open?' open':''}" data-mt="${esc(tid)}" data-mi="${esc(id)}"><div class="mbar"><button class="mmt" data-act="m-open">📝 メモを書く</button>${o.noChk?'':`<button class="chk${m.chk?' on':''}" data-act="m-chk" aria-pressed="${!!m.chk}">${m.chk?'★':'☆'} 後で確認</button>`}</div>
+<div class="mbody"><div class="mnote">🔒 自分用メモ：この内容はファイルに含まれません（この端末だけに保存されます）</div><textarea class="mt" rows="2" placeholder="${esc(o.ph||'気になった点・後で確認したいことなど')}">${esc(m.t||'')}</textarea>
+<div class="phs">${(m.ph||[]).map(thumb).join('')}<button class="btn sm" data-act="m-photo">📷 撮影する</button></div><div class="phn">${PH_NOTE}</div></div></div>`}
+function refreshMemo(id){if(id!=='_all'&&app.querySelector(`.item[data-id="${CSS.escape(id)}"]`)&&UI.ctx){refreshCard(id);refreshProg()}else{const y=scrollY;render();window.scrollTo(0,y)}}
+const oneLine=(t,n=60)=>{t=String(t||'').replace(/\s+/g,' ');return t.length>n?t.slice(0,n)+'…':t};
+function memoText(){const b=MEMO[A.id]||{items:{}};const L=[],P_=s=>L.push(s);const ind=t=>String(t||'').trim().replace(/\r?\n/g,'\n        ');
+  P_('自分用メモ（'+aLabel(A.type)+'担当者の手控え）');P_('※監査ファイル・Excel点検表には含まれない、担当者の自分用のメモです。関係者以外に渡さないでください。');P_('');
+  P_('種類　　：'+aLabel(A.type));if(A.type==='twoparty')P_('生協名　：'+(A.coop||''));P_('団体名　：'+(AS.group.name||''));if(A.type!=='twoparty'&&A.coop)P_('取引先　：'+A.coop);
+  P_('実施日　：'+jdate(A.date));P_((A.type==='twoparty'?'点検者　：':'監査担当：')+(A.inspector||''));P_('出力日時：'+dt(nowISO()));P_('アプリ　：'+APP_TITLE);
+  const s=mStats();P_('件数　　：メモ '+s.n+'件／後で確認 '+s.chk+'件／写真 '+s.ph+'枚');
+  const phl=m=>(m.ph||[]).length?'  写真　：'+m.ph.length+'枚（点検表アプリ内だけに保存。このファイルには含まれません）':'';
+  const cs=(mBook()||{}).consent||{};
+  const all=b.items['_all|_all'];if(mHas(all)){P_('');P_('■ 全体のメモ');if(String(all.t||'').trim())P_('  '+ind(all.t));const x=phl(all);if(x)P_(x)}
+  targetsOf(AS).forEach(t=>{const ans=(A.targets[t.tid]||{}).answers||{};
+    const mem=t.items.filter(it=>{const m=b.items[t.tid+'|'+it.id];return m&&(mHas(m)||m.chk)});
+    const ax=t.items.filter(it=>(ans[it.id]||{}).v==='✕'),sx=t.items.filter(it=>(t.self(it.id)||{}).v==='✕');
+    if(!mem.length&&!ax.length&&!sx.length)return;
+    const ss=st(t.items,t.self),as=st(t.items,id=>ans[id]);
+    P_('');P_('==================================================');P_('■ '+dispT(t)+(t.type==='生産者'?'（生産者）':''));
+    P_('自己点検：入力済 '+ss.done+'/'+ss.n+'　✕ '+ss.x);if(cs[t.tid])P_('写真撮影の許諾確認：'+dt(cs[t.tid]));P_('評価　　：評価済 '+as.done+'/'+as.n+'　○ '+as.o+'　✕ '+as.x+'　ー '+as.na);
+    if(mem.length){P_('');P_('【メモ・後で確認】');mem.forEach(it=>{const m=b.items[t.tid+'|'+it.id],a=ans[it.id]||{},sf=t.self(it.id)||{};
+      P_(it.id+(m.chk?'　★後で確認':'')+'　（評価：'+(a.v||'未評価')+'／自己点検：'+(sf.v||'未入力')+'）');P_('  点検項目：'+oneLine(it.t));
+      if(String(m.t||'').trim())P_('  メモ　：'+ind(m.t));const x=phl(m);if(x)P_(x)})}
+    if(ax.length){P_('');P_('【評価が✕の項目】');ax.forEach(it=>{const c=String(ans[it.id].c||'').trim();P_(it.id+'　'+oneLine(it.t));P_('  コメント：'+(c?ind(c):'（なし）'))})}
+    if(sx.length){P_('');P_('【自己点検が✕の項目】');sx.forEach(it=>{const sf=t.self(it.id),c=String(sf.c||'').trim();P_(it.id+'　'+oneLine(it.t)+'　→ 評価：'+((ans[it.id]||{}).v||'未評価'));if(c)P_('  自己点検のコメント：'+ind(c))})}});
+  return '\ufeff'+L.join('\r\n')+'\r\n'}
+const memoFileBase=()=>`自分用メモ_${aLabel(A.type)}_${fnSafe(AS.group.name)}_${ymd(A.date)}`;
+function viewMemo(){if(!A||!AS)return VIEWS['a-setup']();const b=MEMO[A.id]||{items:{}};let h='';
+  const row=(tid,it,m,ev)=>`<div class="mrow" data-mt="${esc(tid)}" data-mi="${esc(it.id)}"><div class="ih"><span class="no">${it.id}</span>${m.chk?'<span class="pill w">★ 後で確認</span>':''}<span class="mut small">評価：${esc(ev||'未評価')}</span><button class="btn sm" data-act="m-jump" style="margin-left:auto">この項目へ</button></div><div class="mut small">${esc(oneLine(it.t,80))}</div>${String(m.t||'').trim()?`<div class="mtx">${nl(m.t)}</div>`:''}${(m.ph||[]).length?`<div class="phs">${m.ph.map(thumb).join('')}</div>`:''}</div>`;
+  const all=b.items['_all|_all'];if(mHas(all))h+=`<div class="card"><h2>全体のメモ</h2><div data-mt="_all" data-mi="_all">${String(all.t||'').trim()?`<div class="mtx">${nl(all.t)}</div>`:''}${(all.ph||[]).length?`<div class="phs">${all.ph.map(thumb).join('')}</div>`:''}</div></div>`;
+  targetsOf(AS).forEach(t=>{const ans=(A.targets[t.tid]||{}).answers||{};const its=t.items.filter(it=>{const m=b.items[t.tid+'|'+it.id];return m&&(mHas(m)||m.chk)});if(!its.length)return;
+    h+=`<div class="card"><h2>${esc(dispT(t))}</h2>${its.map(it=>row(t.tid,it,b.items[t.tid+'|'+it.id],(ans[it.id]||{}).v)).join('')}</div>`});
+  const s=mStats();
+  return `${bar('自分用メモの一覧','a-targets')}<div class="wrap"><p class="note small">🔒 この端末だけに保存されている自分用のメモです（メモ ${s.n}件／後で確認 ${s.chk}件／写真 ${s.ph}枚）。ファイルには含まれません。</p>${h||'<div class="empty">メモはまだありません</div>'}</div>`}
+
 /* ========== 点検リスト（共通） ========== */
 const FILTERS={self:[['all','すべて'],['todo','未入力'],['x','✕のみ']],
-  audit:[['all','すべて'],['todo','未評価'],['refx','自己点検が✕'],['warn','要コメント']],
+  audit:[['all','すべて'],['todo','未評価'],['refx','自己点検が✕'],['warn','要コメント'],['chk','★後で確認'],['memo','メモあり']],
   ro:[['all','すべて'],['todo','未入力'],['x','✕のみ']]};
 function needC(a,refs){if(!a||!a.v||(a.c||'').trim())return false;return (refs||[]).some(r=>r.cmp&&(r.list?r.list.some(x=>x.v&&x.v!==a.v):(r.v&&r.v!==a.v)))}
 /* 生産者×団体の画面では、1つの項目に評価欄（スロット）が複数ある */
@@ -336,14 +422,15 @@ function stC(items,ctx){if(!ctx.slots)return st(items,ctx.get);const s={n:0,o:0,
 const wC=(items,ctx)=>items.reduce((n,it)=>n+slotsOf(ctx,it.id).filter(sc=>needC(sc.get(it.id),sc.refs(it.id))).length,0);
 /* 検索の対象：番号・点検項目・規範項目に加えて、コメント（今回の入力、自己点検の結果、前回の結果）も探す */
 function searchHit(it,ctx,q){if(it.id.includes(q)||it.t.includes(q)||NORMS[it.norm].t.includes(q))return true;
-  return slotsOf(ctx,it.id).some(sc=>{const a=sc.get(it.id);if(a&&(a.c||'').includes(q))return true;
+  return slotsOf(ctx,it.id).some(sc=>{const a=sc.get(it.id);if(a&&(a.c||'').includes(q))return true;if(ctx.mode==='audit'&&sc.tid&&String((mGet(sc.tid,it.id)||{}).t||'').includes(q))return true;
   if(sc.refs&&sc.refs(it.id).some(r=>(r.c||'').includes(q)||(r.list||[]).some(x=>(x.c||'').includes(q))))return true;
   if(UI.showPrev&&sc.prevRecs&&sc.prevRecs.length&&pvList(it.id,sc).some(x=>(x.a.c||'').includes(q)))return true;return false})}
 function pass(it,ctx){const q=UI.q.trim();if(q&&!searchHit(it,ctx,q))return false;
   const f=UI.filter,ss=slotsOf(ctx,it.id);if(!ss.length)return false;
   if(f==='todo')return ss.some(sc=>!(sc.get(it.id)||{}).v); if(f==='x')return ss.some(sc=>(sc.get(it.id)||{}).v==='✕');
   if(f==='refx')return ss.some(sc=>sc.refs(it.id).some(refX));
-  if(f==='warn')return ss.some(sc=>needC(sc.get(it.id),sc.refs(it.id)));return true}
+  if(f==='warn')return ss.some(sc=>needC(sc.get(it.id),sc.refs(it.id)));
+  if(f==='chk')return ss.some(sc=>sc.tid&&(mGet(sc.tid,it.id)||{}).chk);if(f==='memo')return ss.some(sc=>sc.tid&&mHas(mGet(sc.tid,it.id)));return true}
 function refHTML(r){if(r.list){const many=r.list.length>3;const cnt={};r.list.forEach(x=>{const v=x.v||'未入力';cnt[v]=(cnt[v]||0)+1});
     const sum=['○','✕','ー','未入力'].filter(v=>cnt[v]).map(v=>v+cnt[v]+'名').join('、');
     const rows=r.list.map(x=>`<div class="ref"><span class="rl">${esc(san(x.name))}</span><b class="vv ${vcls(x.v)}">${x.v||'未入力'}</b>${x.c?`<span class="rc">${nl(x.c)}</span>`:''}</div>`).join('');
@@ -356,7 +443,7 @@ ${UI.showPrev&&sc.prevRecs&&sc.prevRecs.length?prevHTML(it,sc):''}
 ${ctx.readonly?`<div class="ro"><b class="vv ${vcls(a.v)}">${a.v||'未入力'}</b> ${a.c?`<span class="mut">${nl(a.c)}</span>`:''}</div>`:`
 <div class="vb">${VALS.map(([v,l])=>`<button class="v ${vcls(v)}${a.v===v?' on':''}" data-v="${v}" aria-pressed="${a.v===v}"><b>${v}</b><span>${l}</span></button>`).join('')}</div>
 <div class="cm${open?' open':''}"><button class="cmt" data-act="cmt">${a.c?'コメントを表示':'＋ コメントを書く'}</button><textarea rows="2" placeholder="${ctx.mode==='audit'?'判断理由（自己点検と評価が異なる場合は必須）':'判断した理由・状況など'}">${esc(a.c||'')}</textarea></div>
-<div class="wm">⚠ 自己点検と評価が異なります。判断内容をコメントに記入してください。</div>`}`}
+<div class="wm">⚠ 自己点検と評価が異なります。判断内容をコメントに記入してください。</div>${ctx.mode==='audit'&&sc.tid?mmHTML(sc.tid,id):''}`}`}
 function itemHTML(it,ctx){const k=ctx.kub(it.id);const hd=`<div class="ih"><span class="no">${it.id}</span><span class="kb k-${k}">${k}</span>${it.crop?`<span class="cr">${it.crop}</span>`:''}</div>
 <div class="it">${nl(it.t)}</div>`;
   if(ctx.slots){const ss=slotsOf(ctx,it.id);const done=ss.every(sc=>(sc.get(it.id)||{}).v);
@@ -371,7 +458,7 @@ function listHTML(ctx){const set=new Set(ctx.items.filter(it=>pass(it,ctx)).map(
       h+=`<div class="norm"><div class="nh"><b>規範 ${n.id}</b><span>${esc(n.f)}</span></div><div class="nt">${nl(n.t)}</div>${n.x?`<details><summary>解説を見る</summary><div>${urlify(n.x)}</div></details>`:''}</div>`;
       ni.forEach(it=>h+=itemHTML(it,ctx))})});return h}
 function progHTML(ctx){const s=stC(ctx.items,ctx);let extra='';
-  if(ctx.mode==='audit'){const w=wC(ctx.items,ctx);extra=`<span>要コメント <b style="color:var(--warn)">${w}</b></span>`}
+  if(ctx.mode==='audit'){const w=wC(ctx.items,ctx);const ck=ctx.items.reduce((n,it)=>n+slotsOf(ctx,it.id).filter(sc=>sc.tid&&(mGet(sc.tid,it.id)||{}).chk).length,0);extra=`<span>要コメント <b style="color:var(--warn)">${w}</b></span>${ck?`<span>★後で確認 <b style="color:var(--warn)">${ck}</b></span>`:''}`}
   return `<div class="pbar"><i style="width:${s.n?Math.round(s.done/s.n*100):0}%"></i></div>
 <div class="pstat"><span>${ctx.mode==='audit'?'評価済':'入力済'} <b>${s.done}</b> / ${s.n}</span><span>○ <b>${s.o}</b></span><span>✕ <b style="color:var(--x)">${s.x}</b></span><span>ー <b>${s.na}</b></span>${extra}</div>`}
 function checklist(ctx){UI.ctx=ctx;const fl=FILTERS[ctx.readonly?'ro':ctx.mode];
@@ -380,16 +467,16 @@ function checklist(ctx){UI.ctx=ctx;const fl=FILTERS[ctx.readonly?'ro':ctx.mode];
 <div class="tools"><input type="search" id="q" placeholder="番号・語句・コメントで検索" value="${esc(UI.q)}"><select id="jump"><option value="">章へ移動</option>${secs}</select></div>
 <div class="fchips">${fl.map(([k,l])=>`<button data-f="${k}" class="${UI.filter===k?'on':''}">${l}</button>`).join('')}${ctx.pair?`<button data-act="hide-g" class="${UI.hideG?'on':''}">${UI.hideG?'団体の項目を隠し中':'団体の項目を隠す'}</button>`:''}${(ctx.allSlots||[ctx]).some(sc=>sc.prevRecs&&sc.prevRecs.length)?`<button data-act="pv-toggle" class="${UI.showPrev?'on':''}" style="margin-left:auto">前回${UI.showPrev?'を表示中':'を隠し中'}</button>`:''}</div></div>
 <div id="list">${listHTML(ctx)}</div>`}
-function refreshCard(id){const el=app.querySelector(`.item[data-id="${CSS.escape(id)}"]`);if(!el||!UI.ctx)return;const t=document.createElement('div');t.innerHTML=itemHTML(BYID[id],UI.ctx);el.replaceWith(t.firstElementChild)}
+function refreshCard(id){const el=app.querySelector(`.item[data-id="${CSS.escape(id)}"]`);if(!el||!UI.ctx)return;const t=document.createElement('div');t.innerHTML=itemHTML(BYID[id],UI.ctx);const ne=t.firstElementChild;el.replaceWith(ne);hydPh(ne)}
 function refreshProg(){const p=$('#pg');if(p&&UI.ctx)p.innerHTML=progHTML(UI.ctx)}
 
 /* ========== 保存シート ========== */
 function canShare(file){try{return !!(navigator.canShare&&navigator.canShare({files:[file]}))}catch(e){return false}}
-function openSheet({title,body='',blob,name,onSaved}){const file=new File([blob],name,{type:blob.type});UI.sheet={blob,name,file,onSaved};
+function openSheet({title,body='',blob,name,onSaved,own}){const file=new File([blob],name,{type:blob.type});UI.sheet={blob,name,file,onSaved};
   $('#modal').innerHTML=`<div class="modal" data-act="sh-bg"><div class="sheet"><h2>${esc(title)}</h2>${body}<div class="fname">📄 ${esc(name)}</div>
 <div class="btns col">${canShare(file)?`<button class="btn pri" data-act="sh-share">LINE・メールなどで送る</button>`:''}<button class="btn ${canShare(file)?'':'pri'}" data-act="sh-dl">この端末に保存（ダウンロード）</button><button class="btn" data-act="sh-close">閉じる</button></div>
-${canShare(file)?'':`<p class="note small" style="margin-top:12px">${/\.xlsx$/i.test(name)?'Excelファイルは、ブラウザの制限により共有画面から直接送れません。':'この端末・ブラウザでは共有画面を使えません。'}いったん「この端末に保存」をして、LINEのトーク画面の「＋」→「ファイル」、またはメールの添付で送ってください。</p>`}
-${/\.xlsx$/i.test(name)?'':'<p class="mut small">送る・保存したファイルは、相手がこのアプリで読み込んで使います。</p>'}</div></div>`}
+${own?`<p class="note small" style="margin-top:12px">🔒 自分用の控えです。関係者以外に送らないでください。${canShare(file)?'':'このファイルは共有画面から直接送れないため、「この端末に保存」をしてください。'}</p>`:canShare(file)?'':`<p class="note small" style="margin-top:12px">${/\.xlsx$/i.test(name)?'Excelファイルは、ブラウザの制限により共有画面から直接送れません。':'この端末・ブラウザでは共有画面を使えません。'}いったん「この端末に保存」をして、LINEのトーク画面の「＋」→「ファイル」、またはメールの添付で送ってください。</p>`}
+${/\.xlsx$/i.test(name)||own?'':'<p class="mut small">送る・保存したファイルは、相手がこのアプリで読み込んで使います。</p>'}</div></div>`}
 function closeSheet(){$('#modal').innerHTML='';UI.sheet=null}
 function download(blob,name){const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}
 const jsonBlob=o=>new Blob([JSON.stringify(o,null,1)],{type:'text/plain'});
@@ -557,7 +644,10 @@ async function selfFromXl(files,base,isAdd){const xs=[];for(const f of files){co
   return {S,conflict,merged:merge,count:xs.length}}
 function aAns(tid){if(!A.targets[tid])A.targets[tid]={answers:{}};return A.targets[tid].answers}
 function aStat(S,t){const ans=(A.targets[t.tid]||{}).answers||{};const s=st(t.items,id=>ans[id]);s.w=t.items.filter(it=>needC(ans[it.id],refsFor(S,t,it.id))).length;return s}
-VIEWS['a-setup']=()=>{let h=`${bar('内部監査・二者点検','home')}<div class="wrap">`;
+function oldMemoNote(){const olds=Object.entries(MEMO).filter(([k,b])=>(!A||k!==A.id)&&Object.keys(b.items||{}).length);if(!olds.length)return '';
+  const ph=olds.reduce((n,[k,b])=>n+Object.values(b.items).reduce((x,m)=>x+(m.ph||[]).length,0),0);const nm=olds.reduce((n,[k,b])=>n+Object.keys(b.items).length,0);
+  return `<div class="note small">この端末に、前の監査の自分用メモ ${nm}件・写真 ${ph}枚 が残っています（${olds.map(([k,b])=>esc(aLabel(b.type)+' '+(b.group||'')+(b.date?' '+jdate(b.date):''))).join('、')}）。取り決めに従って処分してください。<div class="btns" style="margin-top:6px"><button class="btn sm dng" data-act="m-clear-old">前の監査のメモと写真を消去</button></div></div>`}
+VIEWS['a-setup']=()=>{let h=`${bar('内部監査・二者点検','home')}<div class="wrap">${oldMemoNote()}`;
  if(!AS){return h+`<div class="card"><h2>はじめる</h2><p class="mut">団体事務局が保存した「自己点検集約ファイル」、または自己点検を記入した「Excel点検表」を読み込みます。Excel点検表は、団体分・生産者分を<b>まとめて複数</b>選べます（同じ団体のものに限ります）。</p><button class="btn pri" data-act="a-load-self" style="width:100%">自己点検集約ファイル、またはExcel点検表を読み込む</button></div>
 <div class="card"><h3>途中から再開</h3><p class="mut small">保存した内部監査／二者点検ファイルを開きます（対応する自己点検集約ファイル、またはExcel点検表も必要です）。</p><button class="btn" data-act="a-resume">監査ファイルを開く</button></div></div>`}
  const mism=A&&A.ref.selfId!==AS.id;
@@ -573,22 +663,27 @@ ${prevCard((()=>{const ts=targetsOf(AS);return `（前回分がある対象：${
 <div class="card"><h3>その他</h3><div class="btns"><button class="btn sm" data-act="a-resume">別の監査ファイルを開く</button><button class="btn sm dng" data-act="a-reset">この端末の監査データを消去</button></div></div></div>`};
 VIEWS['a-targets']=()=>{if(!A||!AS)return VIEWS['a-setup']();const ts=targetsOf(AS);const q=UI.lq.trim();
  return `${bar(aLabel(A.type)+'：'+(AS.group.name||''),'a-setup')}<div class="wrap">
-${!AS.fromXl&&AS.updated!==A.ref.selfUpdated?`<div class="note">自己点検集約ファイルが、この${aLabel(A.type)}の開始後に更新されています。最新の自己点検を表示しています。</div>`:''}
+${oldMemoNote()}${!AS.fromXl&&AS.updated!==A.ref.selfUpdated?`<div class="note">自己点検集約ファイルが、この${aLabel(A.type)}の開始後に更新されています。最新の自己点検を表示しています。</div>`:''}
 <div class="card"><h2>評価する対象</h2><p class="mut small">自己点検の結果（✕の数）を見ながら対象を選びます。評価が自己点検と異なる項目には、コメントが必須です。</p>
 ${ts.length>8?`<input type="search" id="lq" placeholder="生産者名で絞り込み" value="${esc(UI.lq)}" style="margin-bottom:8px">`:''}
 <div class="rows">${ts.filter(t=>!q||t.label.includes(q)).map(t=>{const ss=st(t.items,t.self),as=aStat(AS,t);return `<div class="row rw"><div class="rn"><b>${esc(dispT(t))}</b><span>自己点検 ${ss.done}/${ss.n}${ss.x?` ✕評価${ss.x}`:''}</span></div>
-${as.done?`<span class="pill${as.todo?'':' ok'}">評価 ${as.done}/${as.n}</span>`:''}${as.w?`<span class="pill w">要コメント${as.w}</span>`:''}<button class="btn sm pri" data-go="a-check" data-tid="${t.tid}">評価</button>${t.type==='生産者'?`<button class="btn sm" data-go="a-pair" data-tid="${t.tid}">生産者×団体</button>`:''}</div>`}).join('')}</div>
+${as.done?`<span class="pill${as.todo?'':' ok'}">評価 ${as.done}/${as.n}</span>`:''}${as.w?`<span class="pill w">要コメント${as.w}</span>`:''}${(c=>c?`<span class="pill w">★${c}</span>`:'')(mStats(t.tid).chk)}<button class="btn sm pri" data-go="a-check" data-tid="${t.tid}">評価</button>${t.type==='生産者'?`<button class="btn sm" data-go="a-pair" data-tid="${t.tid}">生産者×団体</button>`:''}</div>`}).join('')}</div>
 <p class="mut small" style="margin:8px 0 0">「生産者×団体」：その生産者と団体の自己点検を1つの画面で見ながら、両方を評価します（区分「両方」の項目は、生産者・団体の2つの評価欄が出ます）。</p></div>
 <div class="card"><h2>Excel点検表を出力（自己点検＋評価）</h2>${AS.fromXl?'<p class="note small" style="margin:0 0 8px">Excel点検表を読み込んでいる場合は、その対象のExcelをもとに、評価欄（F・G列）と監査の実施日・担当者だけを書き込んだ新しいファイルを作ります（読み込んだExcelがない対象や、アプリを開き直した後は、Excel点検表（原本）をもとに作ります）。</p>':''}<p class="mut small">Excel点検表（原本）に結果を書き込んで、Excel点検表を作ります。生産者を選ぶと、その生産者と団体の結果を1枚にまとめます。「両方」の項目は、1つのセルに「生○／団○」の形で両方の結果が入ります。最初の1回だけ、Excel点検表（原本）を選ぶ画面が出ます。</p>
 <select id="fx-a" style="margin-bottom:8px">${AS.producers.slice().sort((a,b)=>a.name.localeCompare(b.name,'ja')).map(p=>`<option value="${p.id}">${esc(san(p.name))} ＋ 団体（統合）</option>`).join('')}<option value="group">${esc((AS.group.name||'団体')+'（団体のみ）')}</option></select>
 <button class="btn pri" data-act="form-xl-sel" data-src="a" style="width:100%">Excel点検表を作る</button></div>
-<div class="card"><h2>データを保存・出力</h2>${dirtyMark(A)}<div class="btns col"><button class="btn pri" data-act="a-save">${aLabel(A.type)}ファイルを保存</button><button class="btn" data-act="list-xl" data-src="a">一覧Excelを出力（自己点検と評価を並べて）</button></div></div></div>`};
+<div class="card"><h2>データを保存・出力</h2>${dirtyMark(A)}<div class="btns col"><button class="btn pri" data-act="a-save">${aLabel(A.type)}ファイルを保存</button><button class="btn" data-act="list-xl" data-src="a">一覧Excelを出力（自己点検と評価を並べて）</button></div></div>
+${(()=>{const s=mStats();return `<div class="card mcard"><h2>🔒 自分用メモ</h2><p class="mut small">各項目の「メモを書く」で書いたメモと写真は、<b>この端末のブラウザだけ</b>に保存され、監査ファイル・Excel点検表・一覧Excelには含まれません。写真は端末への保存やコピーはできず、機種変更などでほかの端末に移すこともできません。点検が終わったら、取り決めに従って「この監査のメモと写真を消去」で処分してください。</p>
+<p class="small" style="margin:0 0 8px">メモ ${s.n}件　★後で確認 ${s.chk}件　写真 ${s.ph}枚</p>
+<div class="mut small" style="font-weight:600">全体のメモ</div>${mmHTML('_all','_all',{noChk:true,ph:'監査全体について、気になった点・後で確認したいことなど'})}
+<div class="btns col" style="margin-top:10px"><button class="btn" data-go="a-memo">メモの一覧を見る</button><button class="btn" data-act="m-txt">メモをテキストで保存（写真は含みません）</button><button class="btn dng" data-act="m-clear">この監査のメモと写真を消去</button></div></div>`})()}</div>`};
 function aSlot(S,t){return {tid:t.tid,isG:t.type==='団体',mode:'audit',items:t.items,kub:id=>kb(S.kubun,id),get:id=>((A.targets[t.tid]||{}).answers||{})[id],set:(id,a)=>{setAns(aAns(t.tid),id,a);touch(A)},refs:id=>refsFor(S,t,id),prevRecs:t.type==='団体'?pvMatch('団体','',S.group.name):pvMatch('生産者',t.name)}}
 VIEWS['a-check']=()=>{const t=targetsOf(AS).find(x=>x.tid===UI.tid);if(!t)return VIEWS['a-targets']();
  const ctx=aSlot(AS,t);
  return `${bar(aLabel(A.type)+'：'+dispT(t),'a-targets')}${checklist(ctx)}
 <div class="foot"><div class="in"><button class="btn" data-act="form-xl" data-src="a" data-id="${t.tid}">Excel点検表</button><button class="btn pri" data-act="a-save">ファイルに保存</button></div></div>`};
 
+VIEWS['a-memo']=viewMemo;
 /* 生産者×団体：1つの画面で、生産者と団体の両方を評価する（データは、それぞれの対象に保存） */
 VIEWS['a-pair']=()=>{const ts=targetsOf(AS);const tp=ts.find(x=>x.tid===UI.tid&&x.type==='生産者'),tg=ts[0];if(!tp)return VIEWS['a-targets']();
  const pS=new Set(tp.items.map(i=>i.id)),gS=new Set(tg.items.map(i=>i.id));
@@ -667,13 +762,13 @@ async function unzipAll(buf){const dv=new DataView(buf),u8=new Uint8Array(buf);l
     out.push({name,data})}return out}
 const CRC_T=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
 function crc32(u8){let c=0xFFFFFFFF;for(let i=0;i<u8.length;i++)c=CRC_T[(c^u8[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0}
-async function zipBuild(entries){const enc=new TextEncoder();const parts=[],central=[];let off=0;
+async function zipBuild(entries,when){const enc=new TextEncoder();const parts=[],central=[];let off=0;const W=when?{t:(when.getHours()<<11)|(when.getMinutes()<<5)|(when.getSeconds()>>1),d:((when.getFullYear()-1980)<<9)|((when.getMonth()+1)<<5)|when.getDate()}:{t:0,d:0x21};
   for(const e of entries){const nb=enc.encode(e.name),crc=crc32(e.data);let comp=null,method=0;
     if(typeof CompressionStream!=='undefined'){try{comp=new Uint8Array(await new Response(new Blob([e.data]).stream().pipeThrough(new CompressionStream('deflate-raw'))).arrayBuffer());method=8}catch(err){comp=null}}
     if(!comp||comp.length>=e.data.length){comp=e.data;method=0}
-    const lh=new DataView(new ArrayBuffer(30));lh.setUint32(0,0x04034b50,true);lh.setUint16(4,20,true);lh.setUint16(6,0x0800,true);lh.setUint16(8,method,true);lh.setUint16(10,0,true);lh.setUint16(12,0x21,true);lh.setUint32(14,crc,true);lh.setUint32(18,comp.length,true);lh.setUint32(22,e.data.length,true);lh.setUint16(26,nb.length,true);lh.setUint16(28,0,true);
+    const lh=new DataView(new ArrayBuffer(30));lh.setUint32(0,0x04034b50,true);lh.setUint16(4,20,true);lh.setUint16(6,0x0800,true);lh.setUint16(8,method,true);lh.setUint16(10,W.t,true);lh.setUint16(12,W.d,true);lh.setUint32(14,crc,true);lh.setUint32(18,comp.length,true);lh.setUint32(22,e.data.length,true);lh.setUint16(26,nb.length,true);lh.setUint16(28,0,true);
     parts.push(new Uint8Array(lh.buffer),nb,comp);
-    const ch=new DataView(new ArrayBuffer(46));ch.setUint32(0,0x02014b50,true);ch.setUint16(4,20,true);ch.setUint16(6,20,true);ch.setUint16(8,0x0800,true);ch.setUint16(10,method,true);ch.setUint16(12,0,true);ch.setUint16(14,0x21,true);ch.setUint32(16,crc,true);ch.setUint32(20,comp.length,true);ch.setUint32(24,e.data.length,true);ch.setUint16(28,nb.length,true);ch.setUint32(42,off,true);
+    const ch=new DataView(new ArrayBuffer(46));ch.setUint32(0,0x02014b50,true);ch.setUint16(4,20,true);ch.setUint16(6,20,true);ch.setUint16(8,0x0800,true);ch.setUint16(10,method,true);ch.setUint16(12,W.t,true);ch.setUint16(14,W.d,true);ch.setUint32(16,crc,true);ch.setUint32(20,comp.length,true);ch.setUint32(24,e.data.length,true);ch.setUint16(28,nb.length,true);ch.setUint32(42,off,true);
     central.push(new Uint8Array(ch.buffer),nb);off+=30+nb.length+comp.length}
   const cd=central.reduce((n,a)=>n+a.length,0);const end=new DataView(new ArrayBuffer(22));end.setUint32(0,0x06054b50,true);end.setUint16(8,entries.length,true);end.setUint16(10,entries.length,true);end.setUint32(12,cd,true);end.setUint32(16,off,true);
   return new Blob([...parts,...central,new Uint8Array(end.buffer)],{type:XLSX_MIME})}
@@ -777,6 +872,29 @@ ACT['pv-del']=el=>{PV.recs.splice(+el.dataset.i,1);persist();render()};
 ACT['pv-clear']=()=>{if(!confirm('読み込んだ前回の結果をすべて削除しますか？（元のファイルは消えません）'))return;PV={recs:[],idmap:{}};persist();render()};
 ACT['pv-toggle']=()=>{UI.showPrev=!UI.showPrev;render()};
 ACT['hide-g']=()=>{UI.hideG=!UI.hideG;render()};
+const mOf=el=>{const b=el.closest('[data-mt]');return {tid:b.dataset.mt,id:b.dataset.mi}};
+ACT['m-open']=el=>{const b=el.closest('.mm');UI.openM.add(b.dataset.mt+'|'+b.dataset.mi);b.classList.add('open');b.querySelector('textarea').focus()};
+ACT['m-chk']=el=>{const {tid,id}=mOf(el);const m=mGet(tid,id)||{};mSet(tid,id,{chk:!m.chk});refreshMemo(id)};
+let phAsked=false;
+ACT['m-photo']=async el=>{const {tid,id}=mOf(el);if(!A)return;const b=mBook();b.consent=b.consent||{};
+  /* 撮影の前に、被点検者の許諾を確認する（対象ごとに最初の1回） */
+  if(!b.consent[tid]){const t=targetsOf(AS).find(x=>x.tid===tid);const who=tid==='_all'?'被点検者':t?(t.type==='団体'?(AS.group.name||'団体'):san(t.name)):'被点検者';
+    if(!confirm(`写真撮影の許諾の確認\n\n${who}に、写真撮影の許諾を得ましたか？\n許諾を得ていない場合は、撮影しないでください。\n\n［OK］許諾を得た　［キャンセル］撮影しない`))return;b.consent[tid]=nowISO();persist()}
+  /* capture属性でカメラを直接起動する（撮影済みの写真は選べない） */
+  const fs=await pickFiles('image/*',false,'environment');if(!fs.length)return;toast('写真を取り込み中…',1500);
+  if(!phAsked){phAsked=true;try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}}
+  let n=0;const errs=[];for(const f of fs){try{const r=await shrink(f);r.aid=A.id;const pid=uid();await PH.put(pid,r);const m=mGet(tid,id)||{ph:[]};mSet(tid,id,{ph:[...(m.ph||[]),pid]});n++}catch(e){errs.push(e.message)}}
+  UI.openM.add(tid+'|'+id);refreshMemo(id);toast((n?`写真を ${n}枚 追加しました（点検表アプリ内だけに保存）`:'')+(errs.length?'\n'+errs.join('\n'):''),errs.length?5000:2500)};
+ACT['m-view']=async el=>{const {tid,id}=mOf(el);const pid=el.dataset.ph;let bm=null;try{bm=await phBmp(pid)}catch(e){}if(!bm){toast('写真が見つかりません（この端末に保存されていません）',4000);return}
+  UI.mv={tid,id,pid};$('#modal').innerHTML=`<div class="modal" data-act="sh-bg"><div class="sheet"><h2>写真（${esc(id==='_all'?'全体のメモ':id)}）</h2><canvas class="pvbig" id="pvbig"></canvas><p class="mut small">自分用メモの写真です。点検表アプリ内だけに保存され、端末への保存・コピーはできません。監査ファイル・Excel点検表には含まれません。</p><div class="btns col"><button class="btn dng" data-act="m-ph-del">この写真を削除</button><button class="btn" data-act="sh-close">閉じる</button></div></div></div>`;
+  drawPh($('#pvbig'),bm,false)};
+ACT['m-ph-del']=async()=>{const v=UI.mv;if(!v||!confirm('この写真を削除しますか？（元に戻せません）'))return;const m=mGet(v.tid,v.id)||{ph:[]};mSet(v.tid,v.id,{ph:(m.ph||[]).filter(x=>x!==v.pid)});await phDrop(v.pid);closeSheet();UI.mv=null;refreshMemo(v.id);toast('削除しました')};
+ACT['m-jump']=el=>{const {tid,id}=mOf(el);UI.jumpTo=id;go('a-check',{tid})};
+ACT['m-txt']=()=>{if(!A||!AS)return;openSheet({own:true,title:'自分用メモをテキストで保存',body:`<p class="mut small">監査の情報（種類・団体名・実施日など）、メモと「後で確認」の項目、評価が✕の項目とコメント、自己点検が✕の項目をまとめたテキストファイルです。写真は含まれません（枚数だけ記載）。</p>`,blob:new Blob([memoText()],{type:'text/plain'}),name:memoFileBase()+'.txt'})};
+ACT['m-clear']=async()=>{if(!A)return;const s=mStats();if(!confirm(`この監査の自分用メモと写真を消去します（メモ ${s.n}件・★後で確認 ${s.chk}件・写真 ${s.ph}枚）。\n消去したものは元に戻せません。監査データ（評価）は消えません。\n\nよろしいですか？`))return;
+  await memoClear(A.id);UI.openM.clear();render();toast('この監査のメモと写真を消去しました')};
+ACT['m-clear-old']=async()=>{const olds=Object.keys(MEMO).filter(k=>!A||k!==A.id);if(!olds.length)return;const ph=olds.reduce((n,k)=>n+Object.values(MEMO[k].items||{}).reduce((x,m)=>x+(m.ph||[]).length,0),0);
+  if(!confirm(`前の監査の自分用メモと写真を消去します（${olds.length}件の監査・写真 ${ph}枚）。\n元に戻せません。よろしいですか？`))return;for(const k of olds)await memoClear(k);render();toast('前の監査のメモと写真を消去しました')};
 ACT['pv-copy']=el=>{if(!UI.ctx)return;const ctx=scOf(el);const id=el.closest('.item').dataset.id;const r=ctx.prevRecs[+el.dataset.k];const sid=el.dataset.sid;const a=r&&r.answers[sid||id];if(!a)return;
   if(pvAmb({r,a})&&!confirm(AMB+'です。生産者・団体のどちらの結果か確認してください。\n'+(r.type==='団体'?'団体':'この生産者')+'の結果としてコピーしますか？'))return;
   if(sid){const m=pvSrc(id)||{};const role=((m.s||[]).find(z=>z[0]===sid)||[])[1];if(needOldConfirm({sid,role,c:m.c})&&!confirm('2023年版から表現が変わった（または統合・関連する）点検項目です。今の点検項目の内容に合っているか確認したうえでコピーしてください。\nコピーしますか？'))return}
@@ -842,7 +960,8 @@ ACT['a-load-self']=async el=>{const fs=await pickFiles('.txt,.json,.xlsx,text/pl
 ACT['a-new']=el=>{A={kind:'sgap-audit',fmt:FMT,master:MASTER_VER,id:uid(),type:el.dataset.t,ref:{selfId:AS.id,groupName:AS.group.name,selfUpdated:AS.updated},coop:el.dataset.t==='twoparty'?'':(AS.group.coop||''),date:today(),inspector:'',targets:{},created:nowISO(),updated:nowISO()};persist();render()};
 ACT['a-resume']=async()=>{const [f]=await pickFiles('.txt,.json,text/plain,application/json');if(!f)return;try{const o=await readJSON(f);if(o.kind!=='sgap-audit')throw new Error('これは内部監査・二者点検のファイルではありません');checkMaster(o);A=o;A.savedAt=A.updated;persist();
   if(!AS||AS.id!==A.ref.selfId)toast(`対応する自己点検集約ファイル（${A.ref.groupName}）も読み込んでください`,5000);go('a-setup')}catch(e){toast(e.message,4000)}};
-ACT['a-reset']=()=>{if(!confirm('この端末に一時保存されている監査データと、読み込んだ自己点検集約ファイルを閉じます。保存したファイルは消えません。よろしいですか？'))return;A=null;AS=null;persist();go('home')};
+ACT['a-reset']=()=>{const ms=mStats();if(!confirm('この端末に一時保存されている監査データと、読み込んだ自己点検集約ファイルを閉じます。保存したファイルは消えません。'+(Object.keys(MEMO).length?'\n\nこの端末の自分用メモと写真もすべて消えます'+(A?`（この監査：メモ ${ms.n}件・写真 ${ms.ph}枚）`:'')+'。':'')+'\n\nよろしいですか？'))return;
+  MEMO={};Object.keys(PHBMP).forEach(k=>{const b=PHBMP[k];if(b&&b.close)b.close();delete PHBMP[k]});PH.clear().catch(()=>{});A=null;AS=null;persist();go('home')};
 ACT['a-save']=()=>{if(A.type==='twoparty'&&!String(A.coop||'').trim()){toast('生協名を入力してください');go('a-setup');return}
   const ts0=targetsOf(AS);Object.keys(A.targets).forEach(tid=>{const t=ts0.find(x=>x.tid===tid);if(t){A.targets[tid].label=t.type==='団体'?AS.group.name:t.label;A.targets[tid].type=t.type}});
   const o=Object.assign({},A);delete o.savedAt;const ts=targetsOf(AS);let w=0;ts.forEach(t=>w+=aStat(AS,t).w);
@@ -866,8 +985,10 @@ document.addEventListener('click',e=>{const t=e.target;
   const ve=t.closest('button[data-v]');if(ve&&UI.ctx){const id=ve.closest('.item').dataset.id;const sc=scOf(ve);const cur=sc.get(id)||{};const v=cur.v===ve.dataset.v?'':ve.dataset.v;
     sc.set(id,{v,c:cur.c||''});if(v==='✕')UI.openC.add(okey(UI.ctx,sc,id));refreshCard(id);refreshProg()}});
 let qT=null;
+document.addEventListener('contextmenu',e=>{if(e.target.closest&&e.target.closest('canvas[data-ph],#pvbig,.pth'))e.preventDefault()});
 document.addEventListener('input',e=>{const t=e.target;
-  if(t.matches('.item textarea')&&UI.ctx){const card=t.closest('.item'),id=card.dataset.id;const sc=scOf(t);const cur=sc.get(id)||{};sc.set(id,{v:cur.v||'',c:t.value});UI.openC.add(okey(UI.ctx,sc,id));
+  if(t.matches('.mm textarea.mt')){const b=t.closest('.mm');mSet(b.dataset.mt,b.dataset.mi,{t:t.value});UI.openM.add(b.dataset.mt+'|'+b.dataset.mi);return}
+  if(t.matches('.item .cm textarea')&&UI.ctx){const card=t.closest('.item'),id=card.dataset.id;const sc=scOf(t);const cur=sc.get(id)||{};sc.set(id,{v:cur.v||'',c:t.value});UI.openC.add(okey(UI.ctx,sc,id));
     if(UI.ctx.mode==='audit'){const w=needC(sc.get(id),sc.refs(id));(t.closest('.slot')||card).classList.toggle('warn',w)}clearTimeout(qT);qT=setTimeout(refreshProg,400);return}
   if(t.id==='q'){UI.q=t.value;clearTimeout(qT);qT=setTimeout(()=>{const l=$('#list');if(!l)return;if(UI.ctx)l.innerHTML=listHTML(UI.ctx);else{const pos=t.selectionStart;render();const q=$('#q');q.focus();q.setSelectionRange(pos,pos)}},250);return}
   if(t.id==='lq'){UI.lq=t.value;clearTimeout(qT);qT=setTimeout(()=>{const pos=t.selectionStart;render();const q=$('#lq');if(q){q.focus();q.setSelectionRange(pos,pos)}},300);return}
@@ -875,7 +996,7 @@ document.addEventListener('input',e=>{const t=e.target;
 document.addEventListener('change',e=>{const t=e.target;
   if(t.dataset.crop){const o=ROOTS[t.dataset.crop]();const tgt=t.dataset.crop==='p'?o.producer:o.group;const set=new Set(tgt.crops);t.checked?set.add(t.value):set.delete(t.value);tgt.crops=CROPS.filter(c=>set.has(c));touch(o);if(UI.view==='p-setup')render();return}
   if(t.id==='jump'&&t.value!==''){const s=document.getElementById('sec'+t.value);if(s)s.scrollIntoView({behavior:'smooth'});t.value=''}});
-window.addEventListener('pagehide',()=>{clearTimeout(saveT);[['p',P],['g',G],['a',A],['as',AS],['pv',PV]].forEach(([k,v])=>v?store(k,v):drop(k))});
+window.addEventListener('pagehide',()=>{clearTimeout(saveT);[['p',P],['g',G],['a',A],['as',AS],['pv',PV],['m',MEMO]].forEach(([k,v])=>v?store(k,v):drop(k))});
 if(typeof ExcelJS==='undefined')toast('Excel機能を読み込めませんでした',5000);
 document.title=APP_TITLE;
 render();

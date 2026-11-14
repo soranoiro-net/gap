@@ -1,0 +1,871 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<title>Excel点検表 入力ツール（試作版）</title>
+<style>
+:root{--bg:#f2f5f9;--card:#fff;--ink:#1a2330;--sub:#566477;--line:#d3dbe6;--acc:#1f5fa8;--acc-ink:#fff;--soft:#e5eef9;--head:#1f5fa8;--head-ink:#fff;
+--ok:#1f7a4d;--ng:#c0392b;--na:#6b7280;--warn:#8a5a00;--warnbg:#fff4d6}
+@media (prefers-color-scheme:dark){:root{--bg:#11161d;--card:#1a212b;--ink:#e6ecf4;--sub:#a5b4c6;--line:#313c4b;--acc:#7db4f5;--acc-ink:#0b1726;--soft:#1e2b3d;--head:#1c3f6e;--head-ink:#f2f6fb;
+--ok:#4cc38a;--ng:#ff7b6b;--na:#9aa3ad;--warn:#ffd27a;--warnbg:#3a2f12}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Hiragino Sans","Noto Sans JP","Yu Gothic UI",Meiryo,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+.wrap{max-width:820px;margin:0 auto;padding:0 14px 90px}
+header.top{background:var(--head);color:var(--head-ink)}
+header.top .in{max-width:820px;margin:0 auto;padding:10px 14px;display:flex;align-items:center;gap:10px}
+header.top h1{font-size:16px;margin:0;flex:1;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+header.top small{display:block;font-weight:400;opacity:.85;font-size:12px}
+header.top button{background:transparent;border:1px solid currentColor;color:inherit;border-radius:8px;padding:6px 10px;cursor:pointer}
+.tabs{display:flex;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:15}
+.tabs button{flex:1 1 auto;font-size:15px;line-height:1.3;padding:12px 4px;border:0;background:none;border-bottom:3px solid transparent;cursor:pointer;color:var(--sub);font-weight:600}
+.tabs button.on{color:var(--acc);border-bottom-color:var(--acc)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin:14px 0}
+.card h2{font-size:15px;margin:0 0 10px}
+.card h2 small{font-weight:400;color:var(--sub);margin-left:6px}
+p.note{color:var(--sub);font-size:13px;margin:6px 0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:8px 16px;border-radius:10px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-weight:600}
+.btn.pri{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+.btn.big{width:100%;min-height:54px;font-size:17px}
+.btn.sm{min-height:34px;padding:4px 10px;font-size:13px;font-weight:500}
+.btn.danger{color:var(--ng)}
+label.f{display:block;margin:10px 0}
+label.f>span{display:block;font-size:13px;color:var(--sub);margin-bottom:2px}
+input[type=text],input[type=date],input[type=search],select,textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);min-height:42px}
+textarea{resize:vertical;min-height:58px;field-sizing:content;line-height:1.5}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (max-width:520px){.grid2{grid-template-columns:1fr}}
+.trow{border-top:1px dashed var(--line);padding:8px 0}
+.trow.sel{background:var(--soft);margin:0 -8px;padding:8px;border-radius:8px;border-top-color:transparent}
+.trow b{font-size:14px}
+.sess{display:flex;gap:10px;align-items:center}
+.sess .meta{flex:1;min-width:0}
+.sess .meta b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sess .meta span{font-size:12.5px;color:var(--sub);display:block}
+.bar{position:sticky;top:47px;z-index:10;background:var(--bg);padding:8px 0 6px;border-bottom:1px solid var(--line)}
+.bar .r{display:flex;gap:8px;align-items:center}
+.bar select{min-height:40px;padding:6px 8px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;align-items:center;font-size:13px;color:var(--sub)}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:4px 12px;cursor:pointer;font-size:13px;color:var(--ink)}
+.chip.on{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.prog{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:6px}
+.prog i{display:block;height:100%;background:var(--acc)}
+.norm{margin:16px 0 6px;padding:10px 12px;background:var(--soft);border-radius:10px;border-left:4px solid var(--acc)}
+.norm .nid{font-weight:700;margin-right:6px}
+.norm .fld{display:inline-block;font-size:12px;border:1px solid var(--acc);color:var(--acc);border-radius:4px;padding:0 6px;margin-left:4px;white-space:nowrap}
+.norm details{margin-top:6px;font-size:13.5px;color:var(--sub)}
+.norm details div{white-space:pre-wrap;margin-top:4px}
+.item{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;margin:8px 0}
+.item.done{border-left:4px solid var(--acc)}
+.ihead{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.iid{font-weight:700;font-variant-numeric:tabular-nums}
+.kb{font-size:12px;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:0 6px}
+.ihead select{width:auto;min-height:32px;padding:2px 6px;font-size:13px}
+.itext{white-space:pre-wrap;margin-bottom:10px}
+.choices{display:flex;gap:8px;margin-bottom:8px}
+.ch{flex:1;min-height:50px;font-size:22px;font-weight:700;border-radius:10px;border:2px solid var(--line);background:var(--bg);cursor:pointer}
+.ch.c0.on{background:var(--ok);border-color:var(--ok);color:#fff}
+.ch.c1.on{background:var(--ng);border-color:var(--ng);color:#fff}
+.ch.c2.on,.ch.c3.on{background:var(--na);border-color:var(--na);color:#fff}
+.ro{font-size:13.5px;background:var(--bg);border-radius:8px;padding:8px 10px;margin-bottom:8px;white-space:pre-wrap}
+.ro b{margin-right:6px}
+.ro .v{font-weight:700;font-size:16px;margin-right:6px}
+.ro .lab{display:inline-block;font-size:12px;color:var(--sub);margin-right:6px}
+.nav{display:flex;gap:8px;margin:18px 0}
+.nav .btn{flex:1}
+.warn{background:var(--warnbg);color:var(--warn);border-radius:8px;padding:8px 12px;font-size:13.5px;margin:10px 0}
+.stat{display:flex;gap:8px;flex-wrap:wrap}
+.stat div{flex:1;min-width:90px;background:var(--bg);border-radius:8px;padding:8px;text-align:center}
+.stat b{display:block;font-size:22px}
+.stat span{font-size:12px;color:var(--sub)}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#222;color:#fff;padding:10px 16px;border-radius:10px;max-width:90vw;z-index:99;opacity:0;pointer-events:none;transition:opacity .2s;font-size:14px}
+#toast.on{opacity:.95}
+.empty{text-align:center;color:var(--sub);padding:24px 0}
+ol.how{padding-left:1.3em;margin:6px 0;font-size:14px;color:var(--sub)}
+.refs{margin-bottom:8px}
+.ref{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13.5px;border:1px dashed var(--line);border-radius:8px;padding:6px 10px;margin-bottom:6px}
+.ref .rl{color:var(--sub);font-size:12px}.ref .vv{font-size:16px}
+.ref .rc{flex:1 1 100%;white-space:pre-wrap}
+.pvc{margin-left:auto;border:1px solid var(--acc);color:var(--acc);background:var(--card);border-radius:8px;padding:2px 10px;font-size:13px;font-weight:700;cursor:pointer}
+:root{--memo:#7a4fb5}@media (prefers-color-scheme:dark){:root{--memo:#c3a4f0}}
+.mm{margin-top:6px}.mbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.mm .mmt{border:0;background:none;color:var(--memo);font-weight:600;cursor:pointer;padding:4px 0;font-size:14px}
+.mm.open .mmt{display:none}
+.chk{border:1px solid var(--line);background:var(--card);color:var(--sub);border-radius:99px;padding:3px 10px;font-size:13px;cursor:pointer}
+.chk.on{background:var(--warnbg);border-color:var(--warn);color:var(--warn);font-weight:700}
+.mbody{display:none;margin-top:6px;padding:8px 10px;border:1px dashed var(--memo);border-radius:10px;background:color-mix(in srgb,var(--memo) 7%,var(--card))}
+.mm.open .mbody{display:block}
+.mnote{font-size:12px;color:var(--memo);font-weight:600;margin-bottom:6px}
+.phs{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;align-items:center}
+.pth{padding:0;border:1px solid var(--line);border-radius:8px;width:64px;height:64px;overflow:hidden;background:var(--soft);cursor:pointer}
+.pth.miss{opacity:.4}
+.pth canvas{width:100%;height:100%;display:block}
+.pth,.pth canvas,.pvbig{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-user-drag:none}
+.pvbig{display:block;max-width:100%;max-height:62vh;width:auto;height:auto;margin:0 auto 10px;border-radius:8px}
+.phn{margin-top:6px;font-size:12px;color:var(--warn);font-weight:600}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:50;display:flex;align-items:center;justify-content:center;padding:14px}
+.sheet{background:var(--card);border-radius:14px;padding:16px;max-width:560px;width:100%;max-height:92vh;overflow:auto}
+.sheet h2{font-size:15px;margin:0 0 10px}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.plab{font-size:13px;font-weight:700;color:var(--acc);margin:10px 0 4px}
+.wm{background:var(--warnbg);color:var(--warn);border-radius:8px;padding:6px 10px;font-size:13px;font-weight:600;margin:6px 0}
+.bar input[type=search]{min-height:40px;margin-top:6px;border-radius:999px;padding:6px 16px;-webkit-appearance:none;appearance:none;color:var(--ink)}
+::placeholder{color:var(--sub);opacity:1}
+.chip b{font-weight:700}
+#pg{font-weight:700;color:var(--ink)}
+.sech{font-size:15px;margin:22px 0 0;padding-bottom:4px;border-bottom:2px solid var(--acc);color:var(--acc)}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th,.tbl td{border-top:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top}
+.tbl tr:first-child th,.tbl tr:first-child td{border-top:0}
+.tbl th{white-space:nowrap;color:var(--sub);font-weight:600;width:7.5em}
+a{color:var(--acc);word-break:break-all}
+.card p{margin:0 0 8px}.card p:last-child{margin-bottom:0}
+.card ul{margin:0;padding-left:1.3em}
+pre.lic{white-space:pre-wrap;font-size:12px;background:var(--soft);padding:10px;border-radius:8px;margin:8px 0 0}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast"></div>
+<div id="modal"></div>
+<input type="file" id="filePhoto" accept="image/*" capture="environment" hidden>
+<input type="file" id="filePrev" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" multiple hidden>
+<input type="file" id="fileNew" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
+<input type="file" id="fileAdd" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" multiple hidden>
+<script>!function(f){typeof module!='undefined'&&typeof exports=='object'?module.exports=f():typeof define!='undefined'&&define.amd?define(f):(typeof self!='undefined'?self:this).fflate=f()}(function(){var _e={};"use strict";_e.deflate=zt,_e.deflateSync=kt,_e.inflate=At,_e.inflateSync=Tt,_e.gzip=It,_e.compress=It,_e.gzipSync=Ut,_e.compressSync=Ut,_e.gunzip=Zt,_e.gunzipSync=qt,_e.zlib=Lt,_e.zlibSync=Bt,_e.unzlib=Nt,_e.unzlibSync=Pt,_e.gzip=It,_e.compress=It,_e.decompress=Jt,_e.decompressSync=Kt,_e.strToU8=nn,_e.strFromU8=rn,_e.zip=dn,_e.zipSync=gn,_e.unzip=zn,_e.unzipSync=kn;var t=(typeof module!='undefined'&&typeof exports=='object'?function(_f){"use strict";var e,r,t,n=";var __w=require('worker_threads');__w.parentPort.on('message',function(m){onmessage({data:m})}),postMessage=function(m,t){__w.parentPort.postMessage(m,t)},close=process.exit;self=global";try{e=require("worker_threads"),r=e.Worker,t=e.isMarkedAsUntransferable}catch(e){}exports.default=r?function(e,o,a,s,u){var i=!1,l=new r(e+n,{eval:!0}).on("error",function(e){return u(e,null)}).on("message",function(e){return u(null,e)}).on("exit",function(e){e&&!i&&u(Error("exited with code "+e),null)});return t&&(s=s.filter(function(e){return!t(e)})),l.postMessage(a,s),l.terminate=function(){return i=!0,r.prototype.terminate.call(l)},l}:function(e,r,t,n,o){setImmediate(function(){return o(Error("async operations unsupported - update to Node 12+ (or Node 10-11 with the --experimental-worker CLI flag)"),null)});var a=function(){};return{terminate:a,postMessage:a}};return _f}:function(_f){"use strict";var e={};_f.default=function(r,t,s,a,n){var o=new Worker(e[t]||(e[t]=URL.createObjectURL(new Blob([r+';addEventListener("error",function(e){e=e.error;postMessage({$e$:[e.message,e.code,e.stack]})})'],{type:"text/javascript"}))));return o.onmessage=function(e){var r=e.data,t=r.$e$;if(t){var s=Error(t[0]);s.code=t[1],s.stack=t[2],n(s,null)}else n(null,r)},o.postMessage(s,a),o};return _f})({}),n=Uint8Array,r=Uint16Array,i=Int32Array,e=new n([0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0,0,0,0]),o=new n([0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13,0,0]),s=new n([16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15]),a=function(t,n){for(var e=new r(31),o=0;o<31;++o)e[o]=n+=1<<t[o-1];var s=new i(e[30]);for(o=1;o<30;++o)for(var a=e[o];a<e[o+1];++a)s[a]=a-e[o]<<5|o;return{b:e,r:s}},u=a(e,2),h=u.b,f=u.r;h[28]=258,f[258]=28;for(var c=a(o,0),l=c.b,p=c.r,v=new r(32768),d=0;d<32768;++d){var g=(43690&d)>>1|(21845&d)<<1;v[d]=((65280&(g=(61680&(g=(52428&g)>>2|(13107&g)<<2))>>4|(3855&g)<<4))>>8|(255&g)<<8)>>1}var y=function(t,n,i){for(var e=t.length,o=0,s=new r(n);o<e;++o)t[o]&&++s[t[o]-1];var a,u=new r(n);for(o=1;o<n;++o)u[o]=u[o-1]+s[o-1]<<1;if(i){a=new r(1<<n);var h=15-n;for(o=0;o<e;++o)if(t[o])for(var f=o<<4|t[o],c=n-t[o],l=u[t[o]-1]++<<c,p=l|(1<<c)-1;l<=p;++l)a[v[l]>>h]=f}else for(a=new r(e),o=0;o<e;++o)t[o]&&(a[o]=v[u[t[o]-1]++]>>15-t[o]);return a},m=new n(288);for(d=0;d<144;++d)m[d]=8;for(d=144;d<256;++d)m[d]=9;for(d=256;d<280;++d)m[d]=7;for(d=280;d<288;++d)m[d]=8;var b=new n(32);for(d=0;d<32;++d)b[d]=5;var w=y(m,9,0),x=y(m,9,1),z=y(b,5,0),k=y(b,5,1),M=function(t){for(var n=t[0],r=1;r<t.length;++r)t[r]>n&&(n=t[r]);return n},S=function(t,n,r){var i=n/8|0;return(t[i]|t[i+1]<<8)>>(7&n)&r},A=function(t,n){var r=n/8|0;return(t[r]|t[r+1]<<8|t[r+2]<<16)>>(7&n)},T=function(t){return(t+7)/8|0},D=function(t,r,i){return(null==r||r<0)&&(r=0),(null==i||i>t.length)&&(i=t.length),new n(t.subarray(r,i))};_e.FlateErrorCode={UnexpectedEOF:0,InvalidBlockType:1,InvalidLengthLiteral:2,InvalidDistance:3,StreamFinished:4,NoStreamHandler:5,InvalidHeader:6,NoCallback:7,InvalidUTF8:8,ExtraFieldTooLong:9,InvalidDate:10,FilenameTooLong:11,StreamFinishing:12,InvalidZipData:13,UnknownCompressionMethod:14};var C=["unexpected EOF","invalid block type","invalid length/literal","invalid distance","stream finished","no stream handler",,"no callback","invalid UTF-8 data","extra field too long","date not in range 1980-2099","filename too long","stream finishing","invalid zip data"],I=function(t,n,r){var i=Error(n||C[t]);if(i.code=t,Error.captureStackTrace&&Error.captureStackTrace(i,I),!r)throw i;return i},U=function(t,r,i,a){var u=t.length,f=a?a.length:0;if(!u||r.f&&!r.l)return i||new n(0);var c=!i,p=c||2!=r.i,v=r.i;c&&(i=new n(3*u));var d=function(t){var r=i.length;if(t>r){var e=new n(Math.max(2*r,t));e.set(i),i=e}},g=r.f||0,m=r.p||0,b=r.b||0,w=r.l,z=r.d,C=r.m,U=r.n,F=8*u;do{if(!w){g=S(t,m,1);var E=S(t,m+1,3);if(m+=3,!E){var Z=t[(Y=T(m)+4)-4]|t[Y-3]<<8,q=Y+Z;if(q>u){v&&I(0);break}p&&d(b+Z),i.set(t.subarray(Y,q),b),r.b=b+=Z,r.p=m=8*q,r.f=g;continue}if(1==E)w=x,z=k,C=9,U=5;else if(2==E){var O=S(t,m,31)+257,G=S(t,m+10,15)+4,L=O+S(t,m+5,31)+1;m+=14;for(var B=new n(L),H=new n(19),j=0;j<G;++j)H[s[j]]=S(t,m+3*j,7);m+=3*G;var N=M(H),P=(1<<N)-1,V=y(H,N,1);for(j=0;j<L;){var Y,J=V[S(t,m,P)];if(m+=15&J,(Y=J>>4)<16)B[j++]=Y;else{var K=0,Q=0;for(16==Y?(Q=3+S(t,m,3),m+=2,K=B[j-1]):17==Y?(Q=3+S(t,m,7),m+=3):18==Y&&(Q=11+S(t,m,127),m+=7);Q--;)B[j++]=K}}var R=B.subarray(0,O),W=B.subarray(O);C=M(R),U=M(W),w=y(R,C,1),z=y(W,U,1)}else I(1);if(m>F){v&&I(0);break}}p&&d(b+131072);for(var X=(1<<C)-1,$=(1<<U)-1,_=m;;_=m){var tt=(K=w[A(t,m)&X])>>4;if((m+=15&K)>F){v&&I(0);break}if(K||I(2),tt<256)i[b++]=tt;else{if(256==tt){_=m,w=null;break}var nt=tt-254;tt>264&&(nt=S(t,m,(1<<(et=e[j=tt-257]))-1)+h[j],m+=et);var rt=z[A(t,m)&$],it=rt>>4;if(rt||I(3),m+=15&rt,W=l[it],it>3){var et=o[it];W+=A(t,m)&(1<<et)-1,m+=et}if(m>F){v&&I(0);break}p&&d(b+131072);var ot=b+nt;if(b<W){var st=f-W,at=Math.min(W,ot);for(st+b<0&&I(3);b<at;++b)i[b]=a[st+b]}for(;b<ot;++b)i[b]=i[b-W]}}r.l=w,r.p=_,r.b=b,r.f=g,w&&(g=1,r.m=C,r.d=z,r.n=U)}while(!g);return b!=i.length&&c?D(i,0,b):i.subarray(0,b)},F=function(t,n,r){var i=n/8|0;t[i]|=r<<=7&n,t[i+1]|=r>>8},E=function(t,n,r){var i=n/8|0;t[i]|=r<<=7&n,t[i+1]|=r>>8,t[i+2]|=r>>16},Z=function(t,i){for(var e=[],o=0;o<t.length;++o)t[o]&&e.push({s:o,f:t[o]});var s=e.length,a=e.slice();if(!s)return{t:j,l:0};if(1==s){var u=new n(e[0].s+1);return u[e[0].s]=1,{t:u,l:1}}e.sort(function(t,n){return t.f-n.f}),e.push({s:-1,f:25001});var h=e[0],f=e[1],c=0,l=1,p=2;for(e[0]={s:-1,f:h.f+f.f,l:h,r:f};l!=s-1;)h=e[e[c].f<e[p].f?c++:p++],f=e[c!=l&&e[c].f<e[p].f?c++:p++],e[l++]={s:-1,f:h.f+f.f,l:h,r:f};var v=a[0].s;for(o=1;o<s;++o)a[o].s>v&&(v=a[o].s);var d=new r(v+1),g=q(e[l-1],d,0);if(g>i){o=0;var y=0,m=g-i,b=1<<m;for(a.sort(function(t,n){return d[n.s]-d[t.s]||t.f-n.f});o<s;++o){var w=a[o].s;if(!(d[w]>i))break;y+=b-(1<<g-d[w]),d[w]=i}for(y>>=m;y>0;){var x=a[o].s;d[x]<i?y-=1<<i-d[x]++-1:++o}for(;o>=0&&y;--o){var z=a[o].s;d[z]==i&&(--d[z],++y)}g=i}return{t:new n(d),l:g}},q=function(t,n,r){return-1==t.s?Math.max(q(t.l,n,r+1),q(t.r,n,r+1)):n[t.s]=r},O=function(t){for(var n=t.length;n&&!t[--n];);for(var i=new r(++n),e=0,o=t[0],s=1,a=function(t){i[e++]=t},u=1;u<=n;++u)if(t[u]==o&&u!=n)++s;else{if(!o&&s>2){for(;s>138;s-=138)a(32754);s>2&&(a(s>10?s-11<<5|28690:s-3<<5|12305),s=0)}else if(s>3){for(a(o),--s;s>6;s-=6)a(8304);s>2&&(a(s-3<<5|8208),s=0)}for(;s--;)a(o);s=1,o=t[u]}return{c:i.subarray(0,e),n:n}},G=function(t,n){for(var r=0,i=0;i<n.length;++i)r+=t[i]*n[i];return r},L=function(t,n,r){var i=r.length,e=T(n+2);t[e]=255&i,t[e+1]=i>>8,t[e+2]=255^t[e],t[e+3]=255^t[e+1];for(var o=0;o<i;++o)t[e+o+4]=r[o];return 8*(e+4+i)},B=function(t,n,i,a,u,h,f,c,l,p,v){F(n,v++,i),++u[256];for(var d=Z(u,15),g=d.t,x=d.l,k=Z(h,15),M=k.t,S=k.l,A=O(g),T=A.c,D=A.n,C=O(M),I=C.c,U=C.n,q=new r(19),B=0;B<T.length;++B)++q[31&T[B]];for(B=0;B<I.length;++B)++q[31&I[B]];for(var H=Z(q,7),j=H.t,N=H.l,P=19;P>4&&!j[s[P-1]];--P);var V,Y,J,K,Q=p+5<<3,R=G(u,m)+G(h,b)+f,W=G(u,g)+G(h,M)+f+14+3*P+G(q,j)+2*q[16]+3*q[17]+7*q[18];if(l>=0&&Q<=R&&Q<=W)return L(n,v,t.subarray(l,l+p));if(F(n,v,1+(W<R)),v+=2,W<R){V=y(g,x,0),Y=g,J=y(M,S,0),K=M;var X=y(j,N,0);for(F(n,v,D-257),F(n,v+5,U-1),F(n,v+10,P-4),v+=14,B=0;B<P;++B)F(n,v+3*B,j[s[B]]);v+=3*P;for(var $=[T,I],_=0;_<2;++_){var tt=$[_];for(B=0;B<tt.length;++B)F(n,v,X[rt=31&tt[B]]),v+=j[rt],rt>15&&(F(n,v,tt[B]>>5&127),v+=tt[B]>>12)}}else V=w,Y=m,J=z,K=b;for(B=0;B<c;++B){var nt=a[B];if(nt>255){var rt;E(n,v,V[257+(rt=nt>>18&31)]),v+=Y[rt+257],rt>7&&(F(n,v,nt>>23&31),v+=e[rt]);var it=31&nt;E(n,v,J[it]),v+=K[it],it>3&&(E(n,v,nt>>5&8191),v+=o[it])}else E(n,v,V[nt]),v+=Y[nt]}return E(n,v,V[256]),v+Y[256]},H=new i([65540,131080,131088,131104,262176,1048704,1048832,2114560,2117632]),j=new n(0),N=function(t,s,a,u,h,c){var l=c.z||t.length,v=new n(u+l+5*(1+Math.ceil(l/7e3))+h),d=v.subarray(u,v.length-h),g=c.l,y=7&(c.r||0);if(s){y&&(d[0]=c.r>>3);for(var m=H[s-1],b=m>>13,w=8191&m,x=(1<<a)-1,z=c.p||new r(32768),k=c.h||new r(x+1),M=Math.ceil(a/3),S=2*M,A=function(n){return(t[n]^t[n+1]<<M^t[n+2]<<S)&x},C=new i(25e3),I=new r(288),U=new r(32),F=0,E=0,Z=c.i||0,q=0,O=c.w||0,G=0;Z+2<l;++Z){var j=A(Z),N=32767&Z,P=k[j];if(z[N]=P,k[j]=N,O<=Z){var V=l-Z;if((F>7e3||q>24576)&&(V>423||!g)){y=B(t,d,0,C,I,U,E,q,G,Z-G,y),q=F=E=0,G=Z;for(var Y=0;Y<286;++Y)I[Y]=0;for(Y=0;Y<30;++Y)U[Y]=0}var J=2,K=0,Q=w,R=N-P&32767;if(V>2&&j==A(Z-R))for(var W=Math.min(b,V)-1,X=Math.min(32767,Z),$=Math.min(258,V);R<=X&&--Q&&N!=P;){if(t[Z+J]==t[Z+J-R]){for(var _=0;_<$&&t[Z+_]==t[Z+_-R];++_);if(_>J){if(J=_,K=R,_>W)break;var tt=Math.min(R,_-2),nt=0;for(Y=0;Y<tt;++Y){var rt=Z-R+Y&32767,it=rt-z[rt]&32767;it>nt&&(nt=it,P=rt)}}}R+=(N=P)-(P=z[N])&32767}if(K){C[q++]=268435456|f[J]<<18|p[K];var et=31&f[J],ot=31&p[K];E+=e[et]+o[ot],++I[257+et],++U[ot],O=Z+J,++F}else C[q++]=t[Z],++I[t[Z]]}}for(Z=Math.max(Z,O);Z<l;++Z)C[q++]=t[Z],++I[t[Z]];y=B(t,d,g,C,I,U,E,q,G,Z-G,y),g||(c.r=7&y|d[y/8|0]<<3,y-=7,c.h=k,c.p=z,c.i=Z,c.w=O)}else{for(Z=c.w||0;Z<l+g;Z+=65535){var st=Z+65535;st>=l&&(d[y/8|0]=g,st=l),y=L(d,y+1,t.subarray(Z,st))}c.i=l}return D(v,0,u+T(y)+h)},P=function(){for(var t=new Int32Array(256),n=0;n<256;++n){for(var r=n,i=9;--i;)r=(1&r&&-306674912)^r>>>1;t[n]=r}return t}(),V=function(){var t=-1;return{p:function(n){for(var r=t,i=0;i<n.length;++i)r=P[255&r^n[i]]^r>>>8;t=r},d:function(){return~t}}},Y=function(){var t=1,n=0;return{p:function(r){for(var i=t,e=n,o=0|r.length,s=0;s!=o;){for(var a=Math.min(s+2655,o);s<a;++s)e+=i+=r[s];i=(65535&i)+15*(i>>16),e=(65535&e)+15*(e>>16)}t=i,n=e},d:function(){return(255&(t%=65521))<<24|(65280&t)<<8|(255&(n%=65521))<<8|n>>8}}},J=function(t,r,i,e,o){if(!o&&(o={l:1},r.dictionary)){var s=r.dictionary.subarray(-32768),a=new n(s.length+t.length);a.set(s),a.set(t,s.length),t=a,o.w=s.length}return N(t,null==r.level?6:r.level,null==r.mem?o.l?Math.ceil(1.5*Math.max(8,Math.min(13,Math.log(t.length)))):20:12+r.mem,i,e,o)},K=function(t,n){var r={};for(var i in t)r[i]=t[i];for(var i in n)r[i]=n[i];return r},Q=function(t,n,r){for(var i=t(),e=""+t,o=e.slice(e.indexOf("[")+1,e.lastIndexOf("]")).replace(/\s+/g,"").split(","),s=0;s<i.length;++s){var a=i[s],u=o[s];if("function"==typeof a){n+=";"+u+"=";var h=""+a;if(a.prototype)if(-1!=h.indexOf("[native code]")){var f=h.indexOf(" ",8)+1;n+=h.slice(f,h.indexOf("(",f))}else for(var c in n+=h,a.prototype)n+=";"+u+".prototype."+c+"="+a.prototype[c];else n+=h}else r[u]=a}return n},R=[],W=function(t){var n=[];for(var r in t)t[r].buffer&&n.push((t[r]=new t[r].constructor(t[r])).buffer);return n},X=function(n,r,i,e){if(!R[i]){for(var o="",s={},a=n.length-1,u=0;u<a;++u)o=Q(n[u],o,s);R[i]={c:Q(n[a],o,s),e:s}}var h=K({},R[i].e);return(0,t.default)(R[i].c+";onmessage=function(e){for(var k in e.data)self[k]=e.data[k];onmessage="+r+"}",i,h,W(h),e)},$=function(){return[n,r,i,e,o,s,h,l,x,k,v,C,y,M,S,A,T,D,I,U,Tt,et,ot]},_=function(){return[n,r,i,e,o,s,f,p,w,m,z,b,v,H,j,y,F,E,Z,q,O,G,L,B,T,D,N,J,kt,et]},tt=function(){return[pt,gt,lt,V,P]},nt=function(){return[vt,dt]},rt=function(){return[yt,lt,Y]},it=function(){return[mt]},et=function(t){return postMessage(t,[t.buffer])},ot=function(t){return t&&{out:t.size&&new n(t.size),dictionary:t.dictionary}},st=function(t,n,r,i,e,o){var s=X(r,i,e,function(t,n){s.terminate(),o(t,n)});return s.postMessage([t,n],n.consume?[t.buffer]:[]),function(){s.terminate()}},at=function(t){return t.ondata=function(t,n){return postMessage([t,n],[t.buffer])},function(n){n.data[0]?(t.push(n.data[0],n.data[1]),postMessage([n.data[0].length])):t.flush(n.data[1])}},ut=function(t,n,r,i,e,o,s){var a,u=X(t,i,e,function(t,r){t?(u.terminate(),n.ondata.call(n,t)):Array.isArray(r)?1==r.length?(n.queuedSize-=r[0],n.ondrain&&n.ondrain(r[0])):(r[1]&&u.terminate(),n.ondata.call(n,t,r[0],r[1])):s(r)});u.postMessage(r),n.queuedSize=0,n.push=function(t,r){n.ondata||I(5),a&&n.ondata(I(4,0,1),null,!!r),n.queuedSize+=t.length,u.postMessage([t,a=r],t.buffer instanceof ArrayBuffer?[t.buffer]:[])},n.terminate=function(){u.terminate()},o&&(n.flush=function(t){u.postMessage([0,t])})},ht=function(t,n){return t[n]|t[n+1]<<8},ft=function(t,n){return(t[n]|t[n+1]<<8|t[n+2]<<16|t[n+3]<<24)>>>0},ct=function(t,n){return ft(t,n)+4294967296*ft(t,n+4)},lt=function(t,n,r){for(;r;++n)t[n]=r,r>>>=8},pt=function(t,n){var r=n.filename;if(t[0]=31,t[1]=139,t[2]=8,t[8]=n.level<2?4:9==n.level?2:0,t[9]=3,0!=n.mtime&&lt(t,4,Math.floor(new Date(n.mtime||Date.now())/1e3)),r){t[3]=8;for(var i=0;i<=r.length;++i)t[i+10]=r.charCodeAt(i)}},vt=function(t){31==t[0]&&139==t[1]&&8==t[2]||I(6,"invalid gzip data");var n=t[3],r=10;4&n&&(r+=2+(t[10]|t[11]<<8));for(var i=(n>>3&1)+(n>>4&1);i>0;i-=!t[r++]);return r+(2&n)},dt=function(t){var n=t.length;return(t[n-4]|t[n-3]<<8|t[n-2]<<16|t[n-1]<<24)>>>0},gt=function(t){return 10+(t.filename?t.filename.length+1:0)},yt=function(t,n){var r=n.level,i=0==r?0:r<6?1:9==r?3:2;if(t[0]=120,t[1]=i<<6|(n.dictionary&&32),t[1]|=31-(t[0]<<8|t[1])%31,n.dictionary){var e=Y();e.p(n.dictionary),lt(t,2,e.d())}},mt=function(t,n){return(8!=(15&t[0])||t[0]>>4>7||(t[0]<<8|t[1])%31)&&I(6,"invalid zlib data"),(t[1]>>5&1)==+!n&&I(6,"invalid zlib data: "+(32&t[1]?"need":"unexpected")+" dictionary"),2+(t[1]>>3&4)};function bt(t,n){return"function"==typeof t&&(n=t,t={}),this.ondata=n,t}var wt=function(){function t(t,r){if("function"==typeof t&&(r=t,t={}),this.ondata=r,this.o=t||{},this.s={l:0,i:32768,w:32768,z:32768},this.b=new n(98304),this.o.dictionary){var i=this.o.dictionary.subarray(-32768);this.b.set(i,32768-i.length),this.s.i=32768-i.length}}return t.prototype.p=function(t,n){this.ondata(J(t,this.o,0,0,this.s),n)},t.prototype.push=function(t,r){this.ondata||I(5),this.s.l&&I(4);var i=t.length+this.s.z;if(i>this.b.length){if(i>2*this.b.length-32768){var e=new n(-32768&i);e.set(this.b.subarray(0,this.s.z)),this.b=e}var o=this.b.length-this.s.z;this.b.set(t.subarray(0,o),this.s.z),this.s.z=this.b.length,this.p(this.b,!1),this.b.set(this.b.subarray(-32768)),this.b.set(t.subarray(o),32768),this.s.z=t.length-o+32768,this.s.i=32766,this.s.w=32768}else this.b.set(t,this.s.z),this.s.z+=t.length;this.s.l=1&r,(this.s.z>this.s.w+8191||r)&&(this.p(this.b,r||!1),this.s.w=this.s.i,this.s.i-=2),r&&(this.s=this.o={},this.b=j)},t.prototype.flush=function(t){if(this.ondata||I(5),this.s.l&&I(4),this.p(this.b,!1),this.s.w=this.s.i,this.s.i-=2,t){var r=new n(6);r[0]=this.s.r>>3;var i=L(r,this.s.r,j);this.s.r=0,this.ondata(r.subarray(0,i>>3),!1)}},t}();_e.Deflate=wt;var xt=function(){return function(t,n){ut([_,function(){return[at,wt]}],this,bt.call(this,t,n),function(t){var n=new wt(t.data);onmessage=at(n)},6,1)}}();function zt(t,n,r){return r||(r=n,n={}),"function"!=typeof r&&I(7),st(t,n,[_],function(t){return et(kt(t.data[0],t.data[1]))},0,r)}function kt(t,n){return J(t,n||{},0,0)}_e.AsyncDeflate=xt;var Mt=function(){function t(t,r){"function"==typeof t&&(r=t,t={}),this.ondata=r;var i=t&&t.dictionary&&t.dictionary.subarray(-32768);this.s={i:0,b:i?i.length:0},this.o=new n(32768),this.p=new n(0),i&&this.o.set(i)}return t.prototype.e=function(t){if(this.ondata||I(5),this.d&&I(4),this.p.length){if(t.length){var r=new n(this.p.length+t.length);r.set(this.p),r.set(t,this.p.length),this.p=r}}else this.p=t},t.prototype.c=function(t){this.s.i=+(this.d=t||!1);var n=this.s.b,r=U(this.p,this.s,this.o);this.ondata(D(r,n,this.s.b),this.d),this.o=D(r,this.s.b-32768),this.s.b=this.o.length,this.p=D(this.p,this.s.p/8|0),this.s.p&=7},t.prototype.push=function(t,n){this.e(t),this.c(n)},t}();_e.Inflate=Mt;var St=function(){return function(t,n){ut([$,function(){return[at,Mt]}],this,bt.call(this,t,n),function(t){var n=new Mt(t.data);onmessage=at(n)},7,0)}}();function At(t,n,r){return r||(r=n,n={}),"function"!=typeof r&&I(7),st(t,n,[$],function(t){return et(Tt(t.data[0],ot(t.data[1])))},1,r)}function Tt(t,n){return U(t,{i:2},n&&n.out,n&&n.dictionary)}_e.AsyncInflate=St;var Dt=function(){function t(t,n){this.c=V(),this.l=0,this.v=1,wt.call(this,t,n)}return t.prototype.push=function(t,n){this.c.p(t),this.l+=t.length,wt.prototype.push.call(this,t,n)},t.prototype.p=function(t,n){var r=J(t,this.o,this.v&&gt(this.o),n&&8,this.s);this.v&&(pt(r,this.o),this.v=0),n&&(lt(r,r.length-8,this.c.d()),lt(r,r.length-4,this.l)),this.ondata(r,n)},t.prototype.flush=function(t){wt.prototype.flush.call(this,t)},t}();_e.Gzip=Dt,_e.Compress=Dt;var Ct=function(){return function(t,n){ut([_,tt,function(){return[at,wt,Dt]}],this,bt.call(this,t,n),function(t){var n=new Dt(t.data);onmessage=at(n)},8,1)}}();function It(t,n,r){return r||(r=n,n={}),"function"!=typeof r&&I(7),st(t,n,[_,tt,function(){return[Ut]}],function(t){return et(Ut(t.data[0],t.data[1]))},2,r)}function Ut(t,n){n||(n={});var r=V(),i=t.length;r.p(t);var e=J(t,n,gt(n),8),o=e.length;return pt(e,n),lt(e,o-8,r.d()),lt(e,o-4,i),e}_e.AsyncGzip=Ct,_e.AsyncCompress=Ct;var Ft=function(){function t(t,n){this.v=1,this.r=0,Mt.call(this,t,n)}return t.prototype.push=function(t,r){if(Mt.prototype.e.call(this,t),this.r+=t.length,this.v){var i=this.p.subarray(this.v-1),e=i.length>3?vt(i):4;if(e>i.length){if(!r)return}else this.v>1&&this.onmember&&this.onmember(this.r-i.length);this.p=i.subarray(e),this.v=0}Mt.prototype.c.call(this,0),this.s.f&&!this.s.l?(this.v=T(this.s.p)+9,this.s={i:0},this.o=new n(0),this.push(new n(0),r)):r&&Mt.prototype.c.call(this,r)},t}();_e.Gunzip=Ft;var Et=function(){return function(t,n){var r=this;ut([$,nt,function(){return[at,Mt,Ft]}],this,bt.call(this,t,n),function(t){var n=new Ft(t.data);n.onmember=function(t){return postMessage(t)},onmessage=at(n)},9,0,function(t){return r.onmember&&r.onmember(t)})}}();function Zt(t,n,r){return r||(r=n,n={}),"function"!=typeof r&&I(7),st(t,n,[$,nt,function(){return[qt]}],function(t){return et(qt(t.data[0],t.data[1]))},3,r)}function qt(t,r){var i=vt(t);return i+8>t.length&&I(6,"invalid gzip data"),U(t.subarray(i,-8),{i:2},r&&r.out||new n(dt(t)),r&&r.dictionary)}_e.AsyncGunzip=Et;var Ot=function(){function t(t,n){this.c=Y(),this.v=1,wt.call(this,t,n)}return t.prototype.push=function(t,n){this.c.p(t),wt.prototype.push.call(this,t,n)},t.prototype.p=function(t,n){var r=J(t,this.o,this.v&&(this.o.dictionary?6:2),n&&4,this.s);this.v&&(yt(r,this.o),this.v=0),n&&lt(r,r.length-4,this.c.d()),this.ondata(r,n)},t.prototype.flush=function(t){wt.prototype.flush.call(this,t)},t}();_e.Zlib=Ot;var Gt=function(){return function(t,n){ut([_,rt,function(){return[at,wt,Ot]}],this,bt.call(this,t,n),function(t){var n=new Ot(t.data);onmessage=at(n)},10,1)}}();function Lt(t,n,r){return r||(r=n,n={}),"function"!=typeof r&&I(7),st(t,n,[_,rt,function(){return[Bt]}],function(t){return et(Bt(t.data[0],t.data[1]))},4,r)}function Bt(t,n){n||(n={});var r=Y();r.p(t);var i=J(t,n,n.dictionary?6:2,4);return yt(i,n),lt(i,i.length-4,r.d()),i}_e.AsyncZlib=Gt;var Ht=function(){function t(t,n){Mt.call(this,t,n),this.v=t&&t.dictionary?2:1}return t.prototype.push=function(t,n){if(Mt.prototype.e.call(this,t),this.v){if(this.p.length<6&&!n)return;this.p=this.p.subarray(mt(this.p,this.v-1)),this.v=0}n&&(this.p.length<4&&I(6,"invalid zlib data"),this.p=this.p.subarray(0,-4)),Mt.prototype.c.call(this,n)},t}();_e.Unzlib=Ht;var jt=function(){return function(t,n){ut([$,it,function(){return[at,Mt,Ht]}],this,bt.call(this,t,n),function(t){var n=new Ht(t.data);onmessage=at(n)},11,0)}}();function Nt(t,n,r){return r||(r=n,n={}),"function"!=typeof r&&I(7),st(t,n,[$,it,function(){return[Pt]}],function(t){return et(Pt(t.data[0],ot(t.data[1])))},5,r)}function Pt(t,n){return U(t.subarray(mt(t,n&&n.dictionary),-4),{i:2},n&&n.out,n&&n.dictionary)}_e.AsyncUnzlib=jt;var Vt=function(){function t(t,n){this.o=bt.call(this,t,n)||{},this.G=Ft,this.I=Mt,this.Z=Ht}return t.prototype.i=function(){var t=this;this.s.ondata=function(n,r){t.ondata(n,r)}},t.prototype.push=function(t,r){if(this.ondata||I(5),this.s)this.s.push(t,r);else{if(this.p&&this.p.length){var i=new n(this.p.length+t.length);i.set(this.p),i.set(t,this.p.length)}else this.p=t;this.p.length>2&&(this.s=31==this.p[0]&&139==this.p[1]&&8==this.p[2]?new this.G(this.o):8!=(15&this.p[0])||this.p[0]>>4>7||(this.p[0]<<8|this.p[1])%31?new this.I(this.o):new this.Z(this.o),this.i(),this.s.push(this.p,r),this.p=null)}},t}();_e.Decompress=Vt;var Yt=function(){function t(t,n){Vt.call(this,t,n),this.queuedSize=0,this.G=Et,this.I=St,this.Z=jt}return t.prototype.i=function(){var t=this;this.s.ondata=function(n,r,i){t.ondata(n,r,i)},this.s.ondrain=function(n){t.queuedSize-=n,t.ondrain&&t.ondrain(n)}},t.prototype.push=function(t,n){this.queuedSize+=t.length,Vt.prototype.push.call(this,t,n)},t}();function Jt(t,n,r){return r||(r=n,n={}),"function"!=typeof r&&I(7),31==t[0]&&139==t[1]&&8==t[2]?Zt(t,n,r):8!=(15&t[0])||t[0]>>4>7||(t[0]<<8|t[1])%31?At(t,n,r):Nt(t,n,r)}function Kt(t,n){return 31==t[0]&&139==t[1]&&8==t[2]?qt(t,n):8!=(15&t[0])||t[0]>>4>7||(t[0]<<8|t[1])%31?Tt(t,n):Pt(t,n)}_e.AsyncDecompress=Yt;var Qt=function(t,r,i,e){for(var o in t){var s=t[o],a=r+o,u=e;Array.isArray(s)&&(u=K(e,s[1]),s=s[0]),ArrayBuffer.isView(s)?i[a]=[s,u]:(i[a+="/"]=[new n(0),u],Qt(s,a,i,e))}},Rt="undefined"!=typeof TextEncoder&&new TextEncoder,Wt="undefined"!=typeof TextDecoder&&new TextDecoder,Xt=0;try{Wt.decode(j,{stream:!0}),Xt=1}catch(t){}var $t=function(t){for(var n="",r=0;;){var i=t[r++],e=(i>127)+(i>223)+(i>239);if(r+e>t.length)return{s:n,r:D(t,r-1)};e?3==e?(i=((15&i)<<18|(63&t[r++])<<12|(63&t[r++])<<6|63&t[r++])-65536,n+=String.fromCharCode(55296|i>>10,56320|1023&i)):n+=String.fromCharCode(1&e?(31&i)<<6|63&t[r++]:(15&i)<<12|(63&t[r++])<<6|63&t[r++]):n+=String.fromCharCode(i)}},_t=function(){function t(t){this.ondata=t,Xt?this.t=new TextDecoder:this.p=j}return t.prototype.push=function(t,r){if(this.ondata||I(5),r=!!r,this.t)return this.ondata(this.t.decode(t,{stream:!0}),r),void(r&&(this.t.decode().length&&I(8),this.t=null));this.p||I(4);var i=new n(this.p.length+t.length);i.set(this.p),i.set(t,this.p.length);var e=$t(i),o=e.s,s=e.r;r?(s.length&&I(8),this.p=null):this.p=s,this.ondata(o,r)},t}();_e.DecodeUTF8=_t;var tn=function(){function t(t){this.ondata=t}return t.prototype.push=function(t,n){this.ondata||I(5),this.d&&I(4),this.ondata(nn(t),this.d=n||!1)},t}();function nn(t,r){if(r){for(var i=new n(t.length),e=0;e<t.length;++e)i[e]=t.charCodeAt(e);return i}if(Rt)return Rt.encode(t);var o=t.length,s=new n(t.length+(t.length>>1)),a=0,u=function(t){s[a++]=t};for(e=0;e<o;++e){if(a+5>s.length){var h=new n(a+8+(o-e<<1));h.set(s),s=h}var f=t.charCodeAt(e);f<128||r?u(f):f<2048?(u(192|f>>6),u(128|63&f)):f>55295&&f<57344?(u(240|(f=65536+(1047552&f)|1023&t.charCodeAt(++e))>>18),u(128|f>>12&63),u(128|f>>6&63),u(128|63&f)):(u(224|f>>12),u(128|f>>6&63),u(128|63&f))}return D(s,0,a)}function rn(t,n){if(n){for(var r="",i=0;i<t.length;i+=16384)r+=String.fromCharCode.apply(null,t.subarray(i,i+16384));return r}if(Wt)return Wt.decode(t);var e=$t(t),o=e.s;return(r=e.r).length&&I(8),o}_e.EncodeUTF8=tn;var en=function(t){return 1==t?3:t<6?2:9==t?1:0},on=function(t,n){return n+30+ht(t,n+26)+ht(t,n+28)},sn=function(t,n,r){var i=ht(t,n+28),e=ht(t,n+30),o=rn(t.subarray(n+46,n+46+i),!(2048&ht(t,n+8))),s=n+46+i,a=an(t,s,e,r,ft(t,n+20),ft(t,n+24),ft(t,n+42)),u=a[0],h=a[1],f=a[2];return[ht(t,n+10),u,h,o,s+e+ht(t,n+32),f]},an=function(t,n,r,i,e,o,s){var a=4294967295==e,u=4294967295==o,h=4294967295==s,f=n+r;if(i&&a+u+h){for(;n+4<f;n+=4+ht(t,n+2))if(1==ht(t,n))return[a?ct(t,n+4+8*u):e,u?ct(t,n+4):o,h?ct(t,n+4+8*(u+a)):s,1];i<2&&I(13)}return[e,o,s,0]},un=function(t){var n=0;if(t)for(var r in t){var i=t[r].length;i>65535&&I(9),n+=i+4}return n},hn=function(t,n,r,i,e,o,s,a){var u=i.length,h=r.extra,f=a&&a.length,c=un(h);lt(t,n,null!=s?33639248:67324752),n+=4,null!=s&&(t[n++]=20,t[n++]=r.os),t[n]=20,n+=2,t[n++]=r.flag<<1|(o<0&&8),t[n++]=e&&8,t[n++]=255&r.compression,t[n++]=r.compression>>8;var l=new Date(null==r.mtime?Date.now():r.mtime),p=l.getFullYear()-1980;if((p<0||p>119)&&I(10),lt(t,n,p<<25|l.getMonth()+1<<21|l.getDate()<<16|l.getHours()<<11|l.getMinutes()<<5|l.getSeconds()>>1),n+=4,-1!=o&&(lt(t,n,r.crc),lt(t,n+4,o<0?-o-2:o),lt(t,n+8,r.size)),lt(t,n+12,u),lt(t,n+14,c),n+=16,null!=s&&(lt(t,n,f),lt(t,n+6,r.attrs),lt(t,n+10,s),n+=14),t.set(i,n),n+=u,c)for(var v in h){var d=h[v],g=d.length;lt(t,n,+v),lt(t,n+2,g),t.set(d,n+4),n+=4+g}return f&&(t.set(a,n),n+=f),n},fn=function(t,n,r,i,e){lt(t,n,101010256),lt(t,n+8,r),lt(t,n+10,r),lt(t,n+12,i),lt(t,n+16,e)},cn=function(){function t(t){this.filename=t,this.c=V(),this.size=0,this.compression=0}return t.prototype.process=function(t,n){this.ondata(null,t,n)},t.prototype.push=function(t,n){this.ondata||I(5),this.c.p(t),this.size+=t.length,n&&(this.crc=this.c.d()),this.process(t,n||!1)},t}();_e.ZipPassThrough=cn;var ln=function(){function t(t,n){var r=this;n||(n={}),cn.call(this,t),this.d=new wt(n,function(t,n){r.ondata(null,t,n)}),this.compression=8,this.flag=en(n.level)}return t.prototype.process=function(t,n){try{this.d.push(t,n)}catch(t){this.ondata(t,null,n)}},t.prototype.push=function(t,n){cn.prototype.push.call(this,t,n)},t}();_e.ZipDeflate=ln;var pn=function(){function t(t,n){var r=this;n||(n={}),cn.call(this,t),this.d=new xt(n,function(t,n,i){r.ondata(t,n,i)}),this.compression=8,this.flag=en(n.level),this.terminate=this.d.terminate}return t.prototype.process=function(t,n){this.d.push(t,n)},t.prototype.push=function(t,n){cn.prototype.push.call(this,t,n)},t}();_e.AsyncZipDeflate=pn;var vn=function(){function t(t){this.ondata=t,this.u=[],this.d=1}return t.prototype.add=function(t){var r=this;if(this.ondata||I(5),2&this.d)this.ondata(I(4+8*(1&this.d),0,1),null,!1);else{var i=nn(t.filename),e=i.length,o=t.comment,s=o&&nn(o),a=e!=t.filename.length||s&&o.length!=s.length,u=e+un(t.extra)+30;e>65535&&this.ondata(I(11,0,1),null,!1);var h=new n(u);hn(h,0,t,i,a,-1);var f=[h],c=function(){for(var t=0,n=f;t<n.length;t++)r.ondata(null,n[t],!1);f=[]},l=this.d;this.d=0;var p=this.u.length,v=K(t,{f:i,u:a,o:s,t:function(){t.terminate&&t.terminate()},r:function(){if(c(),l){var t=r.u[p+1];t?t.r():r.d=1}l=1}}),d=0;t.ondata=function(i,e,o){if(i)r.ondata(i,e,o),r.terminate();else if(d+=e.length,f.push(e),o){var s=new n(16);lt(s,0,134695760),lt(s,4,t.crc),lt(s,8,d),lt(s,12,t.size),f.push(s),v.c=d,v.b=u+d+16,v.crc=t.crc,v.size=t.size,l&&v.r(),l=1}else l&&c()},this.u.push(v)}},t.prototype.end=function(){var t=this;2&this.d?this.ondata(I(4+8*(1&this.d),0,1),null,!0):(this.d?this.e():this.u.push({r:function(){1&t.d&&(t.u.splice(-1,1),t.e())},t:function(){}}),this.d=3)},t.prototype.e=function(){for(var t=0,r=0,i=0,e=0,o=this.u;e<o.length;e++)i+=46+(h=o[e]).f.length+un(h.extra)+(h.o?h.o.length:0);for(var s=new n(i+22),a=0,u=this.u;a<u.length;a++){var h;hn(s,t,h=u[a],h.f,h.u,-h.c-2,r,h.o),t+=46+h.f.length+un(h.extra)+(h.o?h.o.length:0),r+=h.b}fn(s,t,this.u.length,i,r),this.ondata(null,s,!0),this.d=2},t.prototype.terminate=function(){for(var t=0,n=this.u;t<n.length;t++)n[t].t();this.d=2},t}();function dn(t,r,i){i||(i=r,r={}),"function"!=typeof i&&I(7);var e={};Qt(t,"",e,r);var o=Object.keys(e),s=o.length,a=0,u=0,h=s,f=Array(s),c=[],l=function(){for(var t=0;t<c.length;++t)c[t]()},p=function(t,n){xn(function(){i(t,n)})};xn(function(){p=i});var v=function(){var t=new n(u+22),r=a,i=u-a;u=0;for(var e=0;e<h;++e){var o=f[e];try{var s=o.c.length;hn(t,u,o,o.f,o.u,s);var c=30+o.f.length+un(o.extra),l=u+c;t.set(o.c,l),hn(t,a,o,o.f,o.u,s,u,o.m),a+=16+c+(o.m?o.m.length:0),u=l+s}catch(t){return p(t,null)}}fn(t,a,f.length,i,r),p(null,t)};s||v();for(var d=function(t){var n=o[t],r=e[n],i=r[0],h=r[1],d=V(),g=i.length;d.p(i);var y=nn(n),m=y.length,b=h.comment,w=b&&nn(b),x=w&&w.length,z=un(h.extra),k=0==h.level?0:8,M=function(r,i){if(r)l(),p(r,null);else{var e=i.length;f[t]=K(h,{size:g,crc:d.d(),c:i,f:y,m:w,u:m!=n.length||w&&b.length!=x,compression:k}),a+=30+m+z+e,u+=76+2*(m+z)+(x||0)+e,--s||v()}};if(m>65535&&M(I(11,0,1),null),k)if(g<16e4)try{M(null,kt(i,h))}catch(t){M(t,null)}else c.push(zt(i,h,M));else M(null,i)},g=0;g<h;++g)d(g);return l}function gn(t,r){r||(r={});var i={},e=[];Qt(t,"",i,r);var o=0,s=0;for(var a in i){var u=i[a],h=u[0],f=u[1],c=0==f.level?0:8,l=(M=nn(a)).length,p=f.comment,v=p&&nn(p),d=v&&v.length,g=un(f.extra);l>65535&&I(11);var y=c?kt(h,f):h,m=y.length,b=V();b.p(h),e.push(K(f,{size:h.length,crc:b.d(),c:y,f:M,m:v,u:l!=a.length||v&&p.length!=d,o:o,compression:c})),o+=30+l+g+m,s+=76+2*(l+g)+(d||0)+m}for(var w=new n(s+22),x=o,z=s-o,k=0;k<e.length;++k){var M;hn(w,(M=e[k]).o,M,M.f,M.u,M.c.length);var S=30+M.f.length+un(M.extra);w.set(M.c,M.o+S),hn(w,o,M,M.f,M.u,M.c.length,M.o,M.m),o+=16+S+(M.m?M.m.length:0)}return fn(w,o,e.length,z,x),w}_e.Zip=vn;var yn=function(){function t(){}return t.prototype.push=function(t,n){this.ondata(null,t,n)},t.compression=0,t}();_e.UnzipPassThrough=yn;var mn=function(){function t(){var t=this;this.i=new Mt(function(n,r){t.ondata(null,n,r)})}return t.prototype.push=function(t,n){try{this.i.push(t,n)}catch(t){this.ondata(t,null,n)}},t.compression=8,t}();_e.UnzipInflate=mn;var bn=function(){function t(t,n){var r=this;n<32e4?this.i=new Mt(function(t,n){r.ondata(null,t,n)}):(this.i=new St(function(t,n,i){r.ondata(t,n,i)}),this.terminate=this.i.terminate)}return t.prototype.push=function(t,n){this.i.terminate&&(t=D(t,0)),this.i.push(t,n)},t.compression=8,t}();_e.AsyncUnzipInflate=bn;var wn=function(){function t(t){this.onfile=t,this.k=[],this.o={0:yn},this.p=j}return t.prototype.push=function(t,r){var i=this;if(this.onfile||I(5),this.p||I(4),this.c>0){var e=Math.min(this.c,t.length),o=t.subarray(0,e);if(this.c-=e,this.d?this.d.push(o,!this.c):this.k[0].push(o),(t=t.subarray(e)).length)return this.push(t,r)}else{var s=0,a=0,u=void 0,h=void 0;this.p.length?t.length?((h=new n(this.p.length+t.length)).set(this.p),h.set(t,this.p.length)):h=this.p:h=t;for(var f=h.length,c=this.c,l=c&&this.d,p=function(){var t=ft(h,a);if(67324752==t){s=1,u=a,v.d=null,v.c=0;var n=ht(h,a+6),r=ht(h,a+8),e=2048&n,o=8&n,l=ht(h,a+26),p=ht(h,a+28);if(f>a+30+l+p){var d=[];v.k.unshift(d),s=2;var g,y=ft(h,a+18),m=ft(h,a+22),b=rn(h.subarray(a+30,a+=30+l),!e),w=an(h,a,p,2,y,m,0),x=w[0],z=w[1];o&&(x=-1-w[3]),a+=p,v.c=x;var k={name:b,compression:r,start:function(){if(k.ondata||I(5),x){var t=i.o[r];t||k.ondata(I(14,"unknown compression type "+r,1),null,!1),(g=x<0?new t(b):new t(b,x,z)).ondata=function(t,n,r){k.ondata(t,n,r)};for(var n=0,e=d;n<e.length;n++)g.push(e[n],!1);i.k[0]==d&&i.c?i.d=g:g.push(j,!0)}else k.ondata(null,j,!0)},terminate:function(){g&&g.terminate&&g.terminate()}};x>=0&&(k.size=x,k.originalSize=z),v.onfile(k)}return"break"}if(c){if(134695760==t)return u=a+=12+(-2==c&&8),s=3,v.c=0,"break";if(33639248==t)return u=a-=4,s=3,v.c=0,"break"}},v=this;a<f-4&&"break"!==p();++a);if(this.p=j,c<0){var d=h.subarray(0,s?u-12-(-2==c&&8)-(134695760==ft(h,u-16)&&4):a);l?l.push(d,!!s):this.k[+(2==s)].push(d)}if(2&s)return this.push(h.subarray(a),r);this.p=h.subarray(a)}r&&(this.c&&I(13),this.p=null)},t.prototype.register=function(t){this.o[t.compression]=t},t}();_e.Unzip=wn;var xn="function"==typeof queueMicrotask?queueMicrotask:"function"==typeof setTimeout?setTimeout:function(t){t()};function zn(t,r,i){i||(i=r,r={}),"function"!=typeof i&&I(7);var e=[],o=function(){for(var t=0;t<e.length;++t)e[t]()},s={},a=function(t,n){xn(function(){i(t,n)})};xn(function(){a=i});for(var u=t.length-22;101010256!=ft(t,u);--u)if(!u||t.length-u>65558)return a(I(13,0,1),null),o;var h=ht(t,u+8);if(h){var f=h,c=ft(t,u+16),l=117853008==ft(t,u-20);if(l){var p=ft(t,u-12);(l=101075792==ft(t,p))&&(f=h=ft(t,p+32),c=ft(t,p+48))}for(var v=r&&r.filter,d=function(r){var i=sn(t,c,l),u=i[0],f=i[1],p=i[2],d=i[3],g=i[4],y=on(t,i[5]);c=g;var m=function(t,n){t?(o(),a(t,null)):(n&&(s[d]=n),--h||a(null,s))};if(!v||v({name:d,size:f,originalSize:p,compression:u}))if(u)if(8==u){var b=t.subarray(y,y+f);if(p<524288||f>.8*p)try{m(null,Tt(b,{out:new n(p)}))}catch(t){m(t,null)}else e.push(At(b,{size:p},m))}else m(I(14,"unknown compression type "+u,1),null);else m(null,D(t,y,y+f));else m(null,null)},g=0;g<f;++g)d()}else a(null,{});return o}function kn(t,r){for(var i={},e=t.length-22;101010256!=ft(t,e);--e)(!e||t.length-e>65558)&&I(13);var o=ht(t,e+8);if(!o)return{};var s=ft(t,e+16),a=117853008==ft(t,e-20);if(a){var u=ft(t,e-12);(a=101075792==ft(t,u))&&(o=ft(t,u+32),s=ft(t,u+48))}for(var h=r&&r.filter,f=0;f<o;++f){var c=sn(t,s,a),l=c[0],p=c[1],v=c[2],d=c[3],g=c[4],y=on(t,c[5]);s=g,h&&!h({name:d,size:p,originalSize:v,compression:l})||(l?8==l?i[d]=Tt(t.subarray(y,y+p),{out:new n(v)}):I(14,"unknown compression type "+l):i[d]=D(t,y,y+p))}return i}return _e});</script>
+<script>
+'use strict';
+const APP_VER='0.1.7';
+const APP_NAME='Excel点検表 入力ツール（試作版）';
+const APP_PROVIDER='soranoiro.net　（連絡先）gap@soranoiro.net';
+const LIC_FFLATE="MIT License\n\nCopyright (c) 2026 Arjun Barrett\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.";
+/* ================= 共通 ================= */
+const NS='http://schemas.openxmlformats.org/spreadsheetml/2006/main';
+const dec=new TextDecoder(),enc=new TextEncoder();
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const nz=s=>String(s??'').replace(/[\s　]/g,'');
+const parseXml=s=>new DOMParser().parseFromString(s,'application/xml');
+const serXml=d=>'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\r\n'+new XMLSerializer().serializeToString(d.documentElement);
+const colNum=s=>{let n=0;for(const ch of s)n=n*26+ch.charCodeAt(0)-64;return n};
+const colName=n=>{let s='';while(n>0){s=String.fromCharCode(65+(n-1)%26)+s;n=Math.floor((n-1)/26)}return s};
+const splitRef=ref=>{const m=/^([A-Z]+)(\d+)$/.exec(ref);return{c:colNum(m[1]),r:+m[2],col:m[1]}};
+const pad=n=>String(n).padStart(2,'0');
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())};
+const isoFromSerial=n=>{const d=new Date(Math.round((n-25569)*86400000));return d.getUTCFullYear()+'-'+pad(d.getUTCMonth()+1)+'-'+pad(d.getUTCDate())};
+const serialFromIso=iso=>{const[y,m,d]=iso.split('-').map(Number);return Date.UTC(y,m-1,d)/86400000+25569};
+/* 文中のURLを、別のタブで開くリンクにする */
+const linkify=t=>esc(t).replace(/https?:\/\/[\x21-\x7e]+/g,u=>{const m=/(&quot;|&#39;|&gt;|[.,;:)\]])+$/.exec(u),tail=m?m[0]:'';if(tail)u=u.slice(0,-tail.length);return`<a href="${u}" target="_blank" rel="noopener noreferrer">${u}</a>${tail}`});
+function toast(msg,ms=3200){const t=$('#toast');t.textContent=msg;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('on'),ms)}
+
+/* ================= Excel(xlsx) 読み書き =================
+   元ファイルを展開し、入力セルの値だけを書き換えて再圧縮する。
+   書式・画像・保護・印刷設定などには触れない。 */
+function siText(si){let s='';for(const n of si.children){if(n.localName==='t')s+=n.textContent;else if(n.localName==='r'){for(const t of n.children)if(t.localName==='t')s+=t.textContent}}return s}
+function openBook(bytes){
+  let files;
+  try{files=fflate.unzipSync(new Uint8Array(bytes))}catch(e){throw new Error('Excelファイル(.xlsx)として開けませんでした')}
+  if(!files['xl/workbook.xml'])throw new Error('Excelファイル(.xlsx)ではないようです');
+  const txt=p=>dec.decode(files[p]);
+  const rel={};
+  for(const r of parseXml(txt('xl/_rels/workbook.xml.rels')).getElementsByTagName('Relationship'))rel[r.getAttribute('Id')]=r.getAttribute('Target');
+  const sheets=[...parseXml(txt('xl/workbook.xml')).getElementsByTagName('sheet')].map(s=>{
+    const t=rel[s.getAttribute('r:id')]||'';return{name:s.getAttribute('name'),path:t.startsWith('/')?t.slice(1):'xl/'+t}});
+  let sstDoc=null;const sst=[];
+  if(files['xl/sharedStrings.xml']){sstDoc=parseXml(txt('xl/sharedStrings.xml'));for(const si of sstDoc.documentElement.children)if(si.localName==='si')sst.push(siText(si))}
+  let xfs=[],stDoc=null;
+  if(files['xl/styles.xml']){
+    const st=stDoc=parseXml(txt('xl/styles.xml'));
+    const numFmts={};for(const n of st.getElementsByTagName('numFmt'))numFmts[n.getAttribute('numFmtId')]=n.getAttribute('formatCode')||'';
+    const fontsEl=st.getElementsByTagName('fonts')[0];
+    const fonts=fontsEl?[...fontsEl.children].map(f=>{const z=f.getElementsByTagName('sz')[0];return z?+z.getAttribute('val'):11}):[];
+    const cx=st.getElementsByTagName('cellXfs')[0];
+    xfs=cx?[...cx.children].map(x=>{
+      const p=x.getElementsByTagName('protection')[0];const id=+(x.getAttribute('numFmtId')||0);
+      let date=(id>=14&&id<=22)||(id>=27&&id<=36)||(id>=45&&id<=47)||(id>=50&&id<=58);
+      if(!date&&numFmts[id]){const code=numFmts[id].replace(/"[^"]*"/g,'').replace(/\[[^\]]*\]/g,'').replace(/\\./g,'');date=/[ymd]/i.test(code)&&!/general/i.test(code)}
+      return{locked:!(p&&p.getAttribute('locked')==='0'),date,sz:fonts[+(x.getAttribute('fontId')||0)]||11}}):[];
+  }
+  return{files,sheets,sst,sstDoc,sstIdx:null,xfs,stDoc,stDirty:false,xfSmall:{},loaded:{}};
+}
+function getSheet(book,path){
+  if(book.loaded[path])return book.loaded[path];
+  const doc=parseXml(dec.decode(book.files[path]));
+  const cells=new Map(),rows=new Map();
+  const sd=doc.getElementsByTagName('sheetData')[0];
+  for(const row of sd.children){rows.set(+row.getAttribute('r'),row);for(const c of row.children)cells.set(c.getAttribute('r'),c)}
+  const covered=new Set();
+  for(const m of doc.getElementsByTagName('mergeCell')){
+    const[a,b]=m.getAttribute('ref').split(':');if(!b)continue;const A=splitRef(a),B=splitRef(b);
+    if((B.r-A.r+1)*(B.c-A.c+1)>2000)continue;
+    for(let r=A.r;r<=B.r;r++)for(let c=A.c;c<=B.c;c++)if(r!==A.r||c!==A.c)covered.add(colName(c)+r)}
+  const cols=[];for(const c of doc.getElementsByTagName('col'))cols.push({min:+c.getAttribute('min'),max:+c.getAttribute('max'),w:+c.getAttribute('width')});
+  return book.loaded[path]={doc,cells,rows,covered,cols,sd,dirty:false,path};
+}
+function cellRaw(book,sh,ref){
+  const c=sh.cells.get(ref);if(!c)return'';const t=c.getAttribute('t');
+  if(t==='inlineStr'){const is=c.getElementsByTagName('is')[0];return is?siText(is):''}
+  const v=c.getElementsByTagName('v')[0];if(!v)return'';
+  if(t==='s')return book.sst[+v.textContent]??'';
+  return v.textContent;
+}
+const xfOf=(book,sh,ref)=>{const c=sh.cells.get(ref);return(c&&book.xfs[+(c.getAttribute('s')||0)])||{locked:true,date:false,sz:11}};
+const unlocked=(book,sh,ref)=>sh.cells.has(ref)&&!sh.covered.has(ref)&&!xfOf(book,sh,ref).locked;
+function makeCell(sh,ref){
+  const{r,c}=splitRef(ref);let row=sh.rows.get(r);
+  if(!row){row=sh.doc.createElementNS(NS,'row');row.setAttribute('r',r);
+    let before=null;for(const x of sh.sd.children)if(+x.getAttribute('r')>r){before=x;break}
+    sh.sd.insertBefore(row,before);sh.rows.set(r,row)}
+  const el=sh.doc.createElementNS(NS,'c');el.setAttribute('r',ref);
+  let before=null;for(const x of row.children)if(splitRef(x.getAttribute('r')).c>c){before=x;break}
+  row.insertBefore(el,before);sh.cells.set(ref,el);return el;
+}
+function sstIndex(book,val){
+  if(!book.sstIdx){book.sstIdx=new Map();book.sst.forEach((s,i)=>{if(!book.sstIdx.has(s))book.sstIdx.set(s,i)})}
+  let i=book.sstIdx.get(val);if(i!=null)return i;
+  const root=book.sstDoc.documentElement;
+  const si=book.sstDoc.createElementNS(NS,'si'),t=book.sstDoc.createElementNS(NS,'t');
+  t.setAttributeNS('http://www.w3.org/XML/1998/namespace','xml:space','preserve');t.textContent=val;si.appendChild(t);
+  let ext=null;for(const x of root.children)if(x.localName==='extLst')ext=x;
+  root.insertBefore(si,ext);
+  i=book.sst.length;book.sst.push(val);book.sstIdx.set(val,i);
+  if(root.hasAttribute('uniqueCount'))root.setAttribute('uniqueCount',book.sst.length);
+  return i;
+}
+function setCell(book,sh,ref,val,isNum){
+  const c=sh.cells.get(ref)||makeCell(sh,ref);
+  while(c.firstChild)c.removeChild(c.firstChild);
+  if(val===''){c.removeAttribute('t')}
+  else if(isNum){c.removeAttribute('t');const v=sh.doc.createElementNS(NS,'v');v.textContent=val;c.appendChild(v)}
+  else if(book.sstDoc){c.setAttribute('t','s');const v=sh.doc.createElementNS(NS,'v');v.textContent=sstIndex(book,val);c.appendChild(v);
+    const root=book.sstDoc.documentElement;if(root.hasAttribute('count'))root.setAttribute('count',+root.getAttribute('count')+1)}
+  else{c.setAttribute('t','inlineStr');const is=sh.doc.createElementNS(NS,'is'),t=sh.doc.createElementNS(NS,'t');
+    t.setAttributeNS('http://www.w3.org/XML/1998/namespace','xml:space','preserve');t.textContent=val;is.appendChild(t);c.appendChild(is)}
+  sh.dirty=true;
+}
+function readDate(book,sh,ref){
+  const raw=cellRaw(book,sh,ref);if(raw==='')return'';
+  const c=sh.cells.get(ref),t=c.getAttribute('t');
+  if(!t||t==='n'){const n=+raw;if(isFinite(n)&&n>1)return isoFromSerial(n)}
+  const m=/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/.exec(raw);return m?m[1]+'-'+pad(m[2])+'-'+pad(m[3]):'';
+}
+const colPx=(sh,c)=>{let w=8.43;for(const k of sh.cols)if(c>=k.min&&c<=k.max){w=k.w;break}return w*7+5};
+/* 「生○／団✕」のようにまとめた結果が列幅からはみ出ないよう、そのセルだけ文字を小さくする（12pt以下）。
+   元のセル書式を複製して文字サイズだけ変えた書式を styles.xml に追加する */
+function shrinkFont(book,sh,ref,text){
+  const c=sh.cells.get(ref);if(!c||!book.stDoc||!text)return;
+  let u=0;for(const line of text.split('\n')){let n=0;for(const ch of line)n+=ch.charCodeAt(0)<0x100?0.5:1;u=Math.max(u,n)}
+  if(u<=1)return;
+  const s=+(c.getAttribute('s')||0),xf=book.xfs[s];if(!xf)return;
+  const sz=Math.max(8,Math.min(12,Math.floor((colPx(sh,splitRef(ref).c)-8)*0.75/u)));
+  if(xf.sz<=sz)return;
+  const key=s+'|'+sz;let ns=book.xfSmall[key];
+  if(ns==null){
+    const st=book.stDoc,fonts=st.getElementsByTagName('fonts')[0],cx=st.getElementsByTagName('cellXfs')[0];if(!fonts||!cx)return;
+    const ox=cx.children[s],font=fonts.children[+(ox.getAttribute('fontId')||0)].cloneNode(true);
+    let z=font.getElementsByTagName('sz')[0];if(!z){z=st.createElementNS(NS,'sz');font.insertBefore(z,font.firstChild)}z.setAttribute('val',sz);
+    fonts.appendChild(font);fonts.setAttribute('count',fonts.children.length);
+    const nx=ox.cloneNode(true);nx.setAttribute('fontId',fonts.children.length-1);nx.setAttribute('applyFont','1');
+    cx.appendChild(nx);cx.setAttribute('count',cx.children.length);
+    ns=book.xfSmall[key]=cx.children.length-1;book.xfs[ns]={...xf,sz};book.stDirty=true}
+  c.setAttribute('s',ns);sh.dirty=true}
+/* 文字数から必要な行の高さ(pt)を見積もる */
+function needHeight(book,sh,ref,text){
+  if(!text)return 0;const{c}=splitRef(ref);const xf=xfOf(book,sh,ref);
+  let w=8.43;for(const k of sh.cols)if(c>=k.min&&c<=k.max){w=k.w;break}
+  const cpl=Math.max(1,Math.floor((w*7+5)/(xf.sz*96/72)*2)/2);
+  let lines=0;for(const para of text.split('\n')){let u=0;for(const ch of para)u+=ch.charCodeAt(0)<0x100?0.5:1;lines+=Math.max(1,Math.ceil(u/cpl))}
+  return lines*xf.sz*1.3+6;
+}
+
+/* ================= 点検表の構造を読み取る =================
+   行番号・項番は決め打ちせず、見出し行の文字列を目印にする。 */
+function parseModel(book){
+  const main=book.sheets.find(s=>s.name==='点検表')||book.sheets[0];
+  const sh=getSheet(book,main.path);
+  const V=ref=>cellRaw(book,sh,ref);
+  const maxR=Math.max(0,...sh.rows.keys());
+  const m={sheetPath:main.path,title:'',sub:'',fields:[],types:[],sections:[],items:[],choices:[],kubun:null};
+  let sec=null,norm=null,typeHdr=0,dateCol='',personCol='',kCol='C',svCol='D',firstHdr=0;
+  const seen=new Map();
+  for(let r=1;r<=maxR;r++){
+    const a=nz(V('A'+r)),b=nz(V('B'+r));
+    if(!typeHdr&&!firstHdr&&a.startsWith('点検種別')){
+      for(let c=2;c<=12;c++){const t=nz(V(colName(c)+r));if(t==='実施日')dateCol=colName(c);if(t==='点検者')personCol=colName(c)}
+      if(dateCol||personCol)typeHdr=r;continue}
+    if(a==='番号'&&b==='規範項目'){
+      if(!firstHdr)firstHdr=r;
+      let fc='';for(let c=3;c<=12;c++)if(nz(V(colName(c)+r))==='分野')fc=colName(c);
+      let title='';
+      for(let k=r-1;k>=Math.max(1,r-3);k--){const aa=V('A'+k).trim();if(!aa)continue;if(!nz(V('B'+k))&&nz(aa)!=='番号')title=aa;break}
+      if(title&&(!sec||sec.title!==title)){sec={title,norms:[]};m.sections.push(sec)}
+      if(!sec){sec={title:'点検項目',norms:[]};m.sections.push(sec)}
+      norm={id:V('A'+(r+1)).trim(),text:V('B'+(r+1)),field:fc?V(fc+(r+1)).trim():'',expl:'',items:[]};
+      if(nz(V('A'+(r+2)))==='解説')norm.expl=V('B'+(r+2));
+      sec.norms.push(norm);r++;continue}
+    if(a==='番号'&&b==='点検項目'){
+      if(!firstHdr)firstHdr=r;
+      const cols={};
+      for(let c=3;c<=14;c++){const t=nz(V(colName(c)+r)),L=colName(c);
+        if(t==='区分')cols.k=L;else if(t==='自己点検')cols.sv=L;else if(t==='二者点検')cols.av=L;
+        else if(t==='コメント'){if(cols.av)cols.ac=L;else cols.sc=L}}
+      if(!cols.sv&&!cols.av)continue;
+      if(cols.k)kCol=cols.k;if(cols.sv)svCol=cols.sv;
+      if(!sec){sec={title:'点検項目',norms:[]};m.sections.push(sec)}
+      if(!norm){norm={id:'',text:'',field:'',expl:'',items:[]};sec.norms.push(norm)}
+      let r2=r+1;
+      const inputRow=q=>['k','sv','sc','av','ac'].some(f=>cols[f]&&unlocked(book,sh,cols[f]+q));
+      const strict=inputRow(r2); /* 入力セル（ロック解除）のある行だけを点検項目とみなす */
+      for(;r2<=maxR;r2++){
+        const id=V('A'+r2).trim();if(!id||nz(id)==='番号')break;
+        if(strict?!inputRow(r2):!nz(V('B'+r2)))break;
+        const n=(seen.get(id)||0)+1;seen.set(id,n);
+        const it={row:r2,id,key:n>1?id+'#'+n:id,text:V('B'+r2),ref:{},v:{}};
+        for(const f of['k','sv','sc','av','ac']){if(cols[f]){it.ref[f]=cols[f]+r2;it.v[f]=V(cols[f]+r2).replace(/\r/g,'')}else it.v[f]=''}
+        norm.items.push(it);m.items.push(it)}
+      r=r2-1;continue}
+  }
+  if(!m.items.length)throw new Error('点検項目が見つかりません。見出し行（番号／点検項目／区分／自己点検／コメント／二者点検／コメント）のあるExcel点検表を選んでください');
+  /* 表紙 */
+  const lines=[];for(let r=2;r<=6;r++){const t=V('A'+r).trim();if(t)lines.push(t.replace(/\s+/g,' '))}
+  m.title=lines[1]||lines[0]||'';m.sub=lines[2]||'';
+  const coverEnd=typeHdr||Math.min(firstHdr,20);
+  const fl=[];
+  for(const ref of sh.cells.keys()){const p=splitRef(ref);if(p.r<coverEnd&&unlocked(book,sh,ref))fl.push({ref,...p})}
+  fl.sort((x,y)=>x.r-y.r||x.c-y.c);
+  for(const f of fl){
+    let label=f.c>1?V(colName(f.c-1)+f.r).trim():'';if(!label&&f.r>1)label=V(f.col+(f.r-1)).trim();
+    m.fields.push({ref:f.ref,label:label.replace(/\s+/g,' ')||f.ref,value:V(f.ref)})}
+  if(typeHdr){
+    for(let r=typeHdr+1;r<typeHdr+15;r++){
+      const dr=dateCol?dateCol+r:'',pr=personCol?personCol+r:'';
+      if(!(dr&&unlocked(book,sh,dr))&&!(pr&&unlocked(book,sh,pr)))break;
+      m.types.push({row:r,label:V('A'+r),labelEdit:unlocked(book,sh,'A'+r),dateRef:dr,personRef:pr,date:dr?readDate(book,sh,dr):'',person:pr?V(pr):''})}
+  }
+  /* 選択肢（入力規則から） */
+  for(const dv of sh.doc.getElementsByTagName('dataValidation')){
+    const f=dv.getElementsByTagName('formula1')[0];if(!f)continue;const s=f.textContent.trim();
+    const sq=(dv.getAttribute('sqref')||'').split(/\s+/);
+    if(/^".*"$/.test(s)&&sq.some(x=>x.startsWith(svCol))){m.choices=s.slice(1,-1).split(',').map(x=>x.trim()).filter(Boolean);break}}
+  if(!m.choices.length)m.choices=['○','✕','ー'];
+  /* 区分の選択肢（区分シート） */
+  const tryRange=(f,sq)=>{
+    if(m.kubun||!sq.split(/\s+/).some(x=>x.startsWith(kCol)))return;
+    const mm=/^'?(.+?)'?!\$?([A-Z]+)\$?(\d+):\$?([A-Z]+)\$?(\d+)$/.exec(f.trim());if(!mm)return;
+    const s=book.sheets.find(x=>x.name===mm[1]);if(!s||!book.files[s.path])return;
+    const ks=getSheet(book,s.path);const refs=[],values=[];
+    for(let r=+mm[3];r<=+mm[5];r++){const ref=mm[2]+r,val=cellRaw(book,ks,ref);if(!refs.length&&nz(val)==='区分')continue;refs.push(ref);values.push(val)}
+    m.kubun={path:s.path,refs,values}};
+  for(const x of sh.doc.getElementsByTagName('x14:dataValidation')){
+    const f=x.getElementsByTagName('xm:f')[0],q=x.getElementsByTagName('xm:sqref')[0];if(f&&q)tryRange(f.textContent,q.textContent)}
+  for(const dv of sh.doc.getElementsByTagName('dataValidation')){
+    const f=dv.getElementsByTagName('formula1')[0];if(f)tryRange(f.textContent,dv.getAttribute('sqref')||'')}
+  /* 区分シートがなく、入力規則に直接書かれている場合（2023年版など）は並び順だけ使う */
+  m.kubunOrder=[];
+  if(!m.kubun)for(const dv of sh.doc.getElementsByTagName('dataValidation')){
+    const f=dv.getElementsByTagName('formula1')[0];if(!f)continue;const t=f.textContent.trim();
+    if(/^".*"$/.test(t)&&(dv.getAttribute('sqref')||'').split(/\s+/).some(x=>x.startsWith(kCol))){m.kubunOrder=t.slice(1,-1).split(',').map(nz).filter(Boolean);break}}
+  return m;
+}
+
+/* ================= 状態 ================= */
+const colForLabel=l=>{l=nz(l);if(!l||l.includes('自己点検'))return'self';return'second'};
+const labelName=l=>{l=nz(l);const p=/[（(](.+?)[）)]/.exec(l);if(p)return p[1];const q=l.split(/[:：]/)[1];return q||l};
+function detectLabel(m){const c=m.types.filter(t=>colForLabel(t.label)==='self'&&(t.date||t.person));return c.length===1?labelName(c[0].label):''}
+function newState(m){
+  const s={v:1,fields:{},types:{},items:{},kubun:m.kubun?m.kubun.values.slice():null,kubunEdit:false,sources:[],baseLabel:detectLabel(m),fmt:'nl',
+    sel:{type:null,col:'self'},my:[],sec:0,filt:'all',tab:'info',memo:{items:{}},prev:[],showPrev:true};
+  for(const f of m.fields)s.fields[f.ref]=f.value;
+  for(const t of m.types)s.types[t.row]={label:t.label,date:t.date,person:t.person};
+  for(const it of m.items)s.items[it.key]={...it.v};
+  return s;
+}
+const NORM={'×':'✕','Ｘ':'✕','X':'✕','x':'✕','✖':'✕','〇':'○','◯':'○','－':'ー','-':'ー','―':'ー','—':'ー','ｰ':'ー'};
+const same=(a,b)=>a!==''&&((NORM[a]||a)===(NORM[b]||b));
+function selfParts(S,key){
+  const out=[],b=S.items[key];
+  if(b&&(b.sv||b.sc))out.push({label:S.baseLabel||(S.sources.length?'自己点検1':''),v:b.sv,c:b.sc});
+  for(const s of S.sources){const x=s.items[key];if(x&&(x.v||x.c))out.push({label:s.label,v:x.v,c:x.c})}
+  /* 区分シートの並び順（例：生産者→団体）にそろえる */
+  const ord=l=>{const i=(S.kubun||(cur&&cur.m.kubunOrder)||[]).findIndex(k=>nz(k)===nz(l));return i<0?99:i};
+  return out.map((x,i)=>[ord(x.label),i,x]).sort((a,b)=>a[0]-b[0]||a[1]-b[1]).map(x=>x[2]);
+}
+function selfOut(S,key){
+  const p=selfParts(S,key);if(!p.length)return{v:'',c:''};if(p.length===1)return{v:p[0].v,c:p[0].c};
+  /* 既存の点検表アプリと同じ書式：結果「生○(改行)団✕」、コメント「生：…(改行)団：…」 */
+  const h=x=>[...(x.label||'？')][0];
+  return{v:p.filter(x=>x.v).map(x=>h(x)+x.v).join('\n'),c:p.filter(x=>x.c).map(x=>h(x)+'：'+x.c).join('\n')};
+}
+
+/* ================= 書き出し ================= */
+function buildXlsx(rec){
+  const book=openBook(rec.bytes),m=parseModel(book),sh=getSheet(book,m.sheetPath),S=rec.state;
+  const put=(s,ref,val)=>{val=String(val??'').replace(/\r/g,'');if(val===cellRaw(book,s,ref).replace(/\r/g,''))return false;setCell(book,s,ref,val);return true};
+  for(const f of m.fields)if(f.ref in S.fields)put(sh,f.ref,S.fields[f.ref]);
+  for(const t of m.types){
+    const x=S.types[t.row];if(!x)continue;
+    if(t.labelEdit)put(sh,'A'+t.row,x.label);
+    if(t.personRef)put(sh,t.personRef,x.person);
+    if(t.dateRef&&x.date!==t.date){
+      if(!x.date)setCell(book,sh,t.dateRef,'');
+      else if(xfOf(book,sh,t.dateRef).date)setCell(book,sh,t.dateRef,String(serialFromIso(x.date)),true);
+      else setCell(book,sh,t.dateRef,x.date.replace(/-0?/g,'/'))}
+  }
+  for(const it of m.items){
+    const x=S.items[it.key];if(!x)continue;const so=selfOut(S,it.key),ao=auditOut(S,it.key);
+    const vals={k:x.k,sv:so.v,sc:so.c,av:ao.v,ac:ao.c};let ch=false;
+    for(const f of['k','sv','sc','av','ac'])if(it.ref[f]&&put(sh,it.ref[f],vals[f]))ch=true;
+    for(const f of['sv','av'])if(it.ref[f])shrinkFont(book,sh,it.ref[f],vals[f]);
+    if(ch){
+      let need=0;for(const f of['sv','sc','av','ac'])if(it.ref[f])need=Math.max(need,needHeight(book,sh,it.ref[f],vals[f]));
+      const row=sh.rows.get(it.row),cur=+(row.getAttribute('ht')||0);
+      if(need>cur&&cur>0){row.setAttribute('ht',Math.min(409,need).toFixed(2));row.setAttribute('customHeight','1')}
+    }
+  }
+  if(m.kubun&&S.kubun){const ks=getSheet(book,m.kubun.path);m.kubun.refs.forEach((ref,i)=>put(ks,ref,S.kubun[i]||''))}
+  for(const p in book.loaded)if(book.loaded[p].dirty)book.files[p]=enc.encode(serXml(book.loaded[p].doc));
+  if(book.sstDoc)book.files['xl/sharedStrings.xml']=enc.encode(serXml(book.sstDoc));
+  if(book.stDirty)book.files['xl/styles.xml']=enc.encode(serXml(book.stDoc));
+  const out={};for(const p in book.files)if(!p.startsWith('[trash]')&&!p.endsWith('/'))out[p]=book.files[p];
+  return fflate.zipSync(out,{level:6});
+}
+
+/* ================= 端末内保存（IndexedDB） ================= */
+const store={
+  mem:null,db:null,
+  async open(){
+    if(this.db||this.mem)return;
+    try{this.db=await new Promise((ok,ng)=>{const q=indexedDB.open('tenken-excel',2);q.onupgradeneeded=()=>{const d=q.result;if(!d.objectStoreNames.contains('sessions'))d.createObjectStore('sessions',{keyPath:'id'});if(!d.objectStoreNames.contains('photos'))d.createObjectStore('photos')};q.onsuccess=()=>ok(q.result);q.onerror=()=>ng(q.error)});
+      if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{})}
+    catch(e){this.mem=new Map();this.pmem=new Map()}
+  },
+  tx(mode,fn,name='sessions'){return new Promise((ok,ng)=>{const t=this.db.transaction(name,mode);const q=fn(t.objectStore(name));t.oncomplete=()=>ok(q&&q.result);t.onerror=()=>ng(t.error)})},
+  async phPut(id,r){await this.open();if(this.mem){this.pmem.set(id,r);return}return this.tx('readwrite',s=>s.put(r,id),'photos')},
+  async phGet(id){await this.open();return this.mem?this.pmem.get(id):this.tx('readonly',s=>s.get(id),'photos')},
+  async phDel(id){await this.open();if(this.mem){this.pmem.delete(id);return}return this.tx('readwrite',s=>s.delete(id),'photos')},
+  async all(){await this.open();return this.mem?[...this.mem.values()]:this.tx('readonly',s=>s.getAll())},
+  async get(id){await this.open();return this.mem?this.mem.get(id):this.tx('readonly',s=>s.get(id))},
+  async put(rec){await this.open();if(this.mem){this.mem.set(rec.id,rec);return}return this.tx('readwrite',s=>s.put(rec))},
+  async del(id){await this.open();if(this.mem){this.mem.delete(id);return}return this.tx('readwrite',s=>s.delete(id))}
+};
+
+/* ================= 画面 ================= */
+let cur=null; /* {rec, m} */
+let saveT=null;
+function save(){if(!cur)return;cur.rec.updated=Date.now();clearTimeout(saveT);const rec=cur.rec;saveT=setTimeout(()=>store.put(rec).catch(()=>toast('保存に失敗しました。Excelに書き出して控えを取ってください')),300)}
+async function flush(){if(cur){clearTimeout(saveT);await store.put(cur.rec).catch(()=>{})}}
+const fmtTime=t=>{const d=new Date(t);return d.getFullYear()+'/'+(d.getMonth()+1)+'/'+d.getDate()+' '+pad(d.getHours())+':'+pad(d.getMinutes())};
+const activeCol=S=>S.sel.col==='second'?'av':'sv';
+const NGV=()=>cur.m.choices[1]||'✕';
+/* 区分「両方」の項目は、内部監査・二者点検のとき生産者と団体に分けて評価する */
+function parties(S){const l=(S.kubun||cur.m.kubunOrder||[]).map(nz).filter(k=>k&&k!=='両方');return l.length===2?l:['生産者','団体']}
+const isBoth=(S,key)=>S.sel.col==='second'&&nz(S.items[key].k)==='両方';
+function avParts(S,key){const x=S.items[key];if(!x.avp){const ps=splitCombined(x.av,x.ac);x.avp=parties(S).map(n=>{const q=ps&&ps.find(z=>z.h===[...n][0]);return{v:q?q.v:'',c:q?q.c:''}})}return x.avp}
+function auditOut(S,key){const x=S.items[key];
+  if(nz(x.k)==='両方'&&x.avp&&x.avp.some(q=>q.v||q.c)){const P=parties(S),h=i=>[...P[i]][0];
+    return{v:x.avp.map((q,i)=>q.v?h(i)+q.v:'').filter(Boolean).join('\n'),c:x.avp.map((q,i)=>q.c?h(i)+'：'+q.c:'').filter(Boolean).join('\n')}}
+  return{v:x.av,c:x.ac}}
+function units(S,key){const x=S.items[key];
+  if(isBoth(S,key)){const P=parties(S);return avParts(S,key).map((q,i)=>({v:q.v,c:q.c,label:P[i]}))}
+  return S.sel.col==='second'?[{v:x.av,c:x.ac}]:[{v:x.sv,c:x.sc}]}
+function setUnit(S,key,i,f,val){const x=S.items[key];if(isBoth(S,key))avParts(S,key)[i][f]=val;else x[(S.sel.col==='second'?'a':'s')+f]=val}
+/* 自己点検の結果（まとめたセル「生○／団✕」は自己点検者ごとに分ける） */
+function selfView(S,key){const out=[],P=parties(S);for(const p of selfParts(S,key)){const ps=splitCombined(p.v,p.c);
+  if(ps)ps.forEach(q=>out.push({label:P.find(n=>[...n][0]===q.h)||q.h,v:q.v,c:q.c}));else out.push(p)}return out}
+/* 自己点検と評価が異なるのにコメントがない */
+function needComment(S,key){if(S.sel.col!=='second')return false;const sv=selfView(S,key);
+  return units(S,key).some(u=>{if(!u.v||String(u.c||'').trim())return false;
+    const rel=u.label?sv.filter(p=>!p.label||[...nz(p.label)][0]===[...u.label][0]):sv;return rel.some(p=>p.v&&!same(p.v,u.v))})}
+const itemDone=(S,key)=>units(S,key).every(u=>u.v);
+const itemNg=(S,key)=>units(S,key).some(u=>same(u.v,NGV()));
+function itemCat(S,key){const u=units(S,key),na=cur.m.choices[2];if(u.some(q=>same(q.v,NGV())))return'ng';if(!u.every(q=>q.v))return'';return na&&u.some(q=>same(q.v,na))?'na':'ok'}
+function counts(S,items){const c={done:0,ok:0,ng:0,na:0,need:0,chk:0,memo:0,total:items.length},na=cur.m.choices[2];
+  for(const it of items){const u=units(S,it.key),d=u.every(q=>q.v);if(d)c.done++;
+    if(u.some(q=>same(q.v,NGV())))c.ng++;else if(d){if(na&&u.some(q=>same(q.v,na)))c.na++;else c.ok++}
+    if(needComment(S,it.key))c.need++;const mm=S.memo.items[it.key];if(mm&&mm.chk)c.chk++;if(mm&&(mm.t||(mm.ph&&mm.ph.length)))c.memo++}
+  return c}
+function kubunNames(S,m){const set=[];const add=v=>{v=nz(v);if(v&&!set.includes(v))set.push(v)};(S.kubun||m.kubunOrder||[]).forEach(add);for(const it of m.items)add(S.items[it.key].k);return set}
+const inMy=(S,it)=>!S.my.length||S.my.includes(nz(S.items[it.key].k));
+function typeLabel(S){const t=S.sel.type!=null&&S.types[S.sel.type];return t?nz(t.label):''}
+
+async function renderHome(){
+  cur=null;const list=(await store.all()).sort((a,b)=>b.updated-a.updated);
+  $('#app').innerHTML=`<header class="top"><div class="in"><h1>${APP_NAME}<small>Ver${APP_VER}　Excel点検表を読み込み、同じ形式で書き出します</small></h1></div></header>
+  <div class="wrap">
+   <div class="card"><button class="btn pri big" data-act="new">Excel点検表を読み込む</button>
+    <ol class="how"><li>配布されたExcel点検表（.xlsx）を選びます。記入途中のものでも読み込めます。</li><li>自己点検、または内部監査・二者点検を入力します。入力は自動で保存されます。</li><li>「書き出し」で、元と同じ形式のExcel点検表として保存します。</li></ol></div>
+   ${store.mem?'<div class="warn">このブラウザでは端末内への保存が使えません。画面を閉じると入力が消えるため、終了前に必ずExcelへ書き出してください。</div>':''}
+   <div class="card"><h2>保存されている点検<small>${list.length}件</small></h2>
+   ${list.length?list.map(r=>`<div class="trow sess"><div class="meta"><b>${esc(r.title||r.fileName)}</b><span>${esc(r.summary||'')}</span><span>${esc(fmtTime(r.updated))} 更新　${esc(r.fileName)}</span></div>
+     <button class="btn sm pri" data-act="open" data-id="${esc(r.id)}">開く</button><button class="btn sm danger" data-act="del" data-id="${esc(r.id)}">削除</button></div>`).join(''):'<div class="empty">まだありません</div>'}
+   </div>
+   <p class="note">入力内容と読み込んだExcelは、この端末のブラウザ内にだけ保存されます。サーバーへは送信しません。ブラウザのデータを消去すると失われるため、区切りごとにExcelへ書き出してください。</p>
+   <p><button class="btn" data-act="about" style="width:100%">このアプリについて・ライセンス</button></p>
+   <p class="note" style="text-align:center"><a href="tsukaikata.html" target="_blank" rel="noopener">使い方</a>　｜　<a href="riyou.html" target="_blank" rel="noopener">利用条件・免責事項</a>　｜　<a href="anzen.html" target="_blank" rel="noopener">安全性確認書</a></p>
+  </div>`;
+}
+function renderAbout(){
+  $('#app').innerHTML=`<header class="top"><div class="in"><button data-act="tohome">戻る</button><h1>このアプリについて・ライセンス</h1></div></header>
+  <div class="wrap">
+   <div class="card"><h2>このアプリについて</h2><table class="tbl">
+    <tr><th>名称</th><td>${esc(APP_NAME)}</td></tr><tr><th>版</th><td>Ver${APP_VER}</td></tr><tr><th>提供者</th><td>${esc(APP_PROVIDER)}</td></tr>
+    <tr><th>対応する点検表</th><td>生協産直マネジメントシステムの規範（生協版適正農業規範 青果・米編／畜産編、適正水産規範、適正流通規範、適正産直規範）のExcel点検表<br>※2023年以降の点検表に対応</td></tr></table></div>
+   <div class="card"><h2>点検表の内容について</h2>
+    <p>このアプリに表示される情報（規範項目・点検項目、解説、評価・コメント）は、読み込んだExcel点検表の内容です。アプリ自体は点検表の内容を収録していません。</p>
+    <p>このアプリからの出力は、読み込んだExcel点検表をもとに、入力したデータを書き加えたものです。書式・保護・印刷設定は元のExcel点検表のままです。</p>
+    <p>このアプリの動作は、日本生活協同組合連合会・全国産直研究会「生協産直マネジメントシステム」の運用マニュアル、各点検表の使用方法、各手引きに準拠しています。これらの著作権は同会に帰属します。点検表の内容・運用については、日本生協連の点検表および運用マニュアルが優先します。</p>
+    <p>※<a href="https://jccu.coop/activity/sanchoku/information.html" target="_blank" rel="noopener noreferrer">生協産直マネジメントシステムの情報（外部リンク）</a></p></div>
+   <div class="card"><h2>通信・データの取り扱い</h2>
+    <p>このアプリは、ブラウザの通信禁止の設定（Content Security Policy）により、<b>インターネット上のサーバーと一切通信しません</b>。</p>
+    <ul><li>読み込んだExcel点検表と入力内容は、この端末のブラウザ内と、利用者が保存・送信したExcelファイルの中にだけあります。</li>
+     <li>自分用メモと写真は、この端末のブラウザ内だけに保存され、Excelファイルには含まれません。</li>
+     <li>ブラウザの履歴やデータの削除、機種変更などで、端末内の保存データは消えることがあります。区切りごとにExcelへ書き出してください。</li>
+     <li>外部へのリンク（解説の参考資料など）は、押したときだけ別のタブで開きます。</li></ul></div>
+   <div class="card"><h2>試作版であること</h2>
+    <p>このアプリは試作版です。想定していない操作や、様式の異なるExcelファイルでは、うまく動かないことがあります。書き出したExcel点検表は、提出・保管の前に内容を確認してください。気づいた点は、提供者までお知らせください。</p></div>
+   <div class="card"><h2>使用しているオープンソースソフトウェア</h2>
+    <p class="note">Excelファイル（.xlsx）の読み込みと書き出しのために、次のソフトウェアをアプリ内に組み込んで使用しています。著作権は著作権者に帰属します。</p>
+    <table class="tbl"><tr><th>fflate</th><td>MIT License<br>${esc((LIC_FFLATE.match(/Copyright.*/)||[''])[0])}</td></tr></table>
+    <details style="margin-top:8px"><summary style="cursor:pointer;color:var(--acc);font-weight:600">ライセンス全文（MIT License）</summary><pre class="lic">${esc(LIC_FFLATE)}</pre></details></div>
+  </div>`;window.scrollTo(0,0)}
+function summaryOf(S,m){const a=m.fields.map(f=>S.fields[f.ref]).filter(Boolean).slice(0,4).join('／');const t=typeLabel(S);return[t,a].filter(Boolean).join('　')}
+async function createSession(file){
+  const bytes=await file.arrayBuffer();const book=openBook(bytes),m=parseModel(book);
+  const rec={id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),fileName:file.name,title:m.title,sub:m.sub,bytes,state:newState(m),created:Date.now(),updated:Date.now(),summary:''};
+  await store.put(rec);Q='';cur={rec,m};renderSession();
+  toast(`読み込みました：点検項目 ${m.items.length} 件`);
+}
+async function openSession(id){
+  const rec=await store.get(id);if(!rec)return renderHome();
+  try{const m=parseModel(openBook(rec.bytes));
+    for(const it of m.items)if(!rec.state.items[it.key])rec.state.items[it.key]={...it.v};
+    const S0=rec.state;if(!S0.memo)S0.memo={items:{}};if(!S0.prev){S0.prev=[];S0.showPrev=true}
+    Q='';cur={rec,m};renderSession()}catch(e){toast(e.message)}
+}
+function renderSession(){
+  const{rec,m}=cur,S=rec.state;
+  $('#app').innerHTML=`<header class="top"><div class="in"><button data-act="home">一覧</button><h1>${esc(m.title)}<small>${esc(m.sub)}</small></h1></div></header>
+  <div class="tabs">${[['info','基本情報'],['check',checkTabLabel(S)],['out','書き出し']].map(([k,l])=>`<button data-tab="${k}" class="${S.tab===k?'on':''}">${esc(l)}</button>`).join('')}</div>
+  <div class="wrap" id="body"></div>`;
+  renderTab();
+}
+/* 点検種別が未選択のあいだは点検に進めない（種別の行がない点検表は除く） */
+const needType=S=>cur.m.types.length>0&&S.sel.type==null;
+const checkTabLabel=S=>{const t=typeLabel(S).replace(/[（(](.+?)[）)]/g,'・$1');return t?'点検（'+t+'）':'点検'};
+function renderTab(){
+  const S=cur.rec.state;
+  document.querySelectorAll('.tabs button').forEach(b=>{b.classList.toggle('on',b.dataset.tab===S.tab);if(b.dataset.tab==='check')b.textContent=checkTabLabel(S)});
+  $('#body').innerHTML=S.tab==='info'?infoHtml():S.tab==='check'?(needType(S)?typeWarnHtml():checkHtml()):outHtml();
+  window.scrollTo(0,0);hydPh();
+}
+function typeWarnHtml(){return`<div class="card"><h2>点検種別を選んでください</h2>
+  <div class="warn">点検種別が選ばれていないため、点検を始められません。「基本情報」で点検種別（自己点検、内部監査、二者点検など）を選んでください。選んだ種別に合わせて、結果を記入する欄が決まります。</div>
+  <p><button class="btn pri big" data-tab="info">基本情報で点検種別を選ぶ</button></p></div>`}
+function infoHtml(){
+  const{m,rec}=cur,S=rec.state;
+  const isDateLabel=l=>/日$/.test(nz(l));
+  return`
+  <div class="card"><h2>今回の点検</h2>
+   ${m.types.length?`<label class="f"><span>点検種別</span><select data-b="seltype"><option value="">選んでください</option>${m.types.map(t=>`<option value="${t.row}" ${S.sel.type==t.row?'selected':''}>${esc(nz(S.types[t.row].label)||'（'+t.row+'行目）')}</option>`).join('')}</select></label>`:''}
+   ${needType(S)?'<div class="warn">点検種別を選んでください。選ぶまで点検は始められません。</div>':`<p class="note">結果は<b>「${S.sel.col==='second'?'二者点検':'自己点検'}」の欄</b>に記入します（点検種別に合わせて自動で決まります。内部監査は二者点検の欄です）。</p>`}
+  </div>
+  <div class="card"><h2>表紙</h2><div class="grid2">
+   ${m.fields.map(f=>`<label class="f"><span>${esc(f.label)}</span><input type="${isDateLabel(f.label)?'date':'text'}" data-b="field" data-ref="${f.ref}" value="${esc(isDateLabel(f.label)?toIso(S.fields[f.ref]):S.fields[f.ref])}"></label>`).join('')}</div>
+   ${m.types.map(t=>{const x=S.types[t.row];return`<div class="trow ${S.sel.type==t.row?'sel':''}">
+     ${t.labelEdit?`<label class="f"><span>点検種別：部署名など</span><input type="text" data-b="tlabel" data-row="${t.row}" value="${esc(x.label)}"></label>`:`<b>${esc(nz(x.label))}</b>`}
+     <div class="grid2">${t.dateRef?`<label class="f"><span>実施日</span><input type="date" data-b="tdate" data-row="${t.row}" value="${esc(x.date)}"></label>`:''}
+     ${t.personRef?`<label class="f"><span>点検者</span><input type="text" data-b="tperson" data-row="${t.row}" value="${esc(x.person)}"></label>`:''}</div></div>`}).join('')}
+  </div>
+  <div class="card"><h2>自己点検ファイルをまとめる</h2>
+   <p class="note">区分ごとに別々のファイルで自己点検した場合、ここで追加すると1つにまとめて点検できます。同じ項目に複数の結果がある場合（区分「両方」など）は、書き出し時に同じセルへ並べて出力します。</p>
+   <div class="trow"><label class="f"><span>最初に読み込んだファイル（${esc(rec.fileName)}）の自己点検者</span><input type="text" data-b="baselabel" value="${esc(S.baseLabel)}" placeholder="例：団体"></label></div>
+   ${S.sources.map((s,i)=>`<div class="trow"><label class="f"><span>追加：${esc(s.file)}（${Object.keys(s.items).length}項目）</span><input type="text" data-b="srclabel" data-i="${i}" value="${esc(s.label)}" placeholder="例：生産者"></label><button class="btn sm danger" data-act="delsrc" data-i="${i}">このファイルを外す</button></div>`).join('')}
+   <p><button class="btn" data-act="addsrc">自己点検ファイルを追加</button></p>
+   ${S.sources.length?'<p class="note">同じ項目に複数の結果がある場合、結果は「生○」「団✕」、コメントは「生：…」「団：…」のように、自己点検者名の頭文字を付けて2行で書き出します。</p>':''}
+  </div>
+  <div class="card"><h2>前回の結果（任意）</h2>
+   <p class="note">前年などのExcel点検表を読み込むと、点検画面の各項目に前回の結果が点線の枠で表示され、1項目ずつ「コピー」で入力できます。コピーは、前回と状況が変わっていないか確かめたうえで使ってください。</p>
+   ${S.prev.map((r,i)=>`<div class="trow sess"><div class="meta"><b>${esc(r.file)}</b><span>${r.n}項目${r.sdate?'　自己点検 '+esc(jdate(r.sdate)):''}${r.adate?'　'+esc(r.akind)+' '+esc(jdate(r.adate)):''}</span></div><button class="btn sm danger" data-act="pv-del" data-i="${i}">削除</button></div>`).join('')}
+   <p><button class="btn" data-act="pv-load">前回の結果を読み込む</button></p>
+  </div>
+  ${S.kubun?`<div class="card"><h2>区分の設定</h2>
+   <p class="note">Excelの区分シートにある選択肢です。変更すると書き出すExcelにも反映されます（${S.kubun.length}個まで）。</p>
+   <div class="grid2">${S.kubun.map((k,i)=>`<label class="f"><span>区分 ${i+1}</span><input type="text" data-b="kubun" data-i="${i}" value="${esc(k)}"></label>`).join('')}</div>
+   <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" data-b="kubunedit" ${S.kubunEdit?'checked':''} style="width:20px;height:20px">点検画面で各項目の区分を変更できるようにする</label>
+  </div>`:''}
+  <p><button class="btn pri big" data-tab="check">点検をはじめる</button></p>`;
+}
+function toIso(v){const m=/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/.exec(v||'');if(m)return m[1]+'-'+pad(m[2])+'-'+pad(m[3]);const n=+v;return v!==''&&isFinite(n)&&n>20000&&n<80000?isoFromSerial(n):''}
+function secItems(sec){return sec.norms.flatMap(n=>n.items)}
+let Q='',qT=null;
+function hit(S,n,it,q){const x=S.items[it.key],mm=S.memo.items[it.key];
+  const hay=[n.id,n.text,it.id,it.text,x.sc,x.ac,...(x.avp||[]).map(z=>z.c),...S.sources.map(s=>(s.items[it.key]||{}).c),mm&&mm.t];
+  return hay.some(t=>t&&String(t).toLowerCase().includes(q))}
+function listHtml(){
+  const{m,rec}=cur,S=rec.state,second=S.sel.col==='second',q=Q.trim().toLowerCase();
+  const span=!!q||!['all','todo'].includes(S.filt); /* 「未入力」だけは選択中の章の中で絞り込む */let body='',cnt=0;
+  for(const sec of span?m.sections:[m.sections[S.sec]]){let first=span;for(const n of sec.norms){
+    const its=n.items.filter(it=>inMy(S,it)&&passFilt(S,it)&&(!q||hit(S,n,it,q)));if(!its.length)continue;cnt+=its.length;
+    if(first){first=false;body+=`<h3 class="sech">${esc(sec.title)}</h3>`}
+    body+=`<div class="norm"><span class="nid">${esc(n.id)}</span>${esc(n.text)}${n.field?`<span class="fld">${esc(n.field)}</span>`:''}${n.expl?`<details><summary>解説</summary><div>${linkify(n.expl)}</div></details>`:''}</div>`;
+    body+=its.map(it=>itemHtml(it,second)).join('')}}
+  return(span?`<p class="note">${q?'「'+esc(Q.trim())+'」の検索結果':'絞り込み結果'}：${cnt}件（すべての章から）</p>`:'')+(body||'<div class="empty">この条件に当てはまる点検項目はありません</div>')
+   +(span?'':`<div class="nav"><button class="btn" data-act="prev" ${S.sec===0?'disabled':''}>前の章</button><button class="btn pri" data-act="next">${S.sec>=m.sections.length-1?'書き出しへ':'次の章'}</button></div>`)}
+function checkHtml(){
+  const{m,rec}=cur,S=rec.state;
+  if(S.sec>=m.sections.length)S.sec=0;
+  const names=kubunNames(S,m),all=counts(S,m.items.filter(it=>inMy(S,it))),second=S.sel.col==='second';
+  return`<div class="bar"><div class="r"><select data-b="sec">${m.sections.map((s,i)=>{const c=counts(S,secItems(s).filter(it=>inMy(S,it)));return`<option value="${i}" ${i===S.sec?'selected':''}>${esc(s.title)}（${c.done}/${c.total}）</option>`}).join('')}</select>
+</div>
+   <input type="search" data-b="q" placeholder="番号・語句で検索（すべての章）" value="${esc(Q)}">
+   ${names.length?`<div class="chips">区分：${names.map(k=>`<button class="chip ${S.my.includes(k)?'on':''}" data-act="my" data-k="${esc(k)}">${esc(k)}</button>`).join('')}${S.my.length?'':'（すべて表示中）'}</div>`:''}
+   <div class="chips"><span id="pg">${progText(all)}</span>${fchips(S,all)}</div>
+   ${S.prev.length?`<div class="chips"><button class="chip ${S.showPrev?'on':''}" data-act="pv-toggle">${S.showPrev?'前回を表示中':'前回を非表示'}</button></div>`:''}
+   <div class="prog"><i id="pgbar" style="width:${all.total?all.done/all.total*100:0}%"></i></div></div>
+  <div id="list">${listHtml()}</div>`;
+}
+const secTodo=S=>{const c=counts(S,secItems(cur.m.sections[S.sec]||{norms:[]}).filter(it=>inMy(S,it)));return c.total-c.done};
+const progText=c=>`入力 ${c.done} / ${c.total}`;
+function fchips(S,c){const ch=cur.m.choices,L=[['todo','この章の未入力',secTodo(S)],['ok',ch[0]||'○',c.ok],['ng',NGV(),c.ng],['na',ch[2]||'ー',c.na]];
+  if(S.sel.col==='second')L.push(['need','要コメント',c.need],['chk','★後で確認',c.chk],['memo','メモあり',c.memo]);
+  return L.map(([f,l,n])=>`<button class="chip ${S.filt===f?'on':''}" data-act="filt" data-f="${f}">${esc(l)} <b data-cnt="${f}">${n}</b></button>`).join('')}
+function passFilt(S,it){const k=it.key,mm=S.memo.items[k];
+  if(S.filt==='todo')return!itemDone(S,k);if(S.filt==='ng')return itemNg(S,k);if(S.filt==='ok'||S.filt==='na')return itemCat(S,k)===S.filt;if(S.filt==='need')return needComment(S,k);
+  if(S.filt==='chk')return!!(mm&&mm.chk);if(S.filt==='memo')return!!(mm&&(mm.t||(mm.ph&&mm.ph.length)));return true}
+function itemHtml(it,second){
+  const{m,rec}=cur,S=rec.state,x=S.items[it.key],us=units(S,it.key),both=us.length>1;
+  const kub=S.kubunEdit&&S.kubun&&it.ref.k?`<select data-b="ik">${['',...S.kubun.filter(k=>nz(k))].concat(x.k&&!S.kubun.includes(x.k)?[x.k]:[]).map(k=>`<option value="${esc(k)}" ${k===x.k?'selected':''}>${esc(nz(k))||'（なし）'}</option>`).join('')}</select>`:(nz(x.k)?`<span class="kb">${esc(nz(x.k))}</span>`:'');
+  let ro='';
+  if(second){const p=selfView(S,it.key);
+    ro=p.length?p.map(q=>`<div class="ro"><span class="lab">自己点検${q.label?'（'+esc(q.label)+'）':''}</span><span class="v">${esc(q.v||'未入力')}</span>${esc(q.c)}</div>`).join(''):'<div class="ro"><span class="lab">自己点検</span>未入力</div>'}
+  else{
+    for(const s of S.sources){const q=s.items[it.key];if(q)ro+=`<div class="ro"><span class="lab">自己点検（${esc(s.label)}）</span><span class="v">${esc(q.v)}</span>${esc(q.c)}</div>`}
+    const ao=auditOut(S,it.key);if(ao.v||ao.c)ro+=`<div class="ro"><span class="lab">二者点検</span><span class="v">${esc(ao.v)}</span>${esc(ao.c)}</div>`}
+  let odd='';
+  if(both){if((x.av||x.ac)&&!us.some(u=>u.v||u.c)&&!splitCombined(x.av,x.ac))odd=`<div class="ro"><span class="lab">Excelに入っている評価</span><span class="v">${esc(x.av)}</span>${esc(x.ac)}</div>`}
+  else if(us[0].v&&!m.choices.some(c=>same(us[0].v,c)))odd=`<div class="ro"><span class="lab">現在の値</span>${esc(us[0].v)}</div>`;
+  const ev=us.map((u,i)=>`${both?`<div class="plab">${esc(u.label)}の評価</div>`:''}<div class="choices" data-pi="${i}">${m.choices.map((c,j)=>`<button type="button" class="ch c${j} ${same(u.v,c)?'on':''}" data-ch="${esc(c)}">${esc(c)}</button>`).join('')}</div>
+   <textarea data-b="cm" data-pi="${i}" rows="2" placeholder="コメント">${esc(u.c)}</textarea>`).join('');
+  return`<div class="item ${itemDone(S,it.key)?'done':''}" data-key="${esc(it.key)}"><div class="ihead"><span class="iid">${esc(it.id)}</span>${kub}</div>
+   <div class="itext">${esc(it.text)}</div>${second?ro:''}${prevHtml(it,second)}${odd}
+   ${ev}${second?`<div class="wm" ${needComment(S,it.key)?'':'hidden'}>⚠ 自己点検と評価が異なります。判断内容をコメントに記入してください。</div>`+mmHtml(it.key):ro}</div>`;
+}
+function outName(){
+  const{rec}=cur,S=rec.state;let stem=rec.fileName.replace(/\.xlsx$/i,'').replace(/^[0-9a-f]{8}-/,'');
+  const t=typeLabel(S).replace(/[\\/:*?"<>|：]/g,'');
+  return stem+(t?'_'+t:'_記入')+'_'+today().replace(/-/g,'')+'.xlsx';
+}
+function outHtml(){
+  const{m,rec}=cur,S=rec.state,c=counts(S,m.items.filter(it=>inMy(S,it)));
+  const canShare=!!(navigator.canShare&&window.File);
+  return`<div class="card"><h2>入力状況<small>${S.sel.col==='second'?'二者点検の欄／'+(c.chk?`<span class="chk on" style="cursor:default">★後で確認：${c.chk}</span>`:'★後で確認：0'):'自己点検の欄'}</small></h2>
+   <div class="stat"><div><b>${c.done}</b><span>入力済み</span></div><div><b>${c.total-c.done}</b><span>未入力</span></div><div><b>${c.ok}</b><span>${esc(m.choices[0]||'○')}</span></div><div><b>${c.ng}</b><span>${esc(NGV())}</span></div><div><b>${c.na}</b><span>${esc(m.choices[2]||'ー')}</span></div>${S.sel.col==='second'?`<div><b>${c.need}</b><span>要コメント</span></div>`:''}</div>
+   ${S.sel.type==null&&m.types.length?'<div class="warn">点検種別が選ばれていません。「基本情報」で選び、実施日と点検者を入れてください。</div>':''}</div>
+  <div class="card"><h2>Excel点検表に書き出す</h2>
+   <label class="f"><span>ファイル名</span><input type="text" id="outname" value="${esc(outName())}"></label>
+   <p><button class="btn pri big" data-act="export">Excelファイルを保存</button></p>
+   ${canShare?'<p><button class="btn big" data-act="share">共有する（メール・LINEなど）</button></p>':''}
+   <p class="note">読み込んだExcel点検表の入力セルだけを書き換えて保存します。書式・保護・印刷設定は元のままです。コメントが長い行は、文字が切れないよう行の高さを広げます。</p>
+   <p class="note">書き出したファイルは、このツールにもう一度読み込んで続きを入力できます。</p></div>
+  ${(()=>{const s=mStats(S);return S.sel.col==='second'||s.n||s.chk||s.ph?`<div class="card"><h2>🔒 自分用メモ</h2>
+   <p class="note">各項目の「メモを書く」で書いたメモと写真は、<b>この端末のブラウザだけ</b>に保存され、Excel点検表には含まれません。写真は端末への保存やコピーはできず、ほかの端末に移すこともできません。点検が終わったら、取り決めに従って「メモと写真を消去」で処分してください。</p>
+   <p style="margin:0 0 8px;font-size:14px">メモ ${s.n}件　★後で確認 ${s.chk}件　写真 ${s.ph}枚</p>
+   <div class="note" style="font-weight:600">全体のメモ</div>${mmHtml('_all',{noChk:true,ph:'点検全体について、気になった点・後で確認したいことなど'})}
+   <div class="btns"><button class="btn sm" data-act="m-txt">自分用メモをテキストで保存</button><button class="btn sm danger" data-act="m-clear">メモと写真を消去</button></div></div>`:''})()}`;
+}
+function doExport(share){
+  try{
+    const bytes=buildXlsx(cur.rec);let name=($('#outname').value||outName()).trim();if(!/\.xlsx$/i.test(name))name+='.xlsx';
+    const type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    if(share){const file=new File([bytes],name,{type});
+      if(navigator.canShare({files:[file]})){navigator.share({files:[file],title:name}).catch(()=>{});return}
+      toast('この端末では共有が使えないため、保存します')}
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([bytes],{type}));a.download=name;document.body.appendChild(a);a.click();
+    setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000);toast('書き出しました：'+name);
+  }catch(e){console.error(e);toast('書き出しに失敗しました：'+e.message,6000)}
+}
+async function addSources(fileList){
+  const{m,rec}=cur,S=rec.state;const keys=new Set(m.items.map(i=>i.key));let added=0;
+  for(const file of fileList){
+    try{
+      const m2=parseModel(openBook(await file.arrayBuffer()));
+      const hit=m2.items.filter(i=>keys.has(i.key));
+      if(nz(m2.title)!==nz(m.title)||hit.length<m2.items.length*0.5){toast(`${file.name}：別の点検表のため追加できません`,5000);continue}
+      const items={};
+      for(const it of hit){const v=it.v.sv,c=it.v.sc;if(!v&&!c)continue;const b=S.items[it.key];
+        if(b.sv===v&&b.sc===c)continue;
+        if(S.sources.some(s=>s.items[it.key]&&s.items[it.key].v===v&&s.items[it.key].c===c))continue;
+        items[it.key]={v,c};if(!b.k&&it.v.k)b.k=it.v.k}
+      if(!Object.keys(items).length){toast(`${file.name}：追加できる自己点検結果がありません（未入力か、読み込み済みと同じ内容）`,5000);continue}
+      for(const f of m2.fields)if(f.value&&f.ref in S.fields&&!S.fields[f.ref])S.fields[f.ref]=f.value;
+      for(const t of m2.types){const x=S.types[t.row];if(!x)continue;if(!x.date&&t.date)x.date=t.date;if(!x.person&&t.person)x.person=t.person;if(t.labelEdit&&nz(t.label)&&!nz(x.label))x.label=t.label}
+      S.sources.push({label:detectLabel(m2)||'自己点検'+(S.sources.length+2),file:file.name,items});added++;
+      if(hit.length<m.items.length||hit.length<m2.items.length)toast(`${file.name}：項番が一致しない項目があります（一致 ${hit.length} 件）`,5000);
+    }catch(e){toast(`${file.name}：${e.message}`,5000)}
+  }
+  if(added){save();renderTab();toast(`${added}件の自己点検ファイルを追加しました`)}
+}
+
+/* ================= 自分用メモ・写真 =================
+   メモと写真はこの端末のブラウザだけに保存し、Excelには書き出さない。 */
+const openM=new Set(),PHBMP={};let mTarget=null,mView=null;
+const mGet=k=>cur.rec.state.memo.items[k]||{};
+const mHas=m=>!!(m.t||m.chk||(m.ph&&m.ph.length));
+function mSet(k,patch){const M=cur.rec.state.memo.items;const m={...(M[k]||{}),...patch};if(mHas(m))M[k]=m;else delete M[k];save()}
+function mStats(S){let n=0,chk=0,ph=0;for(const m of Object.values(S.memo.items)){if(m.t)n++;if(m.chk)chk++;ph+=(m.ph||[]).length}return{n,chk,ph}}
+const PH_NOTE='写真撮影は必ず被点検者の許諾を得て行ってください。撮影した写真はこのツール内だけに保存され、メモと写真（または保存データ）を消去すると消えます。';
+const thumb=pid=>`<button class="pth" data-act="m-view" data-ph="${esc(pid)}" aria-label="写真を開く"><canvas class="th" width="128" height="128" data-ph="${esc(pid)}"></canvas></button>`;
+function mmHtml(k,o={}){const m=mGet(k),open=mHas(m)||openM.has(k);
+  return`<div class="mm${open?' open':''}" data-mk="${esc(k)}"><div class="mbar"><button class="mmt" data-act="m-open">📝 メモを書く</button>${o.noChk?'':`<button class="chk${m.chk?' on':''}" data-act="m-chk" aria-pressed="${!!m.chk}">${m.chk?'★':'☆'} 後で確認</button>`}</div>
+<div class="mbody"><div class="mnote">🔒 自分用メモ：この内容はExcel点検表に含まれません（この端末だけに保存されます）</div><textarea data-b="mt" rows="2" placeholder="${esc(o.ph||'気になった点・後で確認したいことなど')}">${esc(m.t||'')}</textarea>
+<div class="phs">${(m.ph||[]).map(thumb).join('')}<button class="btn sm" data-act="m-photo">📷 撮影する</button></div><div class="phn">${PH_NOTE}</div></div></div>`}
+/* 写真は取り込むときに縮小する（長い辺1600px・JPEG）。撮影場所などの埋め込み情報も消える */
+async function shrink(f){const MAX=1600;let src,w,h;
+  try{src=await createImageBitmap(f,{imageOrientation:'from-image'});w=src.width;h=src.height}
+  catch(e){src=await new Promise((res,rej)=>{const u=URL.createObjectURL(f);const im=new Image();im.onload=()=>{URL.revokeObjectURL(u);res(im)};im.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('写真を読み込めませんでした：'+f.name))};im.src=u});w=src.naturalWidth;h=src.naturalHeight}
+  const r=Math.min(1,MAX/Math.max(w,h));const c=document.createElement('canvas');c.width=Math.max(1,Math.round(w*r));c.height=Math.max(1,Math.round(h*r));c.getContext('2d').drawImage(src,0,0,c.width,c.height);if(src.close)src.close();
+  const blob=await new Promise(res=>c.toBlob(res,'image/jpeg',0.8));if(!blob)throw new Error('写真を変換できませんでした：'+f.name);return{buf:await blob.arrayBuffer(),type:'image/jpeg',w:c.width,h:c.height,at:Date.now()}}
+async function phBmp(id){if(PHBMP[id])return PHBMP[id];const r=await store.phGet(id);if(!r)return null;const blob=new Blob([r.buf],{type:r.type});
+  let bm;try{bm=await createImageBitmap(blob)}catch(e){bm=await new Promise((res,rej)=>{const u=URL.createObjectURL(blob);const im=new Image();im.onload=()=>{URL.revokeObjectURL(u);res(im)};im.onerror=()=>{URL.revokeObjectURL(u);rej(e)};im.src=u})}
+  return PHBMP[id]=bm}
+function drawPh(cv,bm,cover){const w=bm.width||bm.naturalWidth,h=bm.height||bm.naturalHeight,g=cv.getContext('2d');
+  if(cover){const Z=cv.width,r=Math.max(Z/w,Z/h),dw=w*r,dh=h*r;g.drawImage(bm,(Z-dw)/2,(Z-dh)/2,dw,dh)}else{cv.width=w;cv.height=h;g.drawImage(bm,0,0)}}
+async function hydPh(){for(const cv of document.querySelectorAll('canvas[data-ph]:not([data-done])')){cv.dataset.done='1';try{const bm=await phBmp(cv.dataset.ph);if(bm)drawPh(cv,bm,true);else cv.closest('.pth').classList.add('miss')}catch(e){}}}
+async function phDrop(id){const bm=PHBMP[id];if(bm&&bm.close)bm.close();delete PHBMP[id];await store.phDel(id).catch(()=>{})}
+async function memoClear(S){for(const m of Object.values(S.memo.items))for(const x of m.ph||[])await phDrop(x);S.memo={items:{}}}
+function refreshMemo(k){if(k!=='_all'&&document.querySelector(`.item[data-key="${CSS.escape(k)}"]`))refreshCard(k);else{const y=scrollY;renderTab();window.scrollTo(0,y)}}
+function refreshCard(key){const it=cur.m.items.find(x=>x.key===key),el=document.querySelector(`.item[data-key="${CSS.escape(key)}"]`);if(!it||!el)return;el.outerHTML=itemHtml(it,cur.rec.state.sel.col==='second');hydPh();refreshProgress()}
+function closeModal(){$('#modal').innerHTML='';mView=null}
+function memoText(){const{m,rec}=cur,S=rec.state,L=[],ind=t=>String(t||'').trim().replace(/\n/g,'\n        ');
+  L.push('自分用メモ（点検担当者の手控え）','※Excel点検表には含まれない、担当者の自分用のメモです。関係者以外に渡さないでください。','');
+  L.push('点検表　：'+m.title+' '+m.sub);if(typeLabel(S))L.push('点検種別：'+typeLabel(S));
+  for(const f of m.fields)if(S.fields[f.ref])L.push(f.label+'：'+S.fields[f.ref]);
+  const a=S.memo.items._all;if(a&&mHas(a)){L.push('','■ 全体のメモ',ind(a.t));if((a.ph||[]).length)L.push('（写真 '+a.ph.length+'枚）')}
+  L.push('','■ 項目ごとのメモ');let n=0;
+  for(const it of m.items){const x=S.memo.items[it.key];if(!x||!mHas(x))continue;n++;L.push(it.id+(x.chk?' ★後で確認':'')+((x.ph||[]).length?'（写真 '+x.ph.length+'枚）':''),'  項目：'+it.text.replace(/\s+/g,' '));if(x.t)L.push('  メモ：'+ind(x.t))}
+  if(!n)L.push('（なし）');
+  const ng=cur.m.choices[1]||'✕';L.push('','■ 評価が'+ng+'の項目');n=0;
+  for(const it of m.items){const o=auditOut(S,it.key);if([...o.v].some(z=>same(z,ng))){n++;L.push(it.id+' '+it.text.replace(/\s+/g,' ')+(o.v.length>1?'（'+o.v.replace(/\n/g,'／')+'）':''));if(o.c)L.push('  コメント：'+ind(o.c))}}
+  if(!n)L.push('（なし）');
+  return L.join('\r\n')}
+function download(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000)}
+
+/* ================= 前回の結果 ================= */
+const jdate=iso=>iso?iso.replace(/-0?/g,'/'):'';
+/* 「生○(改行)団✕」のように1つのセルにまとめた結果を、自己点検者ごとに分ける */
+function splitCombined(v,c){const ls=String(v||'').split('\n').map(x=>x.trim()).filter(Boolean);if(!ls.length)return null;const parts=[];
+  for(const l of ls){const ch=[...l];if(ch.length!==2||!cur.m.choices.some(x=>same(ch[1],x)))return null;parts.push({h:ch[0],v:ch[1],c:''})}
+  let p=null;for(const l of String(c||'').split('\n')){const mm=/^(.)[：:](.*)$/.exec(l),q=mm&&parts.find(x=>x.h===mm[1]);if(q){p=q;q.c=mm[2]}else if(p)p.c+='\n'+l}
+  return parts}
+function prevList(it,second){const S=cur.rec.state,out=[];
+  S.prev.forEach(r=>{const x=r.items[it.key];if(!x)return;
+    const self=()=>{if(!x.sv&&!x.sc)return;const d=r.sdate?' '+jdate(r.sdate):'',ps=splitCombined(x.sv,x.sc);
+      if(ps)ps.forEach(q=>out.push({lab:'前回 自己点検（'+q.h+'）'+d,v:q.v,c:q.c,copy:!second}));else out.push({lab:'前回 自己点検'+d,v:x.sv,c:x.sc,copy:!second})};
+    const aud=()=>{if(!x.av&&!x.ac)return;const d=r.adate?' '+jdate(r.adate):'',kd=r.akind||'二者点検',ps=splitCombined(x.av,x.ac);
+      if(ps)ps.forEach(q=>out.push({lab:'前回 '+kd+'（'+q.h+'）'+d,v:q.v,c:q.c,h:q.h,copy:second}));else out.push({lab:'前回 '+kd+d,v:x.av,c:x.ac,copy:second})};
+    self();aud()});
+  return out}
+function prevHtml(it,second){const S=cur.rec.state;if(!S.showPrev||!S.prev.length)return'';const l=prevList(it,second);if(!l.length)return'';
+  return`<div class="refs">${l.map((x,n)=>`<div class="ref"><span class="rl">${esc(x.lab)}</span><b class="vv">${esc(x.v||'—')}</b>${x.copy?`<button class="pvc" data-act="pv-copy" data-n="${n}">コピー</button>`:''}${x.c?`<span class="rc">${esc(x.c)}</span>`:''}</div>`).join('')}</div>`}
+async function addPrev(fileList){const{m,rec}=cur,S=rec.state;const keys=new Set(m.items.map(i=>i.key));let added=0;
+  for(const file of fileList){try{
+    const m2=parseModel(openBook(await file.arrayBuffer()));
+    if(nz(m2.title)!==nz(m.title)){toast(`${file.name}：別の点検表のため読み込めません`,5000);continue}
+    const items={};let n=0;
+    for(const it of m2.items){if(!keys.has(it.key))continue;const v=it.v;if(v.sv||v.sc||v.av||v.ac){items[it.key]={sv:v.sv,sc:v.sc,av:v.av,ac:v.ac};n++}}
+    if(!n){toast(`${file.name}：点検結果が入っていないか、項番が一致しません`,5000);continue}
+    const ts=m2.types.filter(t=>t.date||t.person),ss=ts.filter(t=>colForLabel(t.label)==='self'),as=ts.filter(t=>colForLabel(t.label)==='second');
+    const mx=a=>a.map(t=>t.date).filter(Boolean).sort().pop()||'';
+    S.prev=S.prev.filter(r=>r.file!==file.name);
+    S.prev.push({file:file.name,n,items,sdate:mx(ss),adate:mx(as),akind:as.map(t=>nz(t.label)).join('・')});added++;
+    const miss=m2.items.length-m2.items.filter(i=>keys.has(i.key)).length;if(miss)toast(`${file.name}：今回の点検表にない項番が ${miss} 件あります（版が違う可能性があります）`,5000);
+  }catch(e){toast(`${file.name}：${e.message}`,5000)}}
+  if(added){S.showPrev=true;save();renderTab();toast(`前回の結果を ${added}件 読み込みました`)}}
+
+/* ================= 操作 ================= */
+function refreshProgress(){const S=cur.rec.state;const c=counts(S,cur.m.items.filter(it=>inMy(S,it)));const p=$('#pg');if(!p)return;p.textContent=progText(c);$('#pgbar').style.width=(c.total?c.done/c.total*100:0)+'%';
+  c.todo=secTodo(S);document.querySelectorAll('[data-cnt]').forEach(b=>{b.textContent=c[b.dataset.cnt]})}
+document.addEventListener('click',async e=>{
+  const tab=e.target.closest('[data-tab]');
+  if(tab&&cur){cur.rec.state.tab=tab.dataset.tab;cur.rec.summary=summaryOf(cur.rec.state,cur.m);save();renderTab();return}
+  const ch=e.target.closest('.ch');
+  if(ch&&cur){const S=cur.rec.state,key=ch.closest('.item').dataset.key,i=+ch.closest('.choices').dataset.pi,u=units(S,key)[i];
+    setUnit(S,key,i,'v',same(u.v,ch.dataset.ch)?'':ch.dataset.ch);refreshCard(key);save();return}
+  const b=e.target.closest('[data-act]');if(!b)return;const act=b.dataset.act;
+  if(act==='about'){renderAbout();return}
+  if(act==='tohome'){renderHome();return}
+  if(act==='new'){$('#fileNew').value='';$('#fileNew').click()}
+  else if(act==='open')openSession(b.dataset.id);
+  else if(act==='del'){if(confirm('この点検の保存データ（自分用メモと写真を含む）を削除します。よろしいですか？')){const r=await store.get(b.dataset.id);if(r&&r.state&&r.state.memo)for(const m of Object.values(r.state.memo.items))for(const x of m.ph||[])await store.phDel(x).catch(()=>{});await store.del(b.dataset.id);renderHome()}}
+  else if(act==='home'){cur.rec.summary=summaryOf(cur.rec.state,cur.m);await flush();renderHome()}
+  else if(act==='addsrc'){$('#fileAdd').value='';$('#fileAdd').click()}
+  else if(act==='delsrc'){cur.rec.state.sources.splice(+b.dataset.i,1);save();renderTab()}
+  else if(act==='filt'){const S=cur.rec.state,f=b.dataset.f;S.filt=S.filt===f?'all':f;save();renderTab()}
+  else if(act==='my'){const S=cur.rec.state,k=b.dataset.k,i=S.my.indexOf(k);if(i>=0)S.my.splice(i,1);else S.my.push(k);save();renderTab()}
+  else if(act==='prev'){cur.rec.state.sec--;save();renderTab()}
+  else if(act==='next'){const S=cur.rec.state;if(S.sec>=cur.m.sections.length-1)S.tab='out';else S.sec++;save();renderTab()}
+  else if(act==='m-open'){const mm=b.closest('.mm');openM.add(mm.dataset.mk);mm.classList.add('open');mm.querySelector('textarea').focus()}
+  else if(act==='m-chk'){const k=b.closest('.mm').dataset.mk,on=!mGet(k).chk;mSet(k,{chk:on});b.classList.toggle('on',on);b.setAttribute('aria-pressed',on);b.textContent=(on?'★':'☆')+' 後で確認';refreshProgress()}
+  else if(act==='m-photo'){mTarget=b.closest('.mm').dataset.mk;$('#filePhoto').value='';$('#filePhoto').click()}
+  else if(act==='m-view'){const k=b.closest('.mm').dataset.mk,pid=b.dataset.ph;let bm=null;try{bm=await phBmp(pid)}catch(err){}
+    if(!bm){toast('写真が見つかりません（この端末に保存されていません）',4000);return}
+    mView={k,pid};$('#modal').innerHTML=`<div class="modal" data-act="m-bg"><div class="sheet"><h2>写真（${esc(k==='_all'?'全体のメモ':k)}）</h2><canvas class="pvbig" id="pvbig"></canvas><p class="note">自分用メモの写真です。このツール内だけに保存され、端末への保存・コピーはできません。Excel点検表には含まれません。</p><div class="btns"><button class="btn danger" data-act="m-ph-del">この写真を削除</button><button class="btn" data-act="m-close">閉じる</button></div></div></div>`;
+    drawPh($('#pvbig'),bm,false)}
+  else if(act==='m-bg'){if(e.target===b)closeModal()}
+  else if(act==='m-close')closeModal();
+  else if(act==='m-ph-del'){const v=mView;if(!v||!confirm('この写真を削除しますか？（元に戻せません）'))return;mSet(v.k,{ph:(mGet(v.k).ph||[]).filter(x=>x!==v.pid)});await phDrop(v.pid);closeModal();refreshMemo(v.k);toast('削除しました')}
+  else if(act==='m-txt'){download(new Blob([memoText()],{type:'text/plain'}),outName().replace(/\.xlsx$/,'')+'_自分用メモ.txt');toast('自分用メモを保存しました（写真は含まれません）')}
+  else if(act==='m-clear'){const S=cur.rec.state,s=mStats(S);if(!confirm(`この点検の自分用メモと写真を消去します（メモ ${s.n}件・★後で確認 ${s.chk}件・写真 ${s.ph}枚）。\n消去したものは元に戻せません。点検結果は消えません。\n\nよろしいですか？`))return;await memoClear(S);openM.clear();save();renderTab();toast('メモと写真を消去しました')}
+  else if(act==='pv-load'){$('#filePrev').value='';$('#filePrev').click()}
+  else if(act==='pv-del'){cur.rec.state.prev.splice(+b.dataset.i,1);save();renderTab()}
+  else if(act==='pv-toggle'){const S=cur.rec.state;S.showPrev=!S.showPrev;save();const y=scrollY;renderTab();window.scrollTo(0,y)}
+  else if(act==='pv-copy'){const S=cur.rec.state,second=S.sel.col==='second',card=b.closest('.item'),key=card.dataset.key,it=cur.m.items.find(x=>x.key===key);
+    const a=prevList(it,second)[+b.dataset.n];if(!a)return;const us=units(S,key),P=parties(S);
+    const idx=us.length>1?(a.h?[P.findIndex(n=>[...n][0]===a.h)].filter(i=>i>=0):us.map((u,i)=>i)):[0];if(!idx.length)return;
+    if(idx.some(i=>(us[i].v||us[i].c)&&!(us[i].v===a.v&&us[i].c===a.c))&&!confirm('いまの入力を、前回の内容で置き換えますか？'))return;
+    idx.forEach(i=>{setUnit(S,key,i,'v',a.v||'');setUnit(S,key,i,'c',a.c||'')});save();refreshCard(key);toast('前回の内容をコピーしました。内容を確認し、必要なら修正してください')}
+  else if(act==='export')doExport(false);
+  else if(act==='share')doExport(true);
+});
+function onInput(e){
+  const el=e.target,b=el.dataset&&el.dataset.b;if(!b||!cur)return;const S=cur.rec.state,v=el.value;
+  if(b==='q'){Q=v;clearTimeout(qT);qT=setTimeout(()=>{const l=$('#list');if(l){l.innerHTML=listHtml();hydPh()}},200);return}
+  if(b==='cm'){const card=el.closest('.item'),key=card.dataset.key;setUnit(S,key,+el.dataset.pi,'c',v.replace(/\r/g,''));
+    const w=card.querySelector('.wm');if(w)w.hidden=!needComment(S,key);refreshProgress()}
+  else if(b==='mt'){mSet(el.closest('.mm').dataset.mk,{t:v.replace(/\r/g,'')});refreshProgress();return}
+  else if(b==='ik'){S.items[el.closest('.item').dataset.key].k=v}
+  else if(b==='field'){S.fields[el.dataset.ref]=el.type==='date'?v.replace(/-0?/g,'/'):v}
+  else if(b==='tlabel'){S.types[el.dataset.row].label=v;if(S.sel.type==el.dataset.row)S.sel.col=colForLabel(v)}
+  else if(b==='tdate'){S.types[el.dataset.row].date=v}
+  else if(b==='tperson'){S.types[el.dataset.row].person=v}
+  else if(b==='baselabel'){S.baseLabel=v.trim()}
+  else if(b==='srclabel'){S.sources[+el.dataset.i].label=v.trim()}
+  else if(b==='kubun'){S.kubun[+el.dataset.i]=v}
+  else if(e.type==='change'){
+    if(b==='seltype'){S.sel.type=v===''?null:+v;if(v==='')S.sel.col='self';if(v!==''){S.sel.col=colForLabel(S.types[+v].label);const t=S.types[+v];if(!t.date)t.date=today()}renderTab()}
+    else if(b==='selcol'){S.sel.col=v}
+    else if(b==='kubunedit'){S.kubunEdit=el.checked}
+    else if(b==='sec'){S.sec=+v;if(S.filt!=='todo')S.filt='all';Q='';renderTab()}
+    else if(b==='filt'){S.filt=v;renderTab()}
+  }
+  save();
+}
+document.addEventListener('input',onInput);
+document.addEventListener('change',onInput);
+$('#fileNew').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{await createSession(f)}catch(err){console.error(err);toast(err.message,6000)}});
+$('#fileAdd').addEventListener('change',e=>{if(e.target.files.length)addSources([...e.target.files])});
+$('#filePrev').addEventListener('change',e=>{if(e.target.files.length)addPrev([...e.target.files])});
+$('#filePhoto').addEventListener('change',async e=>{const fs=[...e.target.files],k=mTarget;if(!fs.length||!k||!cur)return;toast('写真を取り込み中…',1500);let n=0;const errs=[];
+  for(const f of fs){try{const r=await shrink(f);const pid=Date.now().toString(36)+Math.random().toString(36).slice(2,8);await store.phPut(pid,r);mSet(k,{ph:[...(mGet(k).ph||[]),pid]});n++}catch(err){errs.push(err.message)}}
+  openM.add(k);refreshMemo(k);toast((n?`写真を ${n}枚 追加しました（このツール内だけに保存）`:'')+(errs.length?'\n'+errs.join('\n'):''),errs.length?5000:2500)});
+document.addEventListener('contextmenu',e=>{if(e.target.closest&&e.target.closest('canvas[data-ph],#pvbig,.pth'))e.preventDefault()});
+window.addEventListener('pagehide',()=>{flush()});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)flush()});
+
+renderHome();
+</script>
+</body>
+</html>

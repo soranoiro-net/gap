@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>使い方：Excel点検表 入力ツール｜soranoiro.net 産直・GAPの道具箱</title>
+<meta name="theme-color" content="#1f5fa8">
+<style>
+:root{--bg:#f5f8fc;--card:#fff;--ink:#1f2a37;--mut:#566273;--line:#d9e2ec;--acc:#1f5fa8;--acc-ink:#fff;--soft:#e6eff9;--head:#eaf2fb;
+--sun:#f3b94d;--leaf:#4f9d69;--leaf2:#8cc7a1;--paper:#fffdf6;--warn:#8a5a00;--warnbg:#fff4d6;--ok:#1f7a4d;--ng:#c0392b;--shadow:0 2px 12px rgba(31,60,100,.08)}
+@media (prefers-color-scheme:dark){:root{--bg:#0f141b;--card:#18202b;--ink:#e7edf4;--mut:#a6b3c4;--line:#2d3948;--acc:#7db4f5;--acc-ink:#0b1726;--soft:#1d2b3d;--head:#152233;
+--sun:#e9b860;--leaf:#6fc08a;--leaf2:#3f7d57;--paper:#232c38;--warn:#ffd27a;--warnbg:#3a2f12;--ok:#4cc38a;--ng:#ff7b6b;--shadow:0 2px 12px rgba(0,0,0,.45)}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.85 "Hiragino Maru Gothic ProN","BIZ UDPGothic","Hiragino Sans","Yu Gothic UI","Meiryo","Noto Sans JP",sans-serif}
+a{color:var(--acc)}
+.wrap{max-width:860px;margin:0 auto;padding:0 18px}
+
+main{max-width:820px;margin:0 auto;padding:26px 18px 60px}
+.back{margin:0 0 14px;font-size:14px}
+.top{background:var(--head);border:1px solid var(--line);border-radius:18px;padding:22px 24px;margin:0 0 26px}
+.top .k{font-size:13px;font-weight:700;color:var(--acc);letter-spacing:.1em;margin:0 0 2px}
+h1{font-size:clamp(23px,5vw,29px);line-height:1.4;margin:0 0 4px}
+.sub{color:var(--mut);margin:0;font-size:15px}
+h2{font-size:18.5px;margin:34px 0 10px;display:flex;gap:10px;align-items:center}
+h2::before{content:"";width:11px;height:11px;border-radius:50%;background:var(--sun);flex:none}
+h3{font-size:16px;margin:20px 0 6px}
+p{margin:8px 0}
+ol,ul{padding-left:1.5em;margin:6px 0}
+li{margin:4px 0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:10px 0 14px;background:var(--card)}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top;line-height:1.7}
+th{background:var(--soft);white-space:nowrap}
+.box{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--acc);padding:12px 16px;border-radius:0 12px 12px 0;margin:12px 0}
+.box.warn{background:var(--warnbg);border-color:transparent;border-left-color:var(--sun);color:var(--ink)}
+.small{font-size:13.5px;color:var(--mut)}
+code,.hash{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;word-break:break-all;background:var(--soft);padding:1px 6px;border-radius:5px}
+.end{text-align:right;margin-top:30px;color:var(--mut)}
+.wide{overflow-x:auto}
+td.res{white-space:nowrap;font-weight:700}.ok{color:var(--ok)}.cond{color:var(--warn)}
+kbd{display:inline-block;border:1px solid var(--line);border-bottom-width:2px;border-radius:999px;padding:0 10px;font:inherit;font-size:14px;background:var(--card);white-space:nowrap}
+.steps{list-style:none;padding:0;margin:14px 0;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;counter-reset:s}
+.steps li{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 10px 12px;text-align:center;font-size:14px;line-height:1.6;position:relative;counter-increment:s;margin:0}
+.steps li::before{content:counter(s);position:absolute;top:8px;left:10px;width:24px;height:24px;border-radius:50%;background:var(--acc);color:var(--acc-ink);font-weight:700;font-size:13px;line-height:24px}
+.steps svg{width:64px;height:64px;display:block;margin:0 auto 6px}
+.steps b{display:block;font-size:15px}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 6px;padding:0;list-style:none}
+.toc a{display:block;border:1px solid var(--line);border-radius:999px;padding:3px 14px;text-decoration:none;font-size:14px;background:var(--card)}
+ol.do{counter-reset:d;list-style:none;padding:0}
+ol.do>li{counter-increment:d;position:relative;padding:10px 12px 10px 50px;background:var(--card);border:1px solid var(--line);border-radius:12px;margin:8px 0}
+ol.do>li::before{content:counter(d);position:absolute;left:12px;top:12px;width:26px;height:26px;border-radius:50%;background:var(--soft);color:var(--acc);font-weight:700;text-align:center;line-height:26px}
+@media (max-width:640px){th{white-space:normal;min-width:5.6em}td.res{white-space:normal}.steps{grid-template-columns:1fr}.steps li{display:grid;grid-template-columns:60px 1fr;gap:12px;text-align:left;align-items:center;padding:10px 12px 10px 44px}.steps svg{margin:0;width:52px;height:52px}.steps li::before{top:50%;transform:translateY(-50%)}}
+@media print{body{font-size:10.5pt;background:#fff}main{max-width:none;padding:0}h2{break-after:avoid}tr,.box{break-inside:avoid}.back{display:none}@page{size:A4;margin:16mm}}
+</style>
+</head>
+<body>
+<main>
+<p class="back"><a href="index.html">← soranoiro.net 産直・GAPの道具箱へ</a></p>
+<div class="top"><p class="k">使い方</p><h1>Excel点検表 入力ツール の使い方</h1><p class="sub">試作版 Ver0.1.7　自己点検、内部監査・二者点検の進め方と便利な機能</p></div>
+
+<ul class="toc"><li><a href="#s1">できること</a></li><li><a href="#s2">はじめに</a></li><li><a href="#s3">自己点検</a></li><li><a href="#s4">内部監査・二者点検</a></li><li><a href="#s5">便利な機能</a></li><li><a href="#s6">書き出し</a></li><li><a href="#s7">注意点</a></li><li><a href="#s8">困ったとき</a></li></ul>
+
+<h2 id="s1">できること</h2>
+<p>生協産直マネジメントシステムのExcel点検表を読み込み、スマートフォン・タブレット・パソコンの画面で点検結果を入力して、元と同じ形式のExcel点検表として書き出します。</p>
+<ol class="steps">
+<li><svg viewBox="0 0 96 96" aria-hidden="true"><rect x="16" y="10" width="64" height="76" rx="8" fill="var(--paper)" stroke="var(--acc)" stroke-width="4"/><path d="M16 30h64M16 48h64M16 66h64M38 30v56M60 30v56" stroke="var(--line)" stroke-width="3"/><rect x="24" y="16" width="26" height="8" rx="4" fill="var(--leaf)"/></svg><span><b>Excel点検表を読み込む</b>配布された点検表をそのまま</span></li>
+<li><svg viewBox="0 0 96 96" aria-hidden="true"><rect x="26" y="6" width="44" height="84" rx="10" fill="var(--card)" stroke="var(--ink)" stroke-width="4"/><rect x="34" y="18" width="28" height="6" rx="3" fill="var(--line)"/><rect x="33" y="34" width="30" height="20" rx="6" fill="var(--ok)"/><circle cx="48" cy="44" r="5" fill="none" stroke="#fff" stroke-width="3"/><rect x="34" y="60" width="28" height="12" rx="4" fill="var(--soft)"/><circle cx="48" cy="81" r="3" fill="var(--line)"/></svg><span><b>スマホやパソコンで点検</b>○・✕・ーを押して入力</span></li>
+<li><svg viewBox="0 0 96 96" aria-hidden="true"><rect x="16" y="10" width="64" height="76" rx="8" fill="var(--paper)" stroke="var(--acc)" stroke-width="4"/><path d="M16 30h64M38 30v56" stroke="var(--line)" stroke-width="3"/><rect x="24" y="16" width="26" height="8" rx="4" fill="var(--leaf)"/><g fill="none" stroke="var(--ok)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 42l4 4 7-8M22 60l4 4 7-8"/></g><path d="M23 74l8 8M31 74l-8 8" stroke="var(--ng)" stroke-width="4" stroke-linecap="round"/><g stroke="var(--line)" stroke-width="4" stroke-linecap="round"><path d="M46 43h26M46 61h26M46 78h18"/></g></svg><span><b>同じ形式で書き出す</b>書式も印刷設定も元のまま</span></li>
+</ol>
+<table>
+<tr><th>対応する点検表</th><td>生協版適正農業規範（青果・米編、畜産編）、適正水産規範、適正流通規範、適正産直規範のExcel点検表（2023年以降）</td></tr>
+<tr><th>使える端末</th><td>スマートフォン・タブレット・パソコンのブラウザ（iPhoneはSafari、AndroidはChrome、パソコンはChromeまたはEdge）。インストールは不要です。</td></tr>
+<tr><th>用意するもの</th><td>点検に使うExcel点検表（.xlsx）。記入途中のものでも読み込めます。</td></tr>
+</table>
+<div class="box">入力内容は、インターネット上のサーバーには送られません。お使いの端末のブラウザの中と、書き出したExcelファイルの中にだけあります。</div>
+
+<h2 id="s2">はじめに（共通の準備）</h2>
+<ol class="do">
+<li>ツールを開き、<kbd>Excel点検表を読み込む</kbd> を押して、Excel点検表を選びます。LINEやメールで受け取ったファイルは、いったん端末に保存してから選んでください。</li>
+<li><b>「基本情報」</b>で <b>点検種別</b>（自己点検、内部監査、二者点検など）を選びます。選んだ種別に合わせて、結果を記入する欄（自己点検の欄／二者点検の欄）が自動で決まります。点検種別を選ぶまで、点検には進めません。</li>
+<li>表紙の項目（団体名・生産者名など）と、実施日・点検者を入力します。</li>
+<li><kbd>点検をはじめる</kbd> を押すと、点検画面に移ります。</li>
+</ol>
+<p class="small">スマートフォンでは、ブラウザのメニューから「ホーム画面に追加」をしておくと、次からアプリのように開けます。入力は自動で端末に保存され、スタート画面の「保存されている点検」から続きを再開できます。</p>
+
+<h2 id="s3">自己点検の方法</h2>
+<ol class="do">
+<li>点検種別で、自分にあたる自己点検（例：「自己点検（生産者）」「自己点検（団体）」）を選びます。</li>
+<li>点検画面の <b>区分</b> のボタンで、自分が担当する区分（例：「生産者」と「両方」）を選ぶと、その項目だけが表示されます。</li>
+<li>各項目の <kbd>○</kbd> <kbd>✕</kbd> <kbd>ー</kbd> を押して結果を入力します。同じボタンをもう一度押すと取り消せます。判断の理由などは「コメント」に書きます。</li>
+<li>規範項目の下の「解説」を押すと、点検の趣旨や留意点を確認できます。解説の中のURLは、押すと別のタブで開きます。</li>
+<li>章は、画面上部の章の選択、または下の <kbd>前の章</kbd> <kbd>次の章</kbd> で移ります。</li>
+<li>入力が終わったら（途中でも）、<b>「書き出し」</b>で <kbd>Excelファイルを保存</kbd> を押し、できたExcel点検表を団体事務局などへ送ります。</li>
+</ol>
+<div class="box">区分ごとに担当者が分かれる場合（生産者と団体など）は、それぞれが自分のExcel点検表に自己点検を入力して書き出します。内部監査・二者点検のときに、それらを1つにまとめられます。</div>
+
+<h2 id="s4">内部監査・二者点検の方法</h2>
+<ol class="do">
+<li>自己点検が入力されたExcel点検表を読み込み、点検種別で「内部監査」または「二者点検」を選びます。結果は二者点検の欄に記入されます。</li>
+<li>自己点検が区分ごとに別々のファイルになっている場合は、「基本情報」の <b>自己点検ファイルをまとめる</b> で <kbd>自己点検ファイルを追加</kbd> を押し、残りのファイルを選びます。自己点検者の名前（例：生産者、団体）を確かめてください。</li>
+<li>点検画面では、各項目に自己点検の結果とコメントが表示されます。それを見ながら <kbd>○</kbd> <kbd>✕</kbd> <kbd>ー</kbd> で評価します。</li>
+<li>区分が <b>「両方」</b> の項目は、評価とコメントの欄が「生産者の評価」「団体の評価」の2つに分かれます。</li>
+<li>自己点検と評価が異なるのにコメントがない項目には、警告が出ます。<kbd>要コメント</kbd> のボタンで、残りをまとめて確認できます。</li>
+<li>「書き出し」で <kbd>Excelファイルを保存</kbd> を押します。</li>
+</ol>
+<h3>自分用メモと写真（内部監査・二者点検のとき）</h3>
+<ul>
+<li>各項目の「📝 メモを書く」で、担当者だけの手控えを書けます。「☆ 後で確認」の印も付けられます。</li>
+<li>「📷 撮影する」で写真を撮って、メモに添えられます。<b>撮影は、必ず被点検者の許諾を得て行ってください。</b></li>
+<li>メモと写真は、その端末のブラウザの中だけに保存され、Excel点検表には含まれません。写真は端末への保存やコピーができません。</li>
+<li>「書き出し」の「自分用メモ」で、メモをテキストファイルに保存できます（写真は含みません）。点検が終わったら、取り決めに従って <kbd>メモと写真を消去</kbd> で処分してください。</li>
+</ul>
+
+<h2 id="s5">便利な機能</h2>
+<table>
+<tr><th>絞り込み</th><td>点検画面の上部に、○・✕・ー・要コメント・★後で確認・メモありの件数が並びます。押すと、すべての章からその項目だけを表示します（もう一度押すと解除）。「この章の未入力」は、選択中の章の中で絞り込みます。</td></tr>
+<tr><th>検索</th><td>「番号・語句で検索」に番号（例：4-02）や言葉を入れると、すべての章から探します。規範項目、点検項目、コメント、メモが対象です。</td></tr>
+<tr><th>前回の結果</th><td>「基本情報」の <b>前回の結果（任意）</b> で前年などのExcel点検表を読み込むと、各項目に前回の結果とコメントが点線の枠で表示されます。<kbd>コピー</kbd> で1項目ずつ入力できます。前回と状況が変わっていないか確かめたうえで使ってください。</td></tr>
+<tr><th>区分の設定</th><td>区分シートのある点検表（2025年版以降）では、「基本情報」の <b>区分の設定</b> で区分の名前を変更でき、点検画面で項目ごとの区分も変えられます。変更は書き出すExcelに反映されます。</td></tr>
+<tr><th>続きから再開</th><td>入力は自動で端末に保存されます。スタート画面の「保存されている点検」の <kbd>開く</kbd> で再開できます。書き出したExcel点検表を読み込み直して、別の端末で続けることもできます。</td></tr>
+<tr><th>共有</th><td>対応している端末では、「書き出し」に <kbd>共有する（メール・LINEなど）</kbd> が出ます。出ない場合や送れない場合は、保存してからLINEやメールに添付してください。</td></tr>
+</table>
+
+<h2 id="s6">Excel点検表への書き出し</h2>
+<ul>
+<li>読み込んだExcel点検表の、入力するセルだけを書き換えて保存します。書式・シートの保護・印刷設定・区分欄のプルダウンは元のままです。読み込んだ元のファイルは変更されません。</li>
+<li>コメントが長い行は、文字が切れないよう行の高さを広げます。その分、ページの区切りが元とずれることがあります。</li>
+</ul>
+<table>
+<tr><th>区分</th><th>結果の欄</th><th>コメントの欄</th></tr>
+<tr><td>生産者・団体など</td><td>そのままの結果（例：○）</td><td>そのままのコメント</td></tr>
+<tr><td>両方</td><td>1つのセルに2行で「生✕」「団○」<br><span class="small">はみ出さないよう、このセルだけ文字を小さくします</span></td><td>「生：〜」「団：〜」の2行</td></tr>
+</table>
+
+<h2 id="s7">注意点</h2>
+<ul>
+<li><b>記録として保管するのは、書き出したExcelファイルです。</b>端末内の自動保存は、ブラウザのデータ削除、機種変更、プライベートモードなどで消えることがあります。区切りごとにExcelへ書き出してください。</li>
+<li>iPhone（Safari）は、しばらく使わないサイトのデータを自動で消すことがあります。「ホーム画面に追加」と、こまめな書き出しをおすすめします。</li>
+<li>LINEの中のブラウザでは、ファイルの読み込みや保存がうまくいかないことがあります。SafariやChromeで開いてください。</li>
+<li>1つの点検を、複数の端末で同時に入力しないでください。別々のデータになります。</li>
+<li>書き出したExcel点検表には、生産者名や点検結果が含まれます。送り先を確かめ、関係者以外に転送しないでください。</li>
+<li>このツールは試作版です。書き出したExcel点検表は、提出・保管の前に内容を確認してください。</li>
+</ul>
+
+<h2 id="s8">困ったとき</h2>
+<table>
+<tr><th>こんなとき</th><th>確認すること</th></tr>
+<tr><td>Excel点検表を読み込めない</td><td>拡張子が .xlsx のExcel点検表か確認してください。見出し行（番号／点検項目／区分／自己点検／コメント／二者点検／コメント）のある点検表が対象です。</td></tr>
+<tr><td>点検に進めない</td><td>「基本情報」で点検種別を選んでください。</td></tr>
+<tr><td>点検項目が少ない</td><td>区分のボタンや、○・✕などの絞り込み、検索が効いていないか確認してください。押し直すと解除されます。</td></tr>
+<tr><td>自己点検ファイルを追加できない</td><td>別の規範の点検表は追加できません。未入力のファイルや、読み込み済みと同じ内容のファイルも追加されません。</td></tr>
+<tr><td>前回の結果が表示されない</td><td>同じ規範の点検表か確認してください。版が違って項番が変わった項目には表示されません。「前回を非表示」になっていないかも確認してください。</td></tr>
+<tr><td>入力した内容が消えた</td><td>同じ端末・同じブラウザで開いているか確認してください。消えた場合は、最後に書き出したExcel点検表を読み込み直します。</td></tr>
+<tr><td>保存したファイルの名前がおかしい</td><td>「書き出し」のファイル名の欄で、名前を付け直して保存してください。</td></tr>
+</table>
+<p>不具合やご意見は、<a href="mailto:gap@soranoiro.net">gap@soranoiro.net</a> までお知らせください。画面の様子（スクリーンショット）と、機種・ブラウザの名前があると助かります。点検表の内容・運用については、日本生活協同組合連合会の点検表および運用マニュアルをご確認ください。</p>
+
+</main>
+</body>
+</html>

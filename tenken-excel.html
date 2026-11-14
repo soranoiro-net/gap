@@ -660,7 +660,7 @@ function outName(){
 }
 function outHtml(){
   const{m,rec}=cur,S=rec.state,c=counts(S,m.items.filter(it=>inMy(S,it)));
-  const canShare=!!(navigator.canShare&&window.File);
+  const canShare=canShareXlsx();
   return`<div class="card"><h2>入力状況<small>${S.sel.col==='second'?'二者点検の欄／'+(c.chk?`<span class="chk on" style="cursor:default">★後で確認：${c.chk}</span>`:'★後で確認：0'):'自己点検の欄'}</small></h2>
    <div class="stat"><div><b>${c.done}</b><span>入力済み</span></div><div><b>${c.total-c.done}</b><span>未入力</span></div><div><b>${c.ok}</b><span>${esc(m.choices[0]||'○')}</span></div><div><b>${c.ng}</b><span>${esc(NGV())}</span></div><div><b>${c.na}</b><span>${esc(m.choices[2]||'ー')}</span></div>${S.sel.col==='second'?`<div><b>${c.need}</b><span>要コメント</span></div>`:''}</div>
    ${S.sel.type==null&&m.types.length?'<div class="warn">点検種別が選ばれていません。「基本情報」で選び、実施日と点検者を入れてください。</div>':''}</div>
@@ -668,6 +668,7 @@ function outHtml(){
    <label class="f"><span>ファイル名</span><input type="text" id="outname" value="${esc(outName())}"></label>
    <p><button class="btn pri big" data-act="export">Excelファイルを保存</button></p>
    ${canShare?'<p><button class="btn big" data-act="share">共有する（メール・LINEなど）</button></p>':''}
+   ${canShare?'':'<p class="note">LINEやメールで送るときは、保存したファイルを添付してください（この端末では、共有画面からExcelファイルを直接送れません）。</p>'}
    <p class="note">読み込んだExcel点検表の入力セルだけを書き換えて保存します。書式・保護・印刷設定は元のままです。コメントが長い行は、文字が切れないよう行の高さを広げます。</p>
    <p class="note">書き出したファイルは、このツールにもう一度読み込んで続きを入力できます。</p></div>
   ${(()=>{const s=mStats(S);return S.sel.col==='second'||s.n||s.chk||s.ph?`<div class="card"><h2>🔒 自分用メモ</h2>
@@ -676,15 +677,19 @@ function outHtml(){
    <div class="note" style="font-weight:600">全体のメモ</div>${mmHtml('_all',{noChk:true,ph:'点検全体について、気になった点・後で確認したいことなど'})}
    <div class="btns"><button class="btn sm" data-act="m-txt">自分用メモをテキストで保存</button><button class="btn sm danger" data-act="m-clear">メモと写真を消去</button></div></div>`:''})()}`;
 }
+const XLSX_TYPE='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+/* Excelファイルを共有画面で送れる端末かどうか（Android・パソコンのChromeなどは送れない） */
+function canShareXlsx(){try{return!!(navigator.share&&navigator.canShare&&navigator.canShare({files:[new File([new Uint8Array(1)],'a.xlsx',{type:XLSX_TYPE})]}))}catch(e){return false}}
+function saveFile(bytes,name){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([bytes],{type:XLSX_TYPE}));a.download=name;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000)}
 function doExport(share){
   try{
     const bytes=buildXlsx(cur.rec);let name=($('#outname').value||outName()).trim();if(!/\.xlsx$/i.test(name))name+='.xlsx';
-    const type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-    if(share){const file=new File([bytes],name,{type});
-      if(navigator.canShare({files:[file]})){navigator.share({files:[file],title:name}).catch(()=>{});return}
-      toast('この端末では共有が使えないため、保存します')}
-    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([bytes],{type}));a.download=name;document.body.appendChild(a);a.click();
-    setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000);toast('書き出しました：'+name);
+    if(share){const file=new File([bytes],name,{type:XLSX_TYPE});let ok=false;try{ok=navigator.canShare({files:[file]})}catch(e){}
+      if(ok){navigator.share({files:[file],title:name}).then(()=>toast('共有画面を開きました')).catch(e=>{if(e&&e.name==='AbortError')return;
+        saveFile(bytes,name);toast('この端末では共有画面から送れないため、端末に保存しました。LINEやメールに添付して送ってください。',6000)});return}
+      saveFile(bytes,name);toast('この端末では共有画面から送れないため、端末に保存しました。LINEやメールに添付して送ってください。',6000);return}
+    saveFile(bytes,name);toast('書き出しました：'+name);
   }catch(e){console.error(e);toast('書き出しに失敗しました：'+e.message,6000)}
 }
 async function addSources(fileList){

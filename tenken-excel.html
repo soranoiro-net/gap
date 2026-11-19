@@ -128,6 +128,13 @@ a{color:var(--acc);word-break:break-all}
 .card p{margin:0 0 8px}.card p:last-child{margin-bottom:0}
 .card ul{margin:0;padding-left:1.3em}
 pre.lic{white-space:pre-wrap;font-size:12px;background:var(--soft);padding:10px;border-radius:8px;margin:8px 0 0}
+:root{--orange:#c2560c}@media (prefers-color-scheme:dark){:root{--orange:#ff9a52}}
+.btn3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.btn3 .btn{min-height:48px;padding:6px 8px;font-size:14px;line-height:1.35;text-align:center}
+.btn.warn-o{background:#fff;color:var(--orange);border:2px solid var(--orange)}
+@media (prefers-color-scheme:dark){.btn.warn-o{background:var(--card)}}
+.sheet.wide{max-width:760px;display:flex;flex-direction:column}
+pre.memo{white-space:pre-wrap;word-break:break-word;font:14px/1.7 inherit;font-family:inherit;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;margin:0;overflow:auto;flex:1;min-height:0;max-height:66vh}
 </style>
 </head>
 <body>
@@ -683,7 +690,7 @@ function outHtml(){
    <p class="note">各項目の「メモを書く」で書いたメモと写真は、<b>この端末のブラウザだけ</b>に保存され、Excel点検表には含まれません。写真は端末への保存やコピーはできず、ほかの端末に移すこともできません。点検が終わったら、取り決めに従って「メモと写真を消去」で処分してください。</p>
    <p style="margin:0 0 8px;font-size:14px">メモ ${s.n}件　★後で確認 ${s.chk}件　写真 ${s.ph}枚</p>
    <div class="note" style="font-weight:600">全体のメモ</div>${mmHtml('_all',{noChk:true,ph:'点検全体について、気になった点・後で確認したいことなど'})}
-   <div class="btns"><button class="btn sm" data-act="m-txt">自分用メモをテキストで保存</button><button class="btn sm danger" data-act="m-clear">メモと写真を消去</button></div></div>`:''})()}`;
+   <div class="btn3"><button class="btn pri" data-act="m-show">メモを表示</button><button class="btn pri" data-act="m-txt">テキストで保存</button><button class="btn warn-o" data-act="m-clear">メモと写真を消去</button></div></div>`:''})()}`;
 }
 const XLSX_TYPE='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 /* Excelファイルを共有画面で送れる端末かどうか（Android・パソコンのChromeなどは送れない） */
@@ -850,6 +857,9 @@ document.addEventListener('click',async e=>{
   else if(act==='m-bg'){if(e.target===b)closeModal()}
   else if(act==='m-close')closeModal();
   else if(act==='m-ph-del'){const v=mView;if(!v||!confirm('この写真を削除しますか？（元に戻せません）'))return;mSet(v.k,{ph:(mGet(v.k).ph||[]).filter(x=>x!==v.pid)});await phDrop(v.pid);closeModal();refreshMemo(v.k);toast('削除しました')}
+  else if(act==='m-show'){$('#modal').innerHTML=`<div class="modal" data-act="m-bg"><div class="sheet wide"><h2>自分用メモ</h2><pre class="memo">${esc(memoText())}</pre>
+    <p class="note" style="margin-top:8px">Excel点検表には含まれない、自分用のメモです。写真は含みません。</p>
+    <div class="btns"><button class="btn pri" data-act="m-txt">テキストで保存</button><button class="btn" data-act="m-close">閉じる</button></div></div></div>`}
   else if(act==='m-txt'){download(new Blob([memoText()],{type:'text/plain'}),outName().replace(/\.xlsx$/,'')+'_自分用メモ.txt');toast('自分用メモを保存しました（写真は含まれません）')}
   else if(act==='m-clear'){const S=cur.rec.state,s=mStats(S);if(!confirm(`この点検の自分用メモと写真を消去します（メモ ${s.n}件・★後で確認 ${s.chk}件・写真 ${s.ph}枚）。\n消去したものは元に戻せません。点検結果は消えません。\n\nよろしいですか？`))return;await memoClear(S);openM.clear();save();renderTab();toast('メモと写真を消去しました')}
   else if(act==='pv-load'){$('#filePrev').value='';$('#filePrev').click()}

@@ -56,7 +56,7 @@ ol.do>li::before{content:counter(d);position:absolute;left:12px;top:12px;width:2
 <body>
 <main>
 <p class="back"><a href="index.html">← 産直・GAPの道具箱へ</a></p>
-<div class="top"><p class="k">使い方</p><h1>Excel点検表 入力ツール の使い方</h1><p class="sub">試作版 Ver0.1.7　自己点検、内部監査・二者点検の進め方と便利な機能</p></div>
+<div class="top"><p class="k">使い方</p><h1>Excel点検表 入力ツール の使い方</h1><p class="sub">試作版 Ver0.1.8　自己点検、内部監査・二者点検の進め方と便利な機能</p></div>
 
 <ul class="toc"><li><a href="#s1">できること</a></li><li><a href="#s2">はじめに</a></li><li><a href="#s3">自己点検</a></li><li><a href="#s4">内部監査・二者点検</a></li><li><a href="#s6">書き出し</a></li><li><a href="#s5">便利な機能</a></li><li><a href="#s7">注意点</a></li><li><a href="#s8">困ったとき</a></li></ul>
 
@@ -68,7 +68,7 @@ ol.do>li::before{content:counter(d);position:absolute;left:12px;top:12px;width:2
 <li><svg viewBox="0 0 96 96" aria-hidden="true"><rect x="16" y="10" width="64" height="76" rx="8" fill="var(--paper)" stroke="var(--acc)" stroke-width="4"/><path d="M16 30h64M38 30v56" stroke="var(--line)" stroke-width="3"/><rect x="24" y="16" width="26" height="8" rx="4" fill="var(--leaf)"/><g fill="none" stroke="var(--ok)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 42l4 4 7-8M22 60l4 4 7-8"/></g><path d="M23 74l8 8M31 74l-8 8" stroke="var(--ng)" stroke-width="4" stroke-linecap="round"/><g stroke="var(--line)" stroke-width="4" stroke-linecap="round"><path d="M46 43h26M46 61h26M46 78h18"/></g></svg><span><b>同じ形式で書き出す</b>書式も印刷設定も元のまま</span></li>
 </ol>
 <table>
-<tr><th>対応する点検表</th><td>生協版適正農業規範（青果・米編、畜産編）、適正水産規範、適正流通規範、適正産直規範のExcel点検表（2023年以降）</td></tr>
+<tr><th>対応する点検表</th><td>生協版適正農業規範（青果・米編2023/2025、畜産編2025）、適正水産規範2025、適正流通規範2026、適正産直規範2025/2026のExcel点検表</td></tr>
 <tr><th>使える端末</th><td>スマートフォン・タブレット・パソコンのブラウザ（iPhoneはSafari、AndroidはChrome、パソコンはChromeまたはEdge）。インストールは不要です。</td></tr>
 <tr><th>用意するもの</th><td>点検に使うExcel点検表（.xlsx）。記入途中のものでも読み込めます。</td></tr>
 </table>
@@ -124,14 +124,15 @@ ol.do>li::before{content:counter(d);position:absolute;left:12px;top:12px;width:2
 
 <h2 id="s5">便利な機能</h2>
 <table>
-<tr><th>絞り込み</th><td>点検画面の上部に、○・✕・ー・要コメント・★後で確認・メモありの件数が並びます。押すと、すべての章からその項目だけを表示します（もう一度押すと解除）。「この章の未入力」は、選択中の章の中で絞り込みます。</td></tr>
+<tr><th>絞り込み</th><td>点検画面の上部に、○・✕・ー・要コメント・未入力・★後で確認・メモありの件数が並びます。押すと、すべての章からその項目だけを表示します（もう一度押すと解除）。点検の終盤に <kbd>未入力</kbd> を押すと、入力漏れをまとめて確認できます。</td></tr>
+<tr><th>画面を広く使う</th><td>点検画面で下へスクロールすると、上部のタブと絞り込みの部分が隠れます。上へ少しスクロールすると、また表示されます。</td></tr>
 <tr><th>検索</th><td>「番号・語句で検索」に番号（例：4-02）や言葉を入れると、すべての章から探します。規範項目、点検項目、コメント、メモが対象です。</td></tr>
 <tr><th>★後で確認</th><td>内部監査・二者点検のとき、気になった項目は「☆ 後で確認」を押すだけで印が付きます。点検画面上部の <kbd>★後で確認</kbd> を押すと、印を付けた項目だけをすべての章から表示できます。</td></tr>
-<tr><th>自分用メモの保存</th><td>「書き出し」の <kbd>自分用メモをテキストで保存</kbd> で、表紙などの基本情報と、全体のメモ・項目ごとのメモ（★後で確認の印つき）、評価が✕の項目とそのコメントを1つのテキストファイルにまとめて保存できます（写真は含みません）。報告書づくりや振り返りの控えに使えます。</td></tr>
+<tr><th>自分用メモの保存</th><td>「書き出し」の <kbd>自分用メモをテキストで保存</kbd> で、次の内容を1つのテキストファイルにまとめて保存できます（写真は含みません）。報告書づくりや振り返りの控えに使えます。<br>・表紙の情報（生協名・団体名・実施開始日など）、各点検の実施日・点検者、まとめた自己点検ファイル、参照した前回の結果<br>・入力の状況（○・✕・ー・未入力・要コメント・★後で確認の件数）<br>・全体のメモ<br>・★後で確認の項目（自己点検の結果、評価、コメント、メモ）<br>・項目ごとのメモ<br>・評価が✕の項目と、要コメントの項目</td></tr>
 <tr><th>前回の結果</th><td>「基本情報」の <b>前回の結果（任意）</b> で前年などのExcel点検表を読み込むと、各項目に前回の結果とコメントが点線の枠で表示されます。<kbd>コピー</kbd> で1項目ずつ入力できます。前回と状況が変わっていないか確かめたうえで使ってください。</td></tr>
 <tr><th>区分の設定</th><td>区分シートのある点検表（2025年版以降）では、「基本情報」の <b>区分の設定</b> で区分の名前を変更でき、点検画面で項目ごとの区分も変えられます。変更は書き出すExcelに反映されます。</td></tr>
 <tr><th>続きから再開</th><td>入力は自動で端末に保存されます。スタート画面の「保存されている点検」の <kbd>開く</kbd> で再開できます。書き出したExcel点検表を読み込み直して、別の端末で続けることもできます。</td></tr>
-<tr><th>共有</th><td>Excelファイルを共有画面から直接送れる端末でだけ、「書き出し」に <kbd>共有する（メール・LINEなど）</kbd> が出ます。AndroidやパソコンのChromeなどでは出ないため、<kbd>Excelファイルを保存</kbd> で保存してから、LINEの「＋」→「ファイル」やメールの添付で送ってください。</td></tr>
+<tr><th>LINE・メールで送る</th><td>iPhone・iPadでは、「書き出し」の <kbd>LINE・メールなどで送る</kbd> で共有画面が開き、送り先を選べます。Androidやパソコンでは、ブラウザの制限でExcelファイルを共有画面から送れないため、<kbd>Excelファイルを保存</kbd> で保存してから、LINEの「＋」→「ファイル」やメールの添付で送ってください。<br>端末に保存するだけなら、iPhoneでも <kbd>Excelファイルを保存</kbd> が早く、「ダウンロード」に保存されます（Safariのアドレス欄のメニュー →「ダウンロード」から開けます）。</td></tr>
 </table>
 
 <h2 id="s7">注意点</h2>

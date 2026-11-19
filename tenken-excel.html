@@ -134,7 +134,9 @@ pre.lic{white-space:pre-wrap;font-size:12px;background:var(--soft);padding:10px;
 .btn.warn-o{background:#fff;color:var(--orange);border:2px solid var(--orange)}
 @media (prefers-color-scheme:dark){.btn.warn-o{background:var(--card)}}
 .sheet.wide{max-width:760px;display:flex;flex-direction:column}
-pre.memo{white-space:pre-wrap;word-break:break-word;font:14px/1.7 inherit;font-family:inherit;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;margin:0;overflow:auto;flex:1;min-height:0;max-height:66vh}
+div.memo{white-space:pre-wrap;word-break:break-word;font:14px/1.7 inherit;font-family:inherit;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;margin:0;overflow:auto;flex:1;min-height:0;max-height:66vh}
+.mph{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 8px 1.5em;white-space:normal}
+.mph canvas{width:auto;height:auto;max-width:min(240px,100%);max-height:240px;border-radius:8px;border:1px solid var(--line);background:var(--soft);-webkit-touch-callout:none;user-select:none}
 </style>
 </head>
 <body>
@@ -755,13 +757,16 @@ async function phBmp(id){if(PHBMP[id])return PHBMP[id];const r=await store.phGet
   return PHBMP[id]=bm}
 function drawPh(cv,bm,cover){const w=bm.width||bm.naturalWidth,h=bm.height||bm.naturalHeight,g=cv.getContext('2d');
   if(cover){const Z=cv.width,r=Math.max(Z/w,Z/h),dw=w*r,dh=h*r;g.drawImage(bm,(Z-dw)/2,(Z-dh)/2,dw,dh)}else{cv.width=w;cv.height=h;g.drawImage(bm,0,0)}}
-async function hydPh(){for(const cv of document.querySelectorAll('canvas[data-ph]:not([data-done])')){cv.dataset.done='1';try{const bm=await phBmp(cv.dataset.ph);if(bm)drawPh(cv,bm,true);else cv.closest('.pth').classList.add('miss')}catch(e){}}}
+async function hydPh(){for(const cv of document.querySelectorAll('canvas[data-ph]:not([data-done])')){cv.dataset.done='1';try{const bm=await phBmp(cv.dataset.ph);if(bm)drawPh(cv,bm,!cv.dataset.full);else if(cv.closest('.pth'))cv.closest('.pth').classList.add('miss')}catch(e){}}}
 async function phDrop(id){const bm=PHBMP[id];if(bm&&bm.close)bm.close();delete PHBMP[id];await store.phDel(id).catch(()=>{})}
 async function memoClear(S){for(const m of Object.values(S.memo.items))for(const x of m.ph||[])await phDrop(x);S.memo={items:{}}}
 function refreshMemo(k){if(k!=='_all'&&document.querySelector(`.item[data-key="${CSS.escape(k)}"]`))refreshCard(k);else{const y=scrollY;renderTab();window.scrollTo(0,y)}}
 function refreshCard(key){const it=cur.m.items.find(x=>x.key===key),el=document.querySelector(`.item[data-key="${CSS.escape(key)}"]`);if(!it||!el)return;el.outerHTML=itemHtml(it,cur.rec.state.sel.col==='second');hydPh();refreshProgress()}
 function closeModal(){$('#modal').innerHTML='';mView=null}
-function memoText(){const{m,rec}=cur,S=rec.state,L=[],ind=t=>String(t||'').trim().replace(/\n/g,'\n        ');
+const PHMARK='\u0001PH:';
+/* 画面表示用：テキストの写真の位置に、その項目の写真を並べる */
+function memoHtml(){const S=cur.rec.state;return memoText(true).split('\r\n').map(l=>l.startsWith(PHMARK)?`<div class="mph">${(S.memo.items[l.slice(PHMARK.length)]||{ph:[]}).ph.map(pid=>`<canvas data-ph="${esc(pid)}" data-full="1" width="8" height="8"></canvas>`).join('')}</div>`:esc(l)+'\n').join('')}
+function memoText(withPh){const{m,rec}=cur,S=rec.state,L=[],ind=t=>String(t||'').trim().replace(/\n/g,'\n        ');
   const one=t=>String(t||'').replace(/\s+/g,' ').trim(),dt=v=>{const i=toIso(v);return i?jdate(i):v};
   const ch=m.choices,ng=NGV(),c=counts(S,m.items),second=S.sel.col==='second';
   const evalLine=it=>{const o=second?auditOut(S,it.key):selfOut(S,it.key);return(o.v?o.v.replace(/\n/g,'／'):'未入力')};
@@ -771,7 +776,7 @@ function memoText(){const{m,rec}=cur,S=rec.state,L=[],ind=t=>String(t||'').trim(
     const k=nz(S.items[it.key].k);if(k)L.push('  区分　　：'+k);
     if(second){const sl=selfLine(it);if(sl)L.push('  自己点検：'+ind(sl))}
     L.push('  '+(second?'評価　　':'結果　　')+'：'+(o.v?o.v.replace(/\n/g,'／'):'未入力'));if(o.c)L.push('  コメント：'+ind(o.c));
-    if(opt.memo!==false){if(x.t)L.push('  メモ　　：'+ind(x.t));if((x.ph||[]).length)L.push('  写真　　：'+x.ph.length+'枚（ツール内に保存）')}};
+    if(opt.memo!==false){if(x.t)L.push('  メモ　　：'+ind(x.t));if((x.ph||[]).length){L.push('  写真　　：'+x.ph.length+'枚（ツール内に保存）');if(withPh)L.push(PHMARK+it.key)}}};
   L.push('自分用メモ（点検担当者の手控え）','※Excel点検表には含まれない、担当者の自分用のメモです。関係者以外に渡さないでください。','作成日時：'+fmtTime(Date.now()),'');
   L.push('■ 基本情報','点検表　　：'+one(m.title+' '+m.sub),'元のファイル：'+rec.fileName);
   if(typeLabel(S))L.push('今回の点検：'+typeLabel(S)+'（'+(second?'二者点検':'自己点検')+'の欄に記入）');
@@ -781,7 +786,7 @@ function memoText(){const{m,rec}=cur,S=rec.state,L=[],ind=t=>String(t||'').trim(
   if(S.sources.length){L.push('','■ まとめた自己点検ファイル',(S.baseLabel||'自己点検1')+'：'+rec.fileName);for(const x of S.sources)L.push(x.label+'：'+x.file)}
   if(S.prev.length){L.push('','■ 参照した前回の結果');for(const r of S.prev)L.push(r.file+(r.sdate?'　自己点検 '+jdate(r.sdate):'')+(r.adate?'　'+r.akind+' '+jdate(r.adate):''))}
   L.push('','■ 入力の状況（'+(second?'評価':'自己点検')+'）','入力 '+c.done+' / '+c.total+'　'+(ch[0]||'○')+' '+c.ok+'　'+ng+' '+c.ng+'　'+(ch[2]||'ー')+' '+c.na+'　未入力 '+(c.total-c.done)+(second?'　要コメント '+c.need+'　★後で確認 '+c.chk:''));
-  const a=S.memo.items._all;L.push('','■ 全体のメモ');if(a&&(a.t||(a.ph||[]).length)){if(a.t)L.push(ind(a.t));if((a.ph||[]).length)L.push('（写真 '+a.ph.length+'枚・ツール内に保存）')}else L.push('（なし）');
+  const a=S.memo.items._all;L.push('','■ 全体のメモ');if(a&&(a.t||(a.ph||[]).length)){if(a.t)L.push(ind(a.t));if((a.ph||[]).length){L.push('（写真 '+a.ph.length+'枚・ツール内に保存）');if(withPh)L.push(PHMARK+'_all')}}else L.push('（なし）');
   const chk=m.items.filter(it=>(S.memo.items[it.key]||{}).chk);
   L.push('','■ ★後で確認（'+chk.length+'件）');chk.forEach(it=>itemBlock(it));if(!chk.length)L.push('（なし）');
   const mem=m.items.filter(it=>{const x=S.memo.items[it.key];return x&&!x.chk&&(x.t||(x.ph||[]).length)});
@@ -857,9 +862,9 @@ document.addEventListener('click',async e=>{
   else if(act==='m-bg'){if(e.target===b)closeModal()}
   else if(act==='m-close')closeModal();
   else if(act==='m-ph-del'){const v=mView;if(!v||!confirm('この写真を削除しますか？（元に戻せません）'))return;mSet(v.k,{ph:(mGet(v.k).ph||[]).filter(x=>x!==v.pid)});await phDrop(v.pid);closeModal();refreshMemo(v.k);toast('削除しました')}
-  else if(act==='m-show'){$('#modal').innerHTML=`<div class="modal" data-act="m-bg"><div class="sheet wide"><h2>自分用メモ</h2><pre class="memo">${esc(memoText())}</pre>
-    <p class="note" style="margin-top:8px">Excel点検表には含まれない、自分用のメモです。写真は含みません。</p>
-    <div class="btns"><button class="btn pri" data-act="m-txt">テキストで保存</button><button class="btn" data-act="m-close">閉じる</button></div></div></div>`}
+  else if(act==='m-show'){$('#modal').innerHTML=`<div class="modal" data-act="m-bg"><div class="sheet wide"><h2>自分用メモ</h2><div class="memo">${memoHtml()}</div>
+    <p class="note" style="margin-top:8px">Excel点検表には含まれない、自分用のメモです。写真はこの画面でだけ表示し、テキストの保存には含みません。</p>
+    <div class="btns"><button class="btn pri" data-act="m-txt">テキストで保存</button><button class="btn" data-act="m-close">閉じる</button></div></div></div>`;hydPh()}
   else if(act==='m-txt'){download(new Blob([memoText()],{type:'text/plain'}),outName().replace(/\.xlsx$/,'')+'_自分用メモ.txt');toast('自分用メモを保存しました（写真は含まれません）')}
   else if(act==='m-clear'){const S=cur.rec.state,s=mStats(S);if(!confirm(`この点検の自分用メモと写真を消去します（メモ ${s.n}件・★後で確認 ${s.chk}件・写真 ${s.ph}枚）。\n消去したものは元に戻せません。点検結果は消えません。\n\nよろしいですか？`))return;await memoClear(S);openM.clear();save();renderTab();toast('メモと写真を消去しました')}
   else if(act==='pv-load'){$('#filePrev').value='';$('#filePrev').click()}

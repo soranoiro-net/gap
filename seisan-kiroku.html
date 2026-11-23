@@ -53,6 +53,17 @@ nav button.on{color:var(--g);font-weight:700;box-shadow:inset 0 3px 0 var(--g)}
 table{border-collapse:collapse;width:100%;font-size:14px}
 td,th{border-bottom:1px solid var(--line);padding:6px 4px;text-align:left}
 td.n{text-align:right}
+label.btn{display:inline-flex;align-items:center;justify-content:center;color:var(--g);font-size:16px;margin:0;flex:1 1 140px}
+.ph{display:flex;flex-wrap:wrap;gap:10px;margin:4px 0 8px}
+.ph .p{position:relative;width:84px;height:84px}
+.ph .pv{padding:0;border:0;width:100%;height:100%;min-height:0;background:none}
+.ph img,.th img{width:100%;height:100%;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:block}
+.ph .x{position:absolute;top:-8px;right:-8px;width:28px;height:28px;min-height:0;padding:0;border-radius:50%;background:#fff;color:var(--red);border-color:var(--red);font-size:16px;line-height:1}
+.th{display:flex;gap:6px;margin-top:6px;align-items:center}
+.th span{width:56px;height:56px;display:block}
+#viewer{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:30;display:flex;align-items:center;justify-content:center;padding:8px}
+#viewer[hidden]{display:none}
+#viewer img{max-width:100%;max-height:100%}
 </style>
 </head>
 <body>
@@ -61,6 +72,7 @@ td.n{text-align:right}
 <nav id="nav"></nav>
 <div id="modal" class="modal" hidden></div>
 <div id="toast" hidden></div>
+<div id="viewer" hidden data-act="closeViewer"></div>
 <script>
 'use strict';
 const $=s=>document.querySelector(s);
@@ -74,14 +86,29 @@ let db=emptyDb(),storeMode='mem',view='home',sub={master:'fields',type:'',planti
 
 /* ---------- 保存 ---------- */
 const KEY='seisan-kiroku-db';
-function idb(){return new Promise((res,rej)=>{let done=false;setTimeout(()=>{if(!done)rej(new Error('timeout'))},3000);
-  const r=indexedDB.open('seisan-kiroku',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');
-  r.onsuccess=()=>{done=true;res(r.result)};r.onerror=()=>{done=true;rej(r.error)}})}
+let _idb=null;
+function idb(){if(_idb)return Promise.resolve(_idb);return new Promise((res,rej)=>{let done=false;setTimeout(()=>{if(!done)rej(new Error('timeout'))},3000);
+  const r=indexedDB.open('seisan-kiroku',2);r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains('kv'))d.createObjectStore('kv');if(!d.objectStoreNames.contains('photos'))d.createObjectStore('photos')};
+  r.onsuccess=()=>{done=true;_idb=r.result;_idb.onversionchange=()=>{_idb.close();_idb=null};res(_idb)};r.onerror=()=>{done=true;rej(r.error)}})}
 async function idbGet(){const d=await idb();return new Promise((res,rej)=>{const q=d.transaction('kv').objectStore('kv').get(KEY);q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)})}
 async function idbSet(v){const d=await idb();return new Promise((res,rej)=>{const t=d.transaction('kv','readwrite');t.objectStore('kv').put(v,KEY);t.oncomplete=()=>res();t.onerror=()=>rej(t.error)})}
+/* 写真：本体はIndexedDBの photos に1枚ずつ保存。一覧用の縮小画像は起動時に読み込む */
+const thumbs={},memPhotos={};
+async function photoPut(p){if(!p.thumb)p.thumb=p.data;thumbs[p.id]=p.thumb;
+  if(storeMode!=='idb'){memPhotos[p.id]=p;return}
+  const d=await idb();await new Promise((res,rej)=>{const t=d.transaction('photos','readwrite');t.objectStore('photos').put(p,p.id);t.oncomplete=()=>res();t.onerror=()=>rej(t.error)})}
+async function photoGet(id){if(memPhotos[id])return memPhotos[id];if(storeMode!=='idb')return null;
+  const d=await idb();return new Promise((res,rej)=>{const q=d.transaction('photos').objectStore('photos').get(id);q.onsuccess=()=>res(q.result||null);q.onerror=()=>rej(q.error)})}
+async function loadThumbs(){const d=await idb();await new Promise(res=>{const q=d.transaction('photos').objectStore('photos').openCursor();
+  q.onsuccess=()=>{const c=q.result;if(c){thumbs[c.key]=c.value.thumb||c.value.data;c.continue()}else res()};q.onerror=()=>res()})}
+function loadImg(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),i=new Image();i.onload=()=>{URL.revokeObjectURL(u);res(i)};i.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('img'))};i.src=u})}
+function scaleImg(img,max,q){const w=img.naturalWidth,h=img.naturalHeight,r=Math.min(1,max/Math.max(w,h));const c=document.createElement('canvas');c.width=Math.max(1,Math.round(w*r));c.height=Math.max(1,Math.round(h*r));
+  const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(img,0,0,c.width,c.height);return c.toDataURL('image/jpeg',q)}
+async function makePhoto(file){const img=await loadImg(file);return{id:uid(),data:scaleImg(img,1600,.75),thumb:scaleImg(img,240,.6),createdAt:new Date().toISOString()}}
+const usedPhotoIds=()=>[...new Set(live('records').flatMap(r=>r.photoIds||[]))];
 function norm(v){const d=emptyDb();Object.assign(d.meta,v.meta||{});d.meta.last=d.meta.last||{};COLS.forEach(c=>{if(Array.isArray(v[c]))d[c]=v[c]});return d}
 async function load(){
-  try{const v=await idbGet();storeMode='idb';if(v)db=norm(v);return}catch(e){}
+  try{const v=await idbGet();storeMode='idb';if(v)db=norm(v);try{await loadThumbs()}catch(e){}return}catch(e){}
   try{const v=localStorage.getItem(KEY);storeMode='ls';if(v)db=norm(JSON.parse(v));return}catch(e){}
   storeMode='mem';
 }
@@ -164,11 +191,14 @@ function fieldHtml(d,v){
     if(!list.length)return lab+`<div class="warn">作付がまだありません。「台帳」で圃場・品目・作付を登録してください。</div>`;
     return lab+list.map(x=>`<label class="chk"><input type="checkbox" name="${d.k}" value="${x.id}" ${(v||[]).includes(x.id)?'checked':''}>${esc(refLabel(d.ref,x))}</label>`).join('');
   }
+  if(t==='photos')return lab+`<div class="ph" id="phbox">${phBox()}</div><div class="row"><label class="btn">撮影する<input type="file" accept="image/*" capture="environment" data-photo hidden></label><label class="btn">写真を選ぶ<input type="file" accept="image/*" multiple data-photo hidden></label></div>`;
   return lab+`<input id="${id}" name="${d.k}" type="${t}" ${t==='number'?'step="any" inputmode="decimal"':''} value="${esc(v)}">`;
 }
 let formCtx=null;
+function phBox(){return (formCtx.photoIds||[]).map(id=>{const s=(formCtx.newPhotos[id]||{}).thumb||thumbs[id];
+  return `<div class="p"><button type="button" class="pv" data-act="viewPhoto" data-id="${id}">${s?`<img src="${s}" alt="写真">`:'写真'}</button><button type="button" class="x" data-act="rmPhoto" data-id="${id}" aria-label="写真を外す">×</button></div>`}).join('')}
 function openForm(o){
-  formCtx=o;const v=o.values||{};
+  formCtx=o;const v=o.values||{};o.photoIds=(v.photoIds||[]).slice();o.newPhotos={};
   $('#modal').innerHTML=`<div class="sheet"><h2>${esc(o.title)}</h2><form id="frm" novalidate>${o.defs.map(d=>fieldHtml(d,v[d.k])).join('')}
     <div class="err" id="ferr"></div><div class="acts"><button type="submit" class="pri">保存</button><button type="button" data-act="closeForm">キャンセル</button>
     ${o.onDelete?'<button type="button" class="danger" data-act="delForm">削除</button>':''}</div></form></div>`;
@@ -179,6 +209,7 @@ function collect(){
   const f=$('#frm'),out={},miss=[];
   formCtx.defs.forEach(d=>{
     const t=d.t||'text';let val;
+    if(t==='photos'){out[d.k]=formCtx.photoIds.slice();return}
     if(t==='multi')val=[...f.querySelectorAll(`input[name="${d.k}"]:checked`)].map(e=>e.value);
     else if(t==='check')val=f.elements[d.k].checked;
     else if(t==='number'){const s=f.elements[d.k].value;val=s===''?'':Number(s)}
@@ -197,11 +228,11 @@ function collect(){
 function recordForm(type,rec,dup){
   const isNew=!rec||dup,last=db.meta.last||{};
   const base=rec?Object.assign({},rec):{date:today(),workerId:last.workerId||'',machineId:last.machineId||'',unit:(last.unit||{})[type]||''};
-  if(dup){delete base.id;base.date=today();base.plantingIds=[rec.plantingId]}
+  if(dup){delete base.id;base.date=today();base.plantingIds=[rec.plantingId];base.photoIds=[]}
   else if(!rec&&sub.planting)base.plantingIds=[sub.planting];
   const defs=[{k:'date',l:'日付',t:'date',req:1},
     isNew?{k:'plantingIds',l:'作付（複数選ぶと、まとめて記録します）',t:'multi',ref:'plantings',req:1}:{k:'plantingId',l:'作付',t:'ref',ref:'plantings',active:1,req:1}]
-    .concat(RT[type].defs,[{k:'workerId',l:'作業者',t:'ref',ref:'workers',add:1},{k:'memo',l:'メモ',t:'textarea'}]);
+    .concat(RT[type].defs,[{k:'workerId',l:'作業者',t:'ref',ref:'workers',add:1},{k:'memo',l:'メモ',t:'textarea'},{k:'photoIds',l:'写真',t:'photos'}]);
   openForm({title:RT[type].label+(isNew?'を記録':'の修正'),defs,values:base,
     onSave:v=>{
       const ids=isNew?v.plantingIds:[v.plantingId];delete v.plantingIds;
@@ -217,7 +248,7 @@ function recItem(r,showP){
   const t=RT[r.type]||{label:r.type,tag:''};
   return `<button class="item" data-act="editRec" data-id="${r.id}"><div class="t"><span class="tag ${t.tag}">${t.label}</span>${esc(r.date)}</div>
     <div>${esc(recSummary(r))}</div>${showP?`<div class="s">${esc(plantingLabel(byId('plantings',r.plantingId)))}</div>`:''}
-    ${r.memo?`<div class="s">${esc(r.memo)}</div>`:''}</button>`;
+    ${r.memo?`<div class="s">${esc(r.memo)}</div>`:''}${(r.photoIds||[]).length?`<div class="th">${r.photoIds.slice(0,3).map(id=>thumbs[id]?`<span><img src="${thumbs[id]}" alt=""></span>`:'').join('')}<span class="mut" style="width:auto;height:auto">写真${r.photoIds.length}枚</span></div>`:''}</button>`;
 }
 
 /* ---------- 画面 ---------- */
@@ -265,8 +296,9 @@ function vData(){
   const mode={idb:'この端末のブラウザ内（IndexedDB）',ls:'この端末のブラウザ内（localStorage）',mem:'保存されません（この画面を閉じると消えます）'}[storeMode];
   return `<h2>データ</h2>`+backupWarn()+`<div class="card"><table>
     <tr><th>保存先</th><td>${mode}</td></tr><tr><th>記録</th><td>${live('records').length}件</td></tr><tr><th>作付</th><td>${live('plantings').length}件</td></tr>
+    <tr><th>写真</th><td>${usedPhotoIds().length}枚${storeMode==='idb'?'':'（この画面では写真は保存されません）'}</td></tr>
     <tr><th>最後の書き出し</th><td>${db.meta.lastExport?esc(db.meta.lastExport.slice(0,10)):'なし'}</td></tr></table></div>
-    <h3>バックアップ・機種変更</h3><div class="row"><button class="pri" data-act="exportJson">データファイルを書き出す</button>${navigator.share?'<button data-act="shareJson">共有する（LINE・メール）</button>':''}</div>
+    <h3>バックアップ・機種変更</h3><label class="chk"><input type="checkbox" id="withPhotos" checked>写真を含める（ファイルが大きくなります）</label><div class="row"><button class="pri" data-act="exportJson">データファイルを書き出す</button>${navigator.share?'<button data-act="shareJson">共有する（LINE・メール）</button>':''}</div>
     <div style="margin-top:8px"><label>データファイルを読み込む（今のデータと統合します）</label><input type="file" id="imp" accept=".json,application/json"></div>
     <h3>表計算用</h3><button data-act="exportCsv">記録の一覧をCSVで書き出す</button>
     <p class="mut" style="margin-top:16px">記録はこの端末の中だけに保存され、外部には送信されません。書き出したファイルを保管しておくと、端末の故障や機種変更のときに元に戻せます。</p>`;
@@ -280,17 +312,19 @@ let toastT;function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;
 /* ---------- 書き出し・読み込み ---------- */
 const stamp=()=>today().replace(/-/g,'');
 function download(name,text,type){const u=URL.createObjectURL(new Blob([text],{type}));const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000)}
-function jsonText(){db.meta.lastExport=new Date().toISOString();return JSON.stringify(db,null,1)}
+async function exportText(){db.meta.lastExport=new Date().toISOString();const out=Object.assign({},db);
+  const w=$('#withPhotos');if(!w||w.checked){const ps=[];for(const id of usedPhotoIds()){const p=await photoGet(id).catch(()=>null);if(p)ps.push(p)}out.photos=ps}
+  return JSON.stringify(out)}
 function merge(inc){let add=0,upd=0;
   COLS.forEach(c=>(inc[c]||[]).forEach(x=>{if(!x||!x.id)return;const i=db[c].findIndex(y=>y.id===x.id);
     if(i<0){db[c].push(x);add++}else if((x.updatedAt||'')>(db[c][i].updatedAt||'')){db[c][i]=x;upd++}}));
   if(!db.meta.farmName&&inc.meta&&inc.meta.farmName)db.meta.farmName=inc.meta.farmName;return{add,upd}}
 function csvText(){
-  const head=['日付','種類','圃場','品目','品種','作期','栽培区分','資材名','登録番号','有効成分','希釈倍数','散布液量(L/10a)','数量','単位','施用面積(a)','対象病害虫・雑草','方法','機械','天候','風','散布終了時刻','収穫ロット','作業者','メモ'];
+  const head=['日付','種類','圃場','品目','品種','作期','栽培区分','資材名','登録番号','有効成分','希釈倍数','散布液量(L/10a)','数量','単位','施用面積(a)','対象病害虫・雑草','方法','機械','天候','風','散布終了時刻','収穫ロット','作業者','メモ','写真枚数'];
   const q=v=>{v=v==null?'':String(v);return /[",\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
   const rows=sortedRecs().reverse().map(r=>{const p=byId('plantings',r.plantingId)||{},f=byId('fields',p.fieldId)||{},c=byId('crops',p.cropId)||{},it=(itemCol(r.type)&&byId(itemCol(r.type),r.itemId))||{};
     return [r.date,(RT[r.type]||{}).label,f.name,c.name,c.variety,p.season,p.type,it.name,it.regNo,it.ingredient,r.dilution,r.sprayVol,r.amount,r.type==='pesticide'?'':r.unit,r.area,r.target,r.method,
-      (byId('machines',r.machineId)||{}).name,r.weather,r.wind,r.endTime,r.lot,(byId('workers',r.workerId)||{}).name,r.memo].map(q).join(',')});
+      (byId('machines',r.machineId)||{}).name,r.weather,r.wind,r.endTime,r.lot,(byId('workers',r.workerId)||{}).name,r.memo,(r.photoIds||[]).length||''].map(q).join(',')});
   return '﻿'+[head.join(',')].concat(rows).join('\r\n');
 }
 
@@ -305,20 +339,29 @@ const ACT={
   newMaster:()=>{const k=sub.master;openForm({title:MASTERS[k].label+'を追加',defs:MASTERS[k].defs,values:{},onSave:v=>upsert(k,v)})},
   editMaster:e=>{const k=sub.master,x=byId(k,e.dataset.id);openForm({title:MASTERS[k].label+'の修正',defs:MASTERS[k].defs,values:x,onSave:v=>upsert(k,Object.assign({},x,v)),onDelete:()=>removeItem(k,x.id)})},
   closeForm:()=>closeForm(),
+  rmPhoto:e=>{formCtx.photoIds=formCtx.photoIds.filter(x=>x!==e.dataset.id);$('#phbox').innerHTML=phBox()},
+  viewPhoto:async e=>{const id=e.dataset.id;const p=(formCtx&&formCtx.newPhotos[id])||await photoGet(id).catch(()=>null);
+    const v=$('#viewer');v.innerHTML=p?`<img src="${p.data}" alt="写真">`:'<p style="color:#fff">写真を読み込めません</p>';v.hidden=false},
+  closeViewer:()=>{const v=$('#viewer');v.hidden=true;v.innerHTML=''},
   delForm:async e=>{if(e.dataset.sure!=='1'){e.dataset.sure='1';e.textContent='もう一度押すと削除';return}
     formCtx.onDelete();closeForm();await save();render();toast('削除しました')},
-  exportJson:async()=>{const t=jsonText();await save();download('seisan-kiroku-'+stamp()+'.json',t,'application/json');render();toast('データファイルを書き出しました')},
-  shareJson:async()=>{try{const t=jsonText();const f=new File([t],'seisan-kiroku-'+stamp()+'.json',{type:'application/json'});
+  exportJson:async()=>{const t=await exportText();await save();download('seisan-kiroku-'+stamp()+'.json',t,'application/json');render();toast('データファイルを書き出しました')},
+  shareJson:async()=>{try{const t=await exportText();const f=new File([t],'seisan-kiroku-'+stamp()+'.json',{type:'application/json'});
     if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'生産記録データ'});await save();render()}
     else toast('この端末ではファイルの共有に対応していません。書き出しを使ってください。')}catch(err){}},
   exportCsv:()=>{download('seisan-kiroku-'+stamp()+'.csv',csvText(),'text/csv');toast('CSVを書き出しました')}
 };
 document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(el&&ACT[el.dataset.act])ACT[el.dataset.act](el)});
 document.addEventListener('submit',async e=>{if(e.target.id!=='frm')return;e.preventDefault();const v=collect();if(!v)return;
-  const ctx=formCtx;ctx.onSave(v);closeForm();askPersist();await save();render()});
+  const ctx=formCtx;for(const id of (v.photoIds||[])){const p=ctx.newPhotos[id];if(p){try{await photoPut(p)}catch(err){toast('写真の保存に失敗しました')}}}
+  ctx.onSave(v);closeForm();askPersist();await save();render()});
 document.addEventListener('change',async e=>{const el=e.target;
+  if(el.hasAttribute&&el.hasAttribute('data-photo')){const ctx=formCtx;if(!ctx)return;
+    for(const f of [...el.files]){try{const p=await makePhoto(f);ctx.newPhotos[p.id]=p;ctx.photoIds.push(p.id)}catch(err){toast('この画像は読み込めません')}}
+    el.value='';if(formCtx===ctx)$('#phbox').innerHTML=phBox();return}
   if(el.id==='imp'&&el.files[0]){try{const inc=JSON.parse(await el.files[0].text());if(!inc||inc.app!=='seisan-kiroku')throw 0;
-      const r=merge(inc);await save();render();toast('読み込みました（追加'+r.add+'件、更新'+r.upd+'件）')}
+      const r=merge(inc);if(Array.isArray(inc.photos))for(const p of inc.photos){if(p&&p.id&&p.data&&!thumbs[p.id]){await photoPut(p);r.add++}}
+      await save();render();toast('読み込みました（追加'+r.add+'件、更新'+r.upd+'件）')}
     catch(err){toast('このファイルは読み込めません。生産記録ツールのデータファイルを選んでください。')}return}
   const k=el.dataset&&el.dataset.chg;if(!k)return;
   if(k==='farm'){db.meta.farmName=el.value.trim();await save();return}

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>生産記録ツール（試作1）</title>
 <style>
-:root{--g:#2f6b3a;--g2:#e8f1e9;--ink:#1f2a22;--mut:#667066;--line:#d9e0d9;--bg:#f6f8f5;--warn:#b25a00;--warnbg:#fff4e2;--red:#b3261e}
+:root{--g:#1e9e48;--gt:#11873b;--g2:#e4f5e8;--ink:#1f2a22;--mut:#667066;--line:#d9e0d9;--bg:#f6f8f5;--warn:#b25a00;--warnbg:#fff4e2;--red:#b3261e}
 *{box-sizing:border-box}
 html,body{margin:0}
 body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic UI","Noto Sans JP",Meiryo,sans-serif;color:var(--ink);background:var(--bg);font-size:16px;line-height:1.5;padding-bottom:76px}
@@ -18,18 +18,18 @@ h3{font-size:15px;margin:14px 0 6px;color:var(--mut);font-weight:600}
 .card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;margin:8px 0}
 .row{display:flex;gap:8px;flex-wrap:wrap}
 .row>*{flex:1 1 140px}
-button,.btn{font:inherit;border:1px solid var(--g);background:#fff;color:var(--g);border-radius:8px;padding:10px 14px;cursor:pointer;min-height:44px}
-button.pri{background:var(--g);color:#fff}
+button,.btn{font:inherit;border:1px solid var(--g);background:#fff;color:var(--gt);border-radius:8px;padding:10px 14px;cursor:pointer;min-height:44px}
+button.pri{background:var(--g);color:#fff;font-weight:600}
 button.big{padding:16px 10px;font-size:17px;font-weight:600}
 button.sm{min-height:36px;padding:6px 10px;font-size:14px}
 button.danger{border-color:var(--red);color:var(--red)}
 button.tab{border-color:var(--line);color:var(--ink);min-height:38px;padding:6px 12px;font-size:14px;flex:0 0 auto}
-button.tab.on{background:var(--g2);border-color:var(--g);color:var(--g);font-weight:600}
+button.tab.on{background:var(--g2);border-color:var(--gt);color:var(--gt);font-weight:600}
 .tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
 .item{display:block;width:100%;text-align:left;background:#fff;border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:10px 12px;margin:6px 0;min-height:0}
 .item .t{font-weight:600}
 .item .s{color:var(--mut);font-size:14px}
-.tag{display:inline-block;font-size:12px;border-radius:99px;padding:1px 9px;margin-right:6px;background:var(--g2);color:var(--g);font-weight:600}
+.tag{display:inline-block;font-size:12px;border-radius:99px;padding:1px 9px;margin-right:6px;background:var(--g2);color:var(--gt);font-weight:600}
 .tag.f{background:#eef0fb;color:#3a4a9a}.tag.h{background:#fdf0e0;color:#8a5200}
 .warn{background:var(--warnbg);border:1px solid #f0cf9a;color:var(--warn);border-radius:10px;padding:10px 12px;margin:8px 0;font-size:14px}
 .mut{color:var(--mut);font-size:14px}
@@ -40,20 +40,34 @@ input[type=checkbox]{width:22px;height:22px;margin:0 8px 0 0;flex:0 0 auto}
 .new{margin-top:6px;font-size:14px}
 nav{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:center}
 nav button{flex:1;max-width:160px;border:0;border-radius:0;color:var(--mut);font-size:13px;padding:10px 2px;min-height:56px}
-nav button.on{color:var(--g);font-weight:700;box-shadow:inset 0 3px 0 var(--g)}
+nav button.on{color:var(--gt);font-weight:700;box-shadow:inset 0 3px 0 var(--g)}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:10}
 .modal[hidden]{display:none}
 .sheet{background:#fff;width:100%;max-width:760px;max-height:92vh;overflow:auto;border-radius:14px 14px 0 0;padding:16px}
 .sheet h2{margin-top:0}
 .err{color:var(--red);font-size:14px;margin-top:8px}
-.acts{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.acts{display:flex;gap:8px;flex-wrap:wrap;position:sticky;bottom:0;background:#fff;margin:16px -16px 0;padding:10px 16px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--line);z-index:2}
+.acts .err{flex:1 1 100%;margin:0}
+.sheet{padding-bottom:0!important}
+.miss{outline:2px solid var(--red);outline-offset:2px;border-radius:8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}
+.chip{min-height:44px;padding:5px 10px;font-size:15px;border:1px solid #b9c3b9;color:var(--ink);background:#fff;border-radius:10px;text-align:left;line-height:1.25;flex:0 1 auto}
+.chip small{display:block;color:var(--mut);font-size:12px}
+.chip.on{background:var(--g);border-color:var(--g);color:#fff;font-weight:600}
+.chip.on small{color:#eafbe9}
+.pkbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pkbar input[type=search]{flex:1 1 160px;padding:8px}
+.sw{display:flex;align-items:center;gap:6px;margin:0;color:var(--ink);font-size:15px;flex:0 0 auto}
+.sw input{width:22px;height:22px;margin:0}
+.more{border-style:dashed;min-height:40px;font-size:14px}
+.okmsg{background:var(--g2);border:1px solid #a9dcb6;color:#0f5f2a;border-radius:10px;padding:10px 12px;margin:8px 0;font-size:14px}
 .acts .pri{flex:2}
 #toast{position:fixed;left:50%;bottom:86px;transform:translateX(-50%);background:#1f2a22;color:#fff;padding:10px 16px;border-radius:8px;font-size:14px;z-index:20;max-width:90%}
 #toast[hidden]{display:none}
 table{border-collapse:collapse;width:100%;font-size:14px}
 td,th{border-bottom:1px solid var(--line);padding:6px 4px;text-align:left}
 td.n{text-align:right}
-label.btn{display:inline-flex;align-items:center;justify-content:center;color:var(--g);font-size:16px;margin:0;flex:1 1 140px}
+label.btn{display:inline-flex;align-items:center;justify-content:center;color:var(--gt);font-size:16px;margin:0;flex:1 1 140px}
 .ph{display:flex;flex-wrap:wrap;gap:10px;margin:4px 0 8px}
 .ph .p{position:relative;width:84px;height:84px}
 .ph .pv{padding:0;border:0;width:100%;height:100%;min-height:0;background:none}
@@ -112,7 +126,7 @@ async function load(){
   try{const v=localStorage.getItem(KEY);storeMode='ls';if(v)db=norm(JSON.parse(v));return}catch(e){}
   storeMode='mem';
 }
-async function save(){
+async function save(){dbVer++;
   try{if(storeMode==='idb')await idbSet(db);else if(storeMode==='ls')localStorage.setItem(KEY,JSON.stringify(db))}
   catch(e){toast('端末への保存に失敗しました。「データ」から書き出してください。')}
 }
@@ -187,39 +201,58 @@ function fieldHtml(d,v){
       +(d.add?`<input class="new" name="${d.k}__new" placeholder="一覧にない場合は、ここに名前を入力">`:'');
   }
   if(t==='multi'){
-    const list=live(d.ref).filter(x=>!x.done);
+    const list=pkList();
     if(!list.length)return lab+`<div class="warn">作付がまだありません。「台帳」で圃場・品目・作付を登録してください。</div>`;
-    return lab+list.map(x=>`<label class="chk"><input type="checkbox" name="${d.k}" value="${x.id}" ${(v||[]).includes(x.id)?'checked':''}>${esc(refLabel(d.ref,x))}</label>`).join('');
+    formCtx.pk=(v||[]).slice();formCtx.pkMulti=formCtx.pk.length>1;formCtx.pkAll=false;formCtx.pkQ='';
+    return `<div id="pkwrap" data-k="${d.k}">${pkHtml(d)}</div>`;
   }
   if(t==='photos')return lab+`<div class="ph" id="phbox">${phBox()}</div><div class="row"><label class="btn">撮影する<input type="file" accept="image/*" capture="environment" data-photo hidden></label><label class="btn">写真を選ぶ<input type="file" accept="image/*" multiple data-photo hidden></label></div>`;
   return lab+`<input id="${id}" name="${d.k}" type="${t}" ${t==='number'?'step="any" inputmode="decimal"':''} value="${esc(v)}">`;
 }
 let formCtx=null;
+/* 作付の候補：最近記録した作付を先頭に */
+function pkList(){const lu={};live('records').forEach(r=>{const t=(r.date||'')+(r.updatedAt||'');if(!lu[r.plantingId]||lu[r.plantingId]<t)lu[r.plantingId]=t});
+  return live('plantings').filter(x=>!x.done).sort((a,b)=>(lu[b.id]||'').localeCompare(lu[a.id]||'')||plantingLabel(a).localeCompare(plantingLabel(b),'ja'))}
+const PK_SHOW=9;
+function pkHtml(d){
+  const c=formCtx,list=pkList(),q=c.pkQ;
+  let shown=q?list.filter(x=>plantingLabel(x).includes(q)):list;
+  const hidden=!q&&!c.pkAll&&shown.length>PK_SHOW?shown.length-PK_SHOW:0;
+  if(hidden){const top=shown.slice(0,PK_SHOW);shown=top.concat(shown.slice(PK_SHOW).filter(x=>c.pk.includes(x.id)))}
+  const chip=x=>{const f=byId('fields',x.fieldId),cr=byId('crops',x.cropId);
+    return `<button type="button" class="chip ${c.pk.includes(x.id)?'on':''}" data-act="pk" data-id="${x.id}">${esc(f?f.name:'圃場未設定')}<small>${esc([cr?cr.name+(cr.variety?'（'+cr.variety+'）':''):'',x.season].filter(Boolean).join(' '))}</small></button>`};
+  return `<label>作付 <span style="color:var(--red)">必須</span>${c.pk.length?`　<span style="color:var(--ink)">${c.pk.length}件選択中</span>`:''}</label>
+    <div class="pkbar">${list.length>PK_SHOW?`<input type="search" data-pkq placeholder="絞り込み（圃場名・品目）" value="${esc(q)}">`:''}
+    <label class="sw"><input type="checkbox" data-pkm ${c.pkMulti?'checked':''}>複数選ぶ</label></div>
+    <div class="chips">${shown.map(chip).join('')||'<span class="mut">該当する作付がありません</span>'}${hidden?`<button type="button" class="chip more" data-act="pkAll">ほか${hidden}件を表示</button>`:''}</div>`;
+}
+function pkRender(){const w=$('#pkwrap');if(w)w.innerHTML=pkHtml({k:w.dataset.k})}
 function phBox(){return (formCtx.photoIds||[]).map(id=>{const s=(formCtx.newPhotos[id]||{}).thumb||thumbs[id];
   return `<div class="p"><button type="button" class="pv" data-act="viewPhoto" data-id="${id}">${s?`<img src="${s}" alt="写真">`:'写真'}</button><button type="button" class="x" data-act="rmPhoto" data-id="${id}" aria-label="写真を外す">×</button></div>`}).join('')}
 function openForm(o){
   formCtx=o;const v=o.values||{};o.photoIds=(v.photoIds||[]).slice();o.newPhotos={};
   $('#modal').innerHTML=`<div class="sheet"><h2>${esc(o.title)}</h2><form id="frm" novalidate>${o.defs.map(d=>fieldHtml(d,v[d.k])).join('')}
-    <div class="err" id="ferr"></div><div class="acts"><button type="submit" class="pri">保存</button><button type="button" data-act="closeForm">キャンセル</button>
+    <div class="acts"><div class="err" id="ferr"></div><button type="submit" class="pri">保存</button><button type="button" data-act="closeForm">キャンセル</button>
     ${o.onDelete?'<button type="button" class="danger" data-act="delForm">削除</button>':''}</div></form></div>`;
   $('#modal').hidden=false;
 }
 function closeForm(){$('#modal').hidden=true;$('#modal').innerHTML='';formCtx=null}
 function collect(){
-  const f=$('#frm'),out={},miss=[];
+  const f=$('#frm'),out={},miss=[],missEl=[];f.querySelectorAll('.miss').forEach(e=>e.classList.remove('miss'));
   formCtx.defs.forEach(d=>{
     const t=d.t||'text';let val;
     if(t==='photos'){out[d.k]=formCtx.photoIds.slice();return}
-    if(t==='multi')val=[...f.querySelectorAll(`input[name="${d.k}"]:checked`)].map(e=>e.value);
+    if(t==='multi')val=(formCtx.pk||[]).slice();
     else if(t==='check')val=f.elements[d.k].checked;
     else if(t==='number'){const s=f.elements[d.k].value;val=s===''?'':Number(s)}
     else val=f.elements[d.k].value.trim();
     if(t==='ref'&&d.add){const nv=f.elements[d.k+'__new'].value.trim();
       if(nv){const ex=live(d.ref).find(x=>x.name===nv);val=ex?ex.id:'__new__:'+nv}}
-    if(d.req&&(val===''||(Array.isArray(val)&&!val.length)||(typeof val==='number'&&isNaN(val))))miss.push(d.l.replace(/（.*$/,''));
+    if(d.req&&(val===''||(Array.isArray(val)&&!val.length)||(typeof val==='number'&&isNaN(val)))){miss.push(d.l.replace(/（.*$/,''));missEl.push(t==='multi'?$('#pkwrap'):f.elements[d.k])}
     out[d.k]=val;
   });
-  if(miss.length){$('#ferr').textContent='入力してください：'+miss.join('、');return null}
+  if(miss.length){$('#ferr').textContent='入力してください：'+miss.join('、');missEl.forEach(e=>e&&e.classList&&e.classList.add('miss'));
+    const e0=missEl.find(e=>e&&e.scrollIntoView);if(e0)e0.scrollIntoView({block:'center',behavior:'smooth'});return null}
   formCtx.defs.forEach(d=>{const val=out[d.k];if(typeof val==='string'&&val.startsWith('__new__:'))out[d.k]=upsert(d.ref,{name:val.slice(8)}).id});
   return out;
 }
@@ -292,14 +325,17 @@ function vMaster(){
     <div style="margin:10px 0"><button class="pri" data-act="newMaster">＋ ${m.label}を追加</button></div>`
     +(list.length?list.map(x=>`<button class="item" data-act="editMaster" data-id="${x.id}"><div class="t">${esc(refLabel(k,x))}</div><div class="s">${esc(m.sub(x))}</div></button>`).join(''):`<p class="mut">${m.label}はまだ登録されていません。</p>`);
 }
+let importMsg=null,shareFile=null,dbVer=0;
 function vData(){
   const mode={idb:'この端末のブラウザ内（IndexedDB）',ls:'この端末のブラウザ内（localStorage）',mem:'保存されません（この画面を閉じると消えます）'}[storeMode];
-  return `<h2>データ</h2>`+backupWarn()+`<div class="card"><table>
+  const im=importMsg?`<div class="${importMsg.ng?'warn':'okmsg'}">${esc(importMsg.text)}</div>`:'';
+  const proto=location.protocol==='https:'||location.hostname==='localhost'?'':`<div class="warn">このページは端末内のファイルとして開かれています（${esc(location.protocol)}）。この開き方では、データが保存されなかったり、開くたびに別のデータになったりすることがあります。公開アドレス（https://…）から開いてください。</div>`;
+  return `<h2>データ</h2>`+im+proto+backupWarn()+`<div class="card"><table>
     <tr><th>保存先</th><td>${mode}</td></tr><tr><th>記録</th><td>${live('records').length}件</td></tr><tr><th>作付</th><td>${live('plantings').length}件</td></tr>
     <tr><th>写真</th><td>${usedPhotoIds().length}枚${storeMode==='idb'?'':'（この画面では写真は保存されません）'}</td></tr>
     <tr><th>最後の書き出し</th><td>${db.meta.lastExport?esc(db.meta.lastExport.slice(0,10)):'なし'}</td></tr></table></div>
     <h3>バックアップ・機種変更</h3><label class="chk"><input type="checkbox" id="withPhotos" checked>写真を含める（ファイルが大きくなります）</label><div class="row"><button class="pri" data-act="exportJson">データファイルを書き出す</button>${navigator.share?'<button data-act="shareJson">共有する（LINE・メール）</button>':''}</div>
-    <div style="margin-top:8px"><label>データファイルを読み込む（今のデータと統合します）</label><input type="file" id="imp" accept=".json,application/json"></div>
+    <div style="margin-top:8px"><label>データファイルを読み込む（今のデータと統合します）</label><input type="file" id="imp"></div>
     <h3>表計算用</h3><button data-act="exportCsv">記録の一覧をCSVで書き出す</button>
     <p class="mut" style="margin-top:16px">記録はこの端末の中だけに保存され、外部には送信されません。書き出したファイルを保管しておくと、端末の故障や機種変更のときに元に戻せます。</p>`;
 }
@@ -339,6 +375,9 @@ const ACT={
   newMaster:()=>{const k=sub.master;openForm({title:MASTERS[k].label+'を追加',defs:MASTERS[k].defs,values:{},onSave:v=>upsert(k,v)})},
   editMaster:e=>{const k=sub.master,x=byId(k,e.dataset.id);openForm({title:MASTERS[k].label+'の修正',defs:MASTERS[k].defs,values:x,onSave:v=>upsert(k,Object.assign({},x,v)),onDelete:()=>removeItem(k,x.id)})},
   closeForm:()=>closeForm(),
+  pk:e=>{const c=formCtx,id=e.dataset.id;if(c.pkMulti)c.pk=c.pk.includes(id)?c.pk.filter(x=>x!==id):c.pk.concat(id);else c.pk=c.pk.length===1&&c.pk[0]===id?[]:[id];
+    const w=$('#pkwrap');if(w)w.classList.remove('miss');pkRender()},
+  pkAll:()=>{formCtx.pkAll=true;pkRender()},
   rmPhoto:e=>{formCtx.photoIds=formCtx.photoIds.filter(x=>x!==e.dataset.id);$('#phbox').innerHTML=phBox()},
   viewPhoto:async e=>{const id=e.dataset.id;const p=(formCtx&&formCtx.newPhotos[id])||await photoGet(id).catch(()=>null);
     const v=$('#viewer');v.innerHTML=p?`<img src="${p.data}" alt="写真">`:'<p style="color:#fff">写真を読み込めません</p>';v.hidden=false},
@@ -346,11 +385,20 @@ const ACT={
   delForm:async e=>{if(e.dataset.sure!=='1'){e.dataset.sure='1';e.textContent='もう一度押すと削除';return}
     formCtx.onDelete();closeForm();await save();render();toast('削除しました')},
   exportJson:async()=>{const t=await exportText();await save();download('seisan-kiroku-'+stamp()+'.json',t,'application/json');render();toast('データファイルを書き出しました')},
-  shareJson:async()=>{try{const t=await exportText();const f=new File([t],'seisan-kiroku-'+stamp()+'.json',{type:'application/json'});
-    if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'生産記録データ'});await save();render()}
-    else toast('この端末ではファイルの共有に対応していません。書き出しを使ってください。')}catch(err){}},
+  shareJson:async e=>{
+    /* 共有はボタンを押した直後でないと許可されないため、ファイルを先に用意し、2回目の押下で共有する */
+    const fresh=shareFile&&Date.now()-shareFile.at<120000&&shareFile.ver===dbVer;
+    if(!fresh){e.textContent='準備中…';const t=await exportText();
+      shareFile={f:new File([t],'seisan-kiroku-'+stamp()+'.txt',{type:'text/plain'}),at:Date.now(),ver:dbVer};}
+    const f=shareFile.f;
+    if(!(navigator.canShare&&navigator.canShare({files:[f]}))){toast('この端末ではファイルの共有に対応していません。「書き出す」を使ってください。');render();return}
+    try{await navigator.share({files:[f],title:'生産記録データ'});shareFile=null;await save();render();toast('共有しました')}
+    catch(err){if(err&&err.name==='AbortError'){render();return}
+      if(err&&err.name==='NotAllowedError'){e.textContent='もう一度押して共有';return}
+      toast('共有できませんでした（'+(err&&err.name||'エラー')+'）。「書き出す」を使ってください。');render()}},
   exportCsv:()=>{download('seisan-kiroku-'+stamp()+'.csv',csvText(),'text/csv');toast('CSVを書き出しました')}
 };
+document.addEventListener('input',e=>{const el=e.target;if(el.hasAttribute('data-pkq')&&formCtx){formCtx.pkQ=el.value.trim();const pos=el.selectionStart;pkRender();const n=document.querySelector('[data-pkq]');if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(err){}}}});
 document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(el&&ACT[el.dataset.act])ACT[el.dataset.act](el)});
 document.addEventListener('submit',async e=>{if(e.target.id!=='frm')return;e.preventDefault();const v=collect();if(!v)return;
   const ctx=formCtx;for(const id of (v.photoIds||[])){const p=ctx.newPhotos[id];if(p){try{await photoPut(p)}catch(err){toast('写真の保存に失敗しました')}}}
@@ -359,10 +407,18 @@ document.addEventListener('change',async e=>{const el=e.target;
   if(el.hasAttribute&&el.hasAttribute('data-photo')){const ctx=formCtx;if(!ctx)return;
     for(const f of [...el.files]){try{const p=await makePhoto(f);ctx.newPhotos[p.id]=p;ctx.photoIds.push(p.id)}catch(err){toast('この画像は読み込めません')}}
     el.value='';if(formCtx===ctx)$('#phbox').innerHTML=phBox();return}
-  if(el.id==='imp'&&el.files[0]){try{const inc=JSON.parse(await el.files[0].text());if(!inc||inc.app!=='seisan-kiroku')throw 0;
-      const r=merge(inc);if(Array.isArray(inc.photos))for(const p of inc.photos){if(p&&p.id&&p.data&&!thumbs[p.id]){await photoPut(p);r.add++}}
-      await save();render();toast('読み込みました（追加'+r.add+'件、更新'+r.upd+'件）')}
-    catch(err){toast('このファイルは読み込めません。生産記録ツールのデータファイルを選んでください。')}return}
+  if(el.id==='imp'&&el.files[0]){const file=el.files[0];let inc;
+    try{const tx=(await file.text()).replace(/^\ufeff/,'');inc=JSON.parse(tx);if(!inc||inc.app!=='seisan-kiroku')throw 0}
+    catch(err){importMsg={ng:1,text:'「'+file.name+'」は生産記録ツールのデータファイルではないため、読み込めませんでした。'};render();return}
+    try{const before=live('records').length,r=merge(inc);let pa=0,pf=0;
+      if(Array.isArray(inc.photos))for(const p of inc.photos){if(p&&p.id&&p.data&&!thumbs[p.id]){try{await photoPut(p);pa++}catch(err){pf++}}}
+      await save();const fr=(inc.records||[]).filter(x=>x&&!x.deleted).length,after=live('records').length;
+      importMsg={text:`「${file.name}」を読み込みました。ファイル内の記録${fr}件のうち、新しく加わった記録は${after-before}件です（台帳なども含めた追加${r.add}件、更新${r.upd}件、写真${pa}枚）。`
+        +(r.add+r.upd+pa===0?'すべてこの端末にすでにある内容でした。同じ端末で書き出したファイルを読み込むと、このようになります。':'')+(pf?`写真${pf}枚は保存できませんでした。`:'')};
+      render();window.scrollTo(0,0)}
+    catch(err){importMsg={ng:1,text:'読み込み中にエラーが起きました（'+(err&&err.message||err)+'）。'};render()}
+    el.value='';return}
+  if(el.hasAttribute&&el.hasAttribute('data-pkm')&&formCtx){formCtx.pkMulti=el.checked;if(!el.checked&&formCtx.pk.length>1)formCtx.pk=formCtx.pk.slice(0,1);pkRender();return}
   const k=el.dataset&&el.dataset.chg;if(!k)return;
   if(k==='farm'){db.meta.farmName=el.value.trim();await save();return}
   sub[k]=el.value;render()});

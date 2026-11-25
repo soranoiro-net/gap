@@ -30,7 +30,7 @@ button.tab.on{background:var(--g2);border-color:var(--gt);color:var(--gt);font-w
 .item .t{font-weight:600}
 .item .s{color:var(--mut);font-size:14px}
 .tag{display:inline-block;font-size:12px;border-radius:99px;padding:1px 9px;margin-right:6px;background:var(--g2);color:var(--gt);font-weight:600}
-.tag.f{background:#eef0fb;color:#3a4a9a}.tag.h{background:#fdf0e0;color:#8a5200}
+.tag.f{background:#eef0fb;color:#3a4a9a}.tag.w{background:#eceff1;color:#37474f}.tag.h{background:#fdf0e0;color:#8a5200}
 .warn{background:var(--warnbg);border:1px solid #f0cf9a;color:var(--warn);border-radius:10px;padding:10px 12px;margin:8px 0;font-size:14px}
 .mut{color:var(--mut);font-size:14px}
 label{display:block;font-size:14px;color:var(--mut);margin:10px 0 3px}
@@ -104,7 +104,7 @@ const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;'
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 const pad=n=>String(n).padStart(2,'0');
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())};
-const COLS=['fields','crops','plantings','pesticides','fertilizers','machines','workers','records'];
+const COLS=['fields','crops','plantings','tasks','pesticides','fertilizers','machines','workers','records'];
 const emptyDb=()=>{const d={app:'seisan-kiroku',version:1,meta:{farmName:'',lastExport:'',last:{}}};COLS.forEach(c=>d[c]=[]);return d};
 let db=emptyDb(),storeMode='mem',view='home',sub={master:'fields',type:'',planting:''};
 
@@ -131,6 +131,8 @@ function scaleImg(img,max,q){const w=img.naturalWidth,h=img.naturalHeight,r=Math
 async function makePhoto(file){const img=await loadImg(file);return{id:uid(),data:scaleImg(img,1600,.75),thumb:scaleImg(img,240,.6),createdAt:new Date().toISOString()}}
 const usedPhotoIds=()=>[...new Set(live('records').flatMap(r=>r.photoIds||[]))];
 function norm(v){const d=emptyDb();Object.assign(d.meta,v.meta||{});d.meta.last=d.meta.last||{};COLS.forEach(c=>{if(Array.isArray(v[c]))d[c]=v[c]});return d}
+function seedTasks(){if(db.meta.seededTasks)return;db.meta.seededTasks=1;
+  if(!live('tasks').length)['耕起','畝立て','かん水','除草','草刈り','誘引','摘葉','摘果','片付け'].forEach(n=>upsert('tasks',{name:n}))}
 async function load(){
   try{const v=await idbGet();storeMode='idb';if(v)db=norm(v);try{await loadThumbs()}catch(e){}return}catch(e){}
   try{const v=localStorage.getItem(KEY);storeMode='ls';if(v)db=norm(JSON.parse(v));return}catch(e){}
@@ -160,6 +162,7 @@ const MASTERS={
     {k:'season',l:'作期（例：2026年 春作）'},{k:'varietyNote',l:'作付メモ（品種など）'},{k:'type',l:'栽培区分（例：慣行、特別栽培）'},{k:'area',l:'作付面積（a）',t:'number'},
     {k:'start',l:'開始日',t:'date'},{k:'harvestPlan',l:'収穫予定時期'},{k:'done',l:'この作付は終了した',t:'check'}],
     sub:x=>[x.varietyNote?'メモ：'+x.varietyNote:'',x.type,x.area!==''&&x.area!=null?x.area+'a':'',x.done?'終了':''].filter(Boolean).join('　')},
+  tasks:{label:'作業',defs:[{k:'name',l:'作業名（例：耕起、かん水、誘引）',req:1},{k:'note',l:'メモ',t:'textarea'}],sub:x=>x.note||''},
   pesticides:{label:'農薬',defs:[{k:'name',l:'農薬の名称',req:1},{k:'regNo',l:'登録番号'},{k:'ingredient',l:'有効成分'},{k:'note',l:'メモ（使用基準など）',t:'textarea'}],
     sub:x=>[x.regNo?'登録番号 '+x.regNo:'',x.ingredient].filter(Boolean).join('　')},
   fertilizers:{label:'肥料等',defs:[{k:'name',l:'名称',req:1},{k:'kind',l:'種別',t:'select',opts:['肥料','堆肥','土壌改良資材']},{k:'n',l:'窒素成分（%）',t:'number'}],
@@ -168,6 +171,14 @@ const MASTERS={
   workers:{label:'作業者',defs:[{k:'name',l:'氏名',req:1}],sub:()=>''}
 };
 const RT={
+  work:{label:'作業',tag:'w',defs:[
+    {k:'itemId',l:'作業',t:'ref',ref:'tasks',add:1,req:1},
+    {k:'hours',l:'作業時間（時間）',t:'number',row:'w1'},
+    {k:'people',l:'人数',t:'number',row:'w1',s:1},
+    {k:'machineId',l:'使用機械',t:'ref',ref:'machines',add:1}]},
+  harvest:{label:'収穫',tag:'h',defs:[
+    {k:'amount',l:'収穫量',t:'number',req:1,row:'h1'},
+    {k:'unit',l:'単位',t:'select',opts:['kg','箱','袋','本','個','束','t'],row:'h1',s:1}]},
   pesticide:{label:'農薬使用',tag:'',defs:[
     {k:'itemId',l:'農薬',t:'ref',ref:'pesticides',add:1,req:1},
     {k:'dilution',l:'希釈倍数（倍）',t:'number',row:'p1'},
@@ -184,15 +195,13 @@ const RT={
     {k:'unit',l:'単位',t:'select',opts:['kg','L','袋','t'],row:'f1',s:1},
     {k:'area',l:'施用面積 a',t:'number',row:'f1'},
     {k:'method',l:'施肥方法'},
-    {k:'machineId',l:'使用機械',t:'ref',ref:'machines',add:1}]},
-  harvest:{label:'収穫',tag:'h',defs:[
-    {k:'amount',l:'収穫量',t:'number',req:1,row:'h1'},
-    {k:'unit',l:'単位',t:'select',opts:['kg','箱','袋','本','個','束','t'],row:'h1',s:1}]}
+    {k:'machineId',l:'使用機械',t:'ref',ref:'machines',add:1}]}
 };
-const itemCol=t=>t==='pesticide'?'pesticides':t==='fertilizer'?'fertilizers':null;
+const itemCol=t=>({pesticide:'pesticides',fertilizer:'fertilizers',work:'tasks'})[t]||null;
 function recSummary(r){
   const n=itemCol(r.type)?refLabel(itemCol(r.type),byId(itemCol(r.type),r.itemId)):'';
   if(r.type==='pesticide')return [n,r.dilution!==''&&r.dilution!=null?r.dilution+'倍':'',r.sprayVol!==''&&r.sprayVol!=null?r.sprayVol+'L/10a':'',r.amount].filter(Boolean).join('　');
+  if(r.type==='work')return [n,r.hours!==''&&r.hours!=null?r.hours+'時間':'',r.people!==''&&r.people!=null?r.people+'人':''].filter(Boolean).join('　');
   if(r.type==='fertilizer')return [n,(r.amount!==''&&r.amount!=null?r.amount:'')+(r.unit||'')].filter(Boolean).join('　');
   return (r.amount!==''&&r.amount!=null?r.amount:'')+(r.unit||'')+(r.lot?'　ロット '+r.lot:'');
 }
@@ -251,11 +260,21 @@ function formBody(defs,v){let h='',i=0;
 function openForm(o){
   formCtx=o;const v=o.values||{};o.photoIds=(v.photoIds||[]).slice();o.newPhotos={};
   $('#modal').innerHTML=`<div class="sheet"><h2>${esc(o.title)}</h2><form id="frm" novalidate>${formBody(o.defs,v)}
-    <div class="acts"><div class="err" id="ferr"></div><button type="submit" class="pri">保存</button><button type="button" data-act="closeForm">キャンセル</button>
+    <div class="acts"><div class="err" id="ferr"></div><button type="submit" class="pri">${o.submitLabel||'保存'}</button><button type="button" data-act="closeForm">戻る</button>
     ${o.onDelete?'<button type="button" class="danger" data-act="delForm">削除</button>':''}</div></form></div>`;
-  $('#modal').hidden=false;
+  $('#modal').hidden=false;o.snap=formSnap();
+  try{if(history.state&&history.state.form)history.replaceState({form:1},'');else history.pushState({form:1},'')}catch(e){}
 }
-function closeForm(){$('#modal').hidden=true;$('#modal').innerHTML='';formCtx=null}
+function formSnap(){const f=$('#frm');if(!f||!formCtx)return '';
+  return JSON.stringify([[...f.elements].filter(e=>/^(INPUT|SELECT|TEXTAREA)$/.test(e.tagName)&&e.type!=='file'&&!e.hasAttribute('data-pkq')).map(e=>e.type==='checkbox'?e.checked:e.value),formCtx.pk||[],formCtx.photoIds||[]])}
+const formDirty=()=>!!formCtx&&formSnap()!==formCtx.snap;
+function closeForm(keep){$('#modal').hidden=true;$('#modal').innerHTML='';formCtx=null;
+  if(!keep){try{if(history.state&&history.state.form)history.back()}catch(e){}}}
+function backWarn(){const b=document.querySelector('[data-act=closeForm]');if(b){b.dataset.sure='1';b.textContent='破棄して戻る'}
+  $('#ferr').textContent='入力した内容はまだ記録されていません。「破棄して戻る」を押すと、入力した内容は消えます。'}
+window.addEventListener('popstate',()=>{if(!formCtx)return;
+  if(formDirty()&&!formCtx.backWarned){formCtx.backWarned=true;try{history.pushState({form:1},'')}catch(e){}backWarn();return}
+  closeForm(true)});
 function collect(){
   const f=$('#frm'),out={},miss=[],missEl=[];f.querySelectorAll('.miss').forEach(e=>e.classList.remove('miss'));
   formCtx.defs.forEach(d=>{
@@ -285,14 +304,14 @@ function recordForm(type,rec,dup){
   const defs=[{k:'date',l:'日付',t:'date',req:1},
     isNew?{k:'plantingIds',l:'作付',t:'multi',ref:'plantings',req:1}:{k:'plantingId',l:'作付',t:'ref',ref:'plantings',active:1,req:1}]
     .concat(RT[type].defs,[{k:'workerId',l:'作業者',t:'ref',ref:'workers',add:1},{k:'memo',l:'メモ',t:'textarea'},{k:'photoIds',l:'写真',t:'photos'}]);
-  openForm({title:RT[type].label+(isNew?'を記録':'の修正'),defs,values:base,
+  openForm({title:RT[type].label+(isNew?'を記録':'の修正'),defs,values:base,submitLabel:'記録する',
     onSave:v=>{
       const ids=isNew?v.plantingIds:[v.plantingId];delete v.plantingIds;
       ids.forEach(pid=>{const r=Object.assign({},isNew?{}:rec,v,{type,plantingId:pid});
         if(type==='harvest'){const p=byId('plantings',pid),f=p&&byId('fields',p.fieldId);r.lot=(v.date||'').replace(/-/g,'')+'-'+(f?f.name:'')}
         upsert('records',r)});
       db.meta.last=Object.assign({},last,{workerId:v.workerId||last.workerId||'',machineId:v.machineId||last.machineId||'',unit:Object.assign({},last.unit,v.unit?{[type]:v.unit}:{})});
-      toast(ids.length>1?ids.length+'件の記録を保存しました':'保存しました');
+      toast(ids.length>1?ids.length+'件を記録しました':'記録しました');
     },
     onDelete:isNew?null:()=>removeItem('records',rec.id)});
 }
@@ -379,10 +398,10 @@ function merge(inc){let add=0,upd=0;
     if(i<0){db[c].push(x);add++}else if((x.updatedAt||'')>(db[c][i].updatedAt||'')){db[c][i]=x;upd++}}));
   if(!db.meta.farmName&&inc.meta&&inc.meta.farmName)db.meta.farmName=inc.meta.farmName;return{add,upd}}
 function csvText(){
-  const head=['日付','種類','圃場','品目','品種','作期','作付メモ','栽培区分','資材名','登録番号','有効成分','希釈倍数','散布液量(L/10a)','数量','単位','施用面積(a)','対象病害虫・雑草','方法','機械','天候','風','散布終了時刻','収穫ロット','作業者','メモ','写真枚数'];
+  const head=['日付','種類','作業','作業時間(h)','人数','圃場','品目','品種','作期','作付メモ','栽培区分','資材名','登録番号','有効成分','希釈倍数','散布液量(L/10a)','数量','単位','施用面積(a)','対象病害虫・雑草','方法','機械','天候','風','散布終了時刻','収穫ロット','作業者','メモ','写真枚数'];
   const q=v=>{v=v==null?'':String(v);return /[",\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
   const rows=sortedRecs().reverse().map(r=>{const p=byId('plantings',r.plantingId)||{},f=byId('fields',p.fieldId)||{},c=byId('crops',p.cropId)||{},it=(itemCol(r.type)&&byId(itemCol(r.type),r.itemId))||{};
-    return [r.date,(RT[r.type]||{}).label,f.name,c.name,c.variety,p.season,p.varietyNote,p.type,it.name,it.regNo,it.ingredient,r.dilution,r.sprayVol,r.amount,r.type==='pesticide'?'':r.unit,r.area,r.target,r.method,
+    return [r.date,(RT[r.type]||{}).label,r.type==='work'?it.name:'',r.hours,r.people,f.name,c.name,c.variety,p.season,p.varietyNote,p.type,r.type==='work'?'':it.name,it.regNo,it.ingredient,r.dilution,r.sprayVol,r.amount,r.type==='pesticide'?'':r.unit,r.area,r.target,r.method,
       (byId('machines',r.machineId)||{}).name,r.weather,r.wind,r.endTime,r.lot,(byId('workers',r.workerId)||{}).name,r.memo,(r.photoIds||[]).length||''].map(q).join(',')});
   return '﻿'+[head.join(',')].concat(rows).join('\r\n');
 }
@@ -393,11 +412,11 @@ const ACT={
   newRec:e=>recordForm(e.dataset.type),
   editRec:e=>{const r=byId('records',e.dataset.id);if(!r)return;recordForm(r.type,r);
     $('#frm .acts').insertAdjacentHTML('beforeend',`<button type="button" data-act="dupRec" data-id="${r.id}">複製して新しく記録</button>`)},
-  dupRec:e=>{const r=byId('records',e.dataset.id);closeForm();recordForm(r.type,r,true)},
+  dupRec:e=>{const r=byId('records',e.dataset.id);closeForm(true);recordForm(r.type,r,true)},
   masterTab:e=>{sub.master=e.dataset.k;render()},
   newMaster:()=>{const k=sub.master;openForm({title:MASTERS[k].label+'を追加',defs:MASTERS[k].defs,values:{},onSave:v=>upsert(k,v)})},
   editMaster:e=>{const k=sub.master,x=byId(k,e.dataset.id);openForm({title:MASTERS[k].label+'の修正',defs:MASTERS[k].defs,values:x,onSave:v=>upsert(k,Object.assign({},x,v)),onDelete:()=>removeItem(k,x.id)})},
-  closeForm:()=>closeForm(),
+  closeForm:e=>{if(formDirty()&&e.dataset.sure!=='1'){backWarn();return}closeForm()},
   pk:e=>{const c=formCtx,id=e.dataset.id;c.pk=c.pk.includes(id)?c.pk.filter(x=>x!==id):c.pk.concat(id);
     const w=$('#pkwrap');if(w)w.classList.remove('miss');pkRender()},
   pkAll:()=>{formCtx.pkAll=true;pkRender()},
@@ -447,7 +466,7 @@ document.addEventListener('change',async e=>{const el=e.target;
   if(k==='farm'){db.meta.farmName=el.value.trim();await save();return}
   sub[k]=el.value;render()});
 $('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeForm()});
-load().then(render);
+load().then(()=>{if(!db.meta.seededTasks){seedTasks();save()}render()});
 </script>
 </body>
 </html>
